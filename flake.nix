@@ -45,8 +45,7 @@
           libxft
           libxrender
           libxext
-          libxcb # Base XCB
-          libxcb-util # Often needed for state
+          libxcb
           xorgproto
           staticImlib2
           freetype
