@@ -1,84 +1,21 @@
 # Makefile for Serein Window Manager
 
 VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/null || echo "dev")
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-.PHONY: all build config clean fmt lint
+
+.PHONY: all build generate fmt lint clean
 
 all: build
-
-build: clean
-	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=. export --path=./target/release/srwm
-
-build-verbose: clean
-	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=. --progress=plain export --path=./target/release/srwm
+generate:
+	@echo "Building swm..."
+	go build -ldflags="-w -X main.Version=$(VERSION)" -o ./bin/swm
 
 fmt:
 	@echo "Formatting code..."
-	cargo fmt
+	go fmt ./...
 
 lint:
-	@echo "Linting..."
+	CGO_ENABLED=1 CC="zig cc -target x86_64-windows-gnu" GOOS=windows golangci-lint run
 
 clean:
 	@echo "Cleaning..."
-	rm -rf ./target/release
-=======
-=======
-CONFIG_H = internal/core/config.h
-CONFIG_DEF = internal/core/config.def.h
->>>>>>> 2430b91 (Initial scaffolding)
-
-=======
->>>>>>> 46f7a59 (Add UPX)
-.PHONY: all build config clean fmt lint
-
-all: build
-
-build: clean
-	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=. export --path=./target/release/srwm
-
-build-verbose: clean
-	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=. --progress=plain export --path=./target/release/srwm
-
-fmt:
-	@echo "Formatting code..."
-	cargo fmt
-
-lint:
-	@echo "Linting..."
-
-clean:
-	@echo "Cleaning..."
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 	rm -rf ./bin/swm
-<<<<<<< HEAD
->>>>>>> f1a06f2 (Flakes)
-=======
-=======
-	rm -rf ./bin/srwm
-<<<<<<< HEAD
->>>>>>> 269cb88 (Renaming to srwm)
-	rm -f $(CONFIG_H)
->>>>>>> 2430b91 (Initial scaffolding)
-=======
->>>>>>> 6b251de (Add CI/CD)
-=======
-	rm -rf ./bin
-	rm -rf ./result
->>>>>>> 9891618 (Add locale fallback)
-=======
-	rm -rf ./target
-	rm -rf ./bin
->>>>>>> 1a2036c (Dagger)
-=======
-	rm -rf ./target/release
->>>>>>> 6d9990a (Fix compiling error)
