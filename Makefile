@@ -3,6 +3,7 @@
 VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/null || echo "dev")
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 .PHONY: all build config clean fmt lint
 
 all: build
@@ -31,18 +32,16 @@ CONFIG_H = internal/core/config.h
 CONFIG_DEF = internal/core/config.def.h
 >>>>>>> 2430b91 (Initial scaffolding)
 
+=======
+>>>>>>> 46f7a59 (Add UPX)
 .PHONY: all build config clean fmt lint
 
 all: build
 
-# Generate config.h from config.def.h if it doesn't exist
-config: $(CONFIG_H)
-$(CONFIG_H):
-	cp $(CONFIG_DEF) $(CONFIG_H)
-
-build: config
+build:
 	@echo "Building swm $(VERSION)..."
 	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/swm .
+	upx --best --lzma ./bin/swm
 
 fmt:
 	@echo "Formatting code..."
