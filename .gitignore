@@ -1,5 +1,8 @@
 .direnv/
 bin/
 build.log
+<<<<<<< HEAD
 result
 target/
+=======
+>>>>>>> f1a06f2 (Flakes)
