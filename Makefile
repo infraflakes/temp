@@ -1,13 +1,14 @@
 # Makefile for Serein Window Manager
 
 VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/null || echo "dev")
-
-.PHONY: all build generate fmt lint clean
+.PHONY: all build config clean fmt lint
 
 all: build
-generate:
-	@echo "Building swm..."
-	go build -ldflags="-w -X main.Version=$(VERSION)" -o ./bin/swm
+
+build:
+	@echo "Building swm $(VERSION)..."
+	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/swm .
+	upx --best --lzma ./bin/swm
 
 fmt:
 	@echo "Formatting code..."

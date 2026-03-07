@@ -35,6 +35,7 @@
           go_1_26
           zig
           pkg-config
+          upx
         ];
         buildInputs = with staticPkgs; [
           libx11
@@ -70,6 +71,11 @@
           CGO_ENABLED = 1;
           # Force Zig to handle the linking to avoid glibc leaks
           CC = "zig cc -target x86_64-linux-musl";
+
+          preBuild = ''
+            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2)"
+            export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft xrender imlib2)"
+          '';
 
           ldflags = [
             "-w"
