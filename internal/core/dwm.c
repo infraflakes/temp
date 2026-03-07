@@ -46,6 +46,7 @@
 
 #include "drw.h"
 #include "util.h"
+#include "bridge.h"
 
 /* macros */
 #define BUTTONMASK (ButtonPressMask | ButtonReleaseMask)
@@ -222,8 +223,8 @@ static void arrangemon(Monitor* m);
 static void attach(Client* c);
 static void attachstack(Client* c);
 static void buttonpress(XEvent* e);
-static void checkotherwm(void);
-static void cleanup(void);
+void checkotherwm(void);
+void cleanup(void);
 static void cleanupmon(Monitor* mon);
 static void clientmessage(XEvent* e);
 static void configure(Client* c);
@@ -276,8 +277,8 @@ static void resizeclient(Client* c, int x, int y, int w, int h);
 static void resizemouse(const Arg* arg);
 static void resizerequest(XEvent* e);
 static void restack(Monitor* m);
-static void run(void);
-static void scan(void);
+void run(void);
+void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2,
                      long d3, long d4);
 static void sendmon(Client* c, Monitor* m);
@@ -289,7 +290,7 @@ static void setdesktopnames(void);
 static void setfocus(Client* c);
 static void setfullscreen(Client* c, int fullscreen);
 static void setnumdesktops(void);
-static void setup(void);
+void setup(void);
 static void setviewport(void);
 static void seturgent(Client* c, int urg);
 static void show(Client* c);
@@ -362,10 +363,10 @@ static void (*handler[LASTEvent])(XEvent*) = {
     [ResizeRequest] = resizerequest,
     [UnmapNotify] = unmapnotify};
 static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
-static int running = 1;
+int running = 1;
 static Cur* cursor[CurLast];
 static Clr **scheme, clrborder;
-static Display* dpy;
+Display* dpy;
 static Drw* drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
@@ -409,9 +410,9 @@ struct Monitor {
   Pertag* pertag;
 };
 
-#include "movestack.c"
-#include "shiftview.c"
-#include "vanitygaps.c"
+#include "movestack.inc"
+#include "shiftview.inc"
+#include "vanitygaps.inc"
 
 struct Pertag {
   unsigned int curtag, prevtag;   /* current and previous tag */
@@ -522,7 +523,6 @@ void arrange(Monitor* m) {
 
 void arrangemon(Monitor* m) {
   Client* c;
-  unsigned int n = 0;
   int newx, newy, neww, newh;
 
   updatebarpos(m);
@@ -1080,7 +1080,7 @@ void tagtoprev(const Arg* arg) {
 }
 
 void drawbar(Monitor* m) {
-  int x, y = borderpx, w, sw = 0, stw = 0;
+  int x, y = borderpx, w, stw = 0;
   int bh_n = bh - borderpx * 2;
   int mw = m->ww - m->gappov * 2 - borderpx * 2;
   int boxs = drw->fonts->h / 9;
@@ -2015,7 +2015,7 @@ void propertynotify(XEvent* e) {
   }
 }
 
-void restart(const Arg* arg) { running = 0; }
+void restart(const Arg* arg) { swm_request_restart(); }
 
 Client* recttoclient(int x, int y, int w, int h) {
   Client *c, *r = NULL;
@@ -3186,27 +3186,6 @@ Monitor* systraytomon(Monitor* m) {
   return t;
 }
 
-int main(int argc, char* argv[]) {
-  if (argc == 2 && !strcmp("-v", argv[1]))
-    die("dwm-" VERSION);
-  else if (argc != 1 && strcmp("-s", argv[1]))
-    die("usage: dwm [-v]");
-  if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-    fputs("warning: no locale support\n", stderr);
-  if (!(dpy = XOpenDisplay(NULL))) die("dwm: cannot open display");
-  if (argc > 1 && !strcmp("-s", argv[1])) {
-    XStoreName(dpy, RootWindow(dpy, DefaultScreen(dpy)), argv[2]);
-    XCloseDisplay(dpy);
-    return 0;
-  }
-  checkotherwm();
-  setup();
-#ifdef __OpenBSD__
-  if (pledge("stdio rpath proc exec", NULL) == -1) die("pledge");
-#endif /* __OpenBSD__ */
-  scan();
-  run();
-  cleanup();
-  XCloseDisplay(dpy);
-  return EXIT_SUCCESS;
-}
+/* main() removed — Go owns the entry point.
+ * Lifecycle is driven via bridge.c: swm_init() → swm_run() → swm_cleanup()
+ */

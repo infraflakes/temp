@@ -31,15 +31,21 @@
               staticPkgs.xorgproto
             ];
         });
+
         nativeBuildInputs = with pkgs; [
           go_1_26
           zig
           pkg-config
         ];
+
         buildInputs = with staticPkgs; [
           libx11
           libxinerama
           libxft
+          libxrender
+          libxext
+          libxcb # Base XCB
+          libxcb-util # Often needed for state
           xorgproto
           staticImlib2
           freetype
@@ -49,13 +55,12 @@
         devShells.default = pkgs.mkShell {
           inherit nativeBuildInputs buildInputs;
 
-          # Automatically set the environment build command
           shellHook = ''
             export CGO_ENABLED=1
             export CC="zig cc -target x86_64-linux-musl"
-            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft)"
-            export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft)"
-            echo "Environment ready for swm build."
+            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2) -DVERSION=\"$(VERSION)\""
+            export CGO_LDFLAGS="$(pkg-config --libs --static x11 x11-xcb xcb-shm xinerama xft xrender imlib2)"
+            echo "swm dev shell ready. Run 'make build' to build."
           '';
         };
 
@@ -63,25 +68,29 @@
           pname = "swm";
           version = "0.1.0";
           src = ./.;
-          vendorHash = null; # Set this if using modules
+          vendorHash = null;
 
           inherit nativeBuildInputs buildInputs;
 
           CGO_ENABLED = 1;
-          # Force Zig to handle the linking to avoid glibc leaks
           CC = "zig cc -target x86_64-linux-musl";
+
+          preBuild = ''
+            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2)"
+            export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft xrender imlib2)"
+            if [ ! -f internal/core/config.h ]; then
+              cp internal/core/config.def.h internal/core/config.h
+            fi
+          '';
 
           ldflags = [
             "-w"
             "-s"
             "-linkmode external"
             "-extldflags '-static'"
+            "-X main.Version=0.1.0"
           ];
-
-          preBuild = ''
-            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft)"
-            export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft)"
-          '';
+          tags = ["netgo"];
         };
       }
     );
