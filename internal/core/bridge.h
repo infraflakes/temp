@@ -3,6 +3,10 @@
 #define SRWM_BRIDGE_H
 
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
+
+/* Helper to convert string to Keysym */
+KeySym srwm_string_to_keysym(const char *name);
 
 /* These are defined in dwm.c (non-static) */
 extern int running;
@@ -26,5 +30,13 @@ void srwm_set_status(const char *text);
 
 /* Called from dwm.c restart() to distinguish restart from quit */
 void srwm_request_restart(void);
+
+/* Dynamic keybindings (Go -> C) */
+void srwm_add_keybinding(unsigned int mod, KeySym keysym, int id);
+void srwm_clear_keybindings(void);
+void srwm_grabkeys(void);
+
+/* Called from C -> Go when a dynamic key is pressed */
+extern void srwm_handle_key(int id);
 
 #endif /* SRWM_BRIDGE_H */

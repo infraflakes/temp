@@ -73,3 +73,9 @@ func SetStatus(text string) {
 	defer C.free(unsafe.Pointer(cs))
 	C.srwm_set_status(cs)
 }
+
+func StringToKeysym(name string) uint {
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	return uint(C.srwm_string_to_keysym(cs))
+}

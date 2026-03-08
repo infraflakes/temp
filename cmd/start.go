@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"log"
 
+	"github.com/nixuris/srwm/internal/config"
 	"github.com/nixuris/srwm/internal/core"
 	"github.com/nixuris/srwm/internal/ipc"
-	"github.com/nixuris/srwm/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -33,14 +34,19 @@ func runWM(socketPath string) {
 		}
 	}()
 
-	// Start Lua Status Bar
-	config.StartBar()
-
 	for {
 		if err := core.Init(); err != nil {
 			log.Fatalf("init failed: %v", err)
 		}
+
+		// Start Lua Configuration and Bar WITH context
+		ctx, cancel := context.WithCancel(context.Background())
+		config.StartConfig(ctx)
+
 		core.Run() // blocks until `running = 0`
+
+		// Stop Lua before cleaning up C core
+		cancel()
 		core.Cleanup()
 
 		if !core.ShouldRestart() {

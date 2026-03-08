@@ -140,13 +140,6 @@ static unsigned int prevtag(void);
 static const Key keys[] = {
     /* modifier                         key         function        argument */
 
-    // brightness and audio
-    {0, XF86XK_AudioRaiseVolume, spawn, {.v = volup}},
-    {0, XF86XK_AudioLowerVolume, spawn, {.v = voldown}},
-    {0, XF86XK_AudioMute, spawn, {.v = volmute}},
-    {0, XF86XK_MonBrightnessUp, spawn, {.v = brightup}},
-    {0, XF86XK_MonBrightnessDown, spawn, {.v = brightdown}},
-
     // screenshot fullscreen and cropped
     {MODKEY | ALTKEY, XK_s, spawn, SHCMD("flameshot full")},
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("flameshot gui")},
