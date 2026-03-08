@@ -6,7 +6,7 @@
 interval=0
 
 # load colors
-. ~/.local/bin/swm-scripts/themes/vague
+. ~/.local/bin/srwm-scripts/themes/vague
 
 battery() {
   get_capacity="$(cat /sys/class/power_supply/BAT0/capacity)"

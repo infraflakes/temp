@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 xset r rate 200 50 &
 export XDG_SESSION_TYPE=x11
-export XDG_CURRENT_DESKTOP=swm
-export XDG_SESSION_DESKTOP=swm
+export XDG_CURRENT_DESKTOP=srwm
+export XDG_SESSION_DESKTOP=srwm
 export XMODIFIERS=@im=fcitx
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
@@ -13,19 +13,19 @@ unset SSH_ASKPASS
 # export __NV_PRIME_RENDER_OFFLOAD=1 
 feh --bg-scale ~/.config/wallpapers/wave.png &
 fcitx5 &
-swm_bar &
+srwm_bar &
 copyq &
 flameshot &
 # xrandr --output DP-2 --mode 1920x1080 --rate 144.00
 # 1. Initialize the lockfile
-touch /tmp/swm.lock
+touch /tmp/srwm.lock
 
 # 2. The Hot-Reload Loop
-# As long as the lockfile exists, swm will respawn when it exits/is killed
-while [ -f /tmp/swm.lock ] && type swm >/dev/null; do 
-    swm 2>/dev/null
+# As long as the lockfile exists, srwm will respawn when it exits/is killed
+while [ -f /tmp/srwm.lock ] && type srwm >/dev/null; do 
+    srwm 2>/dev/null
 done
 # 3. Cleanup
-# If the loop breaks (because you ran 'swmctl quit' which deletes the file), 
+# If the loop breaks (because you ran 'srwmctl quit' which deletes the file), 
 # we clean up any remnants before exiting the X session.
-rm -f /tmp/swm.lock
+rm -f /tmp/srwm.lock

@@ -1,7 +1,7 @@
 #!/usr/bin/env dash
 
 # Target for signaling the bar refresh
-BAR_NAME="swm_bar"
+BAR_NAME="srwm_bar"
 
 subcommand=$1
 action=$2
@@ -22,9 +22,9 @@ case "$subcommand" in
         esac
         ;;
     quit)
-        rm -f /tmp/swm.lock
+        rm -f /tmp/srwm.lock
         pkill -9 -f "$BAR_NAME"
-        pkill -TERM swm
+        pkill -TERM srwm
         exit 0
         ;;
     launcher)

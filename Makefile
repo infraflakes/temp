@@ -6,9 +6,9 @@ VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/nu
 all: build
 
 build:
-	@echo "Building swm $(VERSION)..."
-	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/swm .
-	upx --best --lzma ./bin/swm
+	@echo "Building srwm $(VERSION)..."
+	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/srwm .
+	upx --best --lzma ./bin/srwm
 
 fmt:
 	@echo "Formatting code..."
@@ -20,5 +20,5 @@ lint:
 
 clean:
 	@echo "Cleaning..."
-	rm -rf ./bin/swm
+	rm -rf ./bin/srwm
 	rm -f $(CONFIG_H)

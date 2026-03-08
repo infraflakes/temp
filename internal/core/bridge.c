@@ -9,7 +9,7 @@
 /* Internal flag: distinguishes restart (running=0) from quit */
 static int restart_requested = 0;
 
-int swm_init(void) {
+int srwm_init(void) {
   /* Reset for re-init on restart */
   running = 1;
   restart_requested = 0;
@@ -18,7 +18,7 @@ int swm_init(void) {
     fputs("warning: no locale support\n", stderr);
 
   if (!(dpy = XOpenDisplay(NULL))) {
-    fputs("swm: cannot open display\n", stderr);
+    fputs("srwm: cannot open display\n", stderr);
     return -1;
   }
 
@@ -28,32 +28,32 @@ int swm_init(void) {
   return 0;
 }
 
-void swm_run(void) {
+void srwm_run(void) {
   run(); /* blocks until running == 0 */
 }
 
-void swm_cleanup(void) {
+void srwm_cleanup(void) {
   cleanup();
   XCloseDisplay(dpy);
   dpy = NULL;
 }
 
-void swm_quit(void) {
+void srwm_quit(void) {
   restart_requested = 0;
   running = 0;
 }
 
-int swm_should_restart(void) {
+int srwm_should_restart(void) {
   return restart_requested;
 }
 
-void swm_set_status(const char *text) {
+void srwm_set_status(const char *text) {
   if (!dpy) return;
   XStoreName(dpy, DefaultRootWindow(dpy), text);
   XFlush(dpy);
 }
 
-void swm_request_restart(void) {
+void srwm_request_restart(void) {
   restart_requested = 1;
   running = 0;
 }
