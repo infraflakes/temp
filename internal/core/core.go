@@ -61,6 +61,11 @@ func ShouldRestart() bool {
 	return C.srwm_should_restart() != 0
 }
 
+// Restart signals the C event loop to stop and triggers a restart.
+func Restart() {
+	C.srwm_request_restart()
+}
+
 // SetStatus sets the X root window name, which dwm reads as the status
 // bar text. This replaces the old `xsetroot -name` approach.
 func SetStatus(text string) {

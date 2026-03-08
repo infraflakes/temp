@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/nixuris/srwm/internal/control"
 	"github.com/nixuris/srwm/internal/core"
 )
 
@@ -17,9 +18,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	socketPath := control.DefaultSocketPath()
+
 	switch os.Args[1] {
 	case "start":
-		runWM()
+		runWM(socketPath)
+	case "shutdown":
+		if err := control.Send(socketPath, "shutdown"); err != nil {
+			log.Fatalf("shutdown failed: %v", err)
+		}
+	case "restart":
+		if err := control.Send(socketPath, "restart"); err != nil {
+			log.Fatalf("restart failed: %v", err)
+		}
 	case "version":
 		fmt.Printf("srwm %s\n", Version)
 	default:
@@ -33,13 +44,22 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "Usage: srwm <command>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Commands:")
-	fmt.Fprintln(os.Stderr, "  start     Start the window manager")
-	fmt.Fprintln(os.Stderr, "  version   Print version information")
+	fmt.Fprintln(os.Stderr, "  start      Start the window manager")
+	fmt.Fprintln(os.Stderr, "  shutdown   Shut down the running window manager")
+	fmt.Fprintln(os.Stderr, "  restart    Soft-restart the running window manager")
+	fmt.Fprintln(os.Stderr, "  version    Print version information")
 }
 
-func runWM() {
+func runWM(socketPath string) {
 	log.SetPrefix("srwm: ")
 	log.SetFlags(0)
+
+	// Start IPC server
+	go func() {
+		if err := control.Listen(socketPath); err != nil {
+			log.Printf("IPC server error: %v", err)
+		}
+	}()
 
 	for {
 		if err := core.Init(); err != nil {
