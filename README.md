@@ -50,11 +50,16 @@ A fully statically linked dynamic X11 window manager with CGO
 
 Current the project only supports flakes and direnv.
 After having all the dependencies you can easily build the window manager:
+<<<<<<< HEAD
 >>>>>>> b63f90c (Create README.md for Serein Window Manager)
+=======
+
+>>>>>>> 6fd8943 (Update README)
 ```bash
 make build
 ```
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ## Acknowledgements
 
@@ -67,4 +72,13 @@ Special thanks to:
 - [wh1tepearl](https://codeberg.org/wh1tepearl) for the canvas layout `srwm` based on.
 =======
 >>>>>>> b63f90c (Create README.md for Serein Window Manager)
+=======
+# Start
+
+You can start the window manager with `srwm start` for example with `sx`:
+```bash
+sx srwm start
+```
+
+>>>>>>> 6fd8943 (Update README)
 ---
