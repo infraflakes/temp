@@ -1,5 +1,5 @@
 {
-  description = "Build environment for swm (Go + C core)";
+  description = "Build environment for srwm (Go + C core)";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -60,12 +60,12 @@
             export CC="zig cc -target x86_64-linux-musl"
             export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2) -DVERSION=\"$(VERSION)\""
             export CGO_LDFLAGS="$(pkg-config --libs --static x11 x11-xcb xcb-shm xinerama xft xrender imlib2)"
-            echo "swm dev shell ready. Run 'make build' to build."
+            echo "srwm dev shell ready. Run 'make build' to build."
           '';
         };
 
         packages.default = pkgs.buildGoModule {
-          pname = "swm";
+          pname = "srwm";
           version = "0.1.0";
           src = ./.;
           vendorHash = null;

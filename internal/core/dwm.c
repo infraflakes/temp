@@ -2015,7 +2015,7 @@ void propertynotify(XEvent* e) {
   }
 }
 
-void restart(const Arg* arg) { swm_request_restart(); }
+void restart(const Arg* arg) { srwm_request_restart(); }
 
 Client* recttoclient(int x, int y, int w, int h) {
   Client *c, *r = NULL;
@@ -3187,5 +3187,5 @@ Monitor* systraytomon(Monitor* m) {
 }
 
 /* main() removed — Go owns the entry point.
- * Lifecycle is driven via bridge.c: swm_init() → swm_run() → swm_cleanup()
+ * Lifecycle is driven via bridge.c: srwm_init() → srwm_run() → srwm_cleanup()
  */

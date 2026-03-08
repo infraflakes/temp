@@ -1,4 +1,4 @@
-// Package core provides Go bindings to the swm C window manager core.
+// Package core provides Go bindings to the srwm C window manager core.
 //
 // The C core handles all X11 state and event processing. This package
 // exposes lifecycle control (Init, Run, Cleanup) and a status bar setter.
@@ -32,9 +32,9 @@ import (
 // calls must happen on this same goroutine.
 func Init() error {
 	runtime.LockOSThread()
-	if C.swm_init() != 0 {
+	if C.srwm_init() != 0 {
 		runtime.UnlockOSThread()
-		return errors.New("swm: failed to initialize (cannot open display?)")
+		return errors.New("srwm: failed to initialize (cannot open display?)")
 	}
 	return nil
 }
@@ -42,23 +42,23 @@ func Init() error {
 // Run enters the blocking X11 event loop. Returns when the WM is asked
 // to quit or restart (running == 0).
 func Run() {
-	C.swm_run()
+	C.srwm_run()
 }
 
 // Cleanup tears down all X resources and closes the display.
 func Cleanup() {
-	C.swm_cleanup()
+	C.srwm_cleanup()
 }
 
 // Quit signals the C event loop to stop (clean exit, not restart).
 func Quit() {
-	C.swm_quit()
+	C.srwm_quit()
 }
 
 // ShouldRestart returns true if the event loop exited due to a restart
 // request (Mod+Shift+R) rather than a quit.
 func ShouldRestart() bool {
-	return C.swm_should_restart() != 0
+	return C.srwm_should_restart() != 0
 }
 
 // SetStatus sets the X root window name, which dwm reads as the status
@@ -66,5 +66,5 @@ func ShouldRestart() bool {
 func SetStatus(text string) {
 	cs := C.CString(text)
 	defer C.free(unsafe.Pointer(cs))
-	C.swm_set_status(cs)
+	C.srwm_set_status(cs)
 }

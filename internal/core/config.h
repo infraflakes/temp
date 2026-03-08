@@ -45,13 +45,13 @@ static const int tag_preview = 0; /* 1 means enable, 0 is off */
 static const int colorfultag =
     1; /* 0 means use SchemeSel for selected non vacant tag */
 
-static const char* volup[] = {"swmctl", "volume", "up", "2", NULL};
-static const char* voldown[] = {"swmctl", "volume", "down", "2", NULL};
-static const char* volmute[] = {"swmctl", "volume", "mute", NULL};
-static const char* brightup[] = {"swmctl", "brightness", "up", "5", NULL};
-static const char* brightdown[] = {"swmctl", "brightness", "down", "5", NULL};
+static const char* volup[] = {"srwmctl", "volume", "up", "2", NULL};
+static const char* voldown[] = {"srwmctl", "volume", "down", "2", NULL};
+static const char* volmute[] = {"srwmctl", "volume", "mute", NULL};
+static const char* brightup[] = {"srwmctl", "brightness", "up", "5", NULL};
+static const char* brightdown[] = {"srwmctl", "brightness", "down", "5", NULL};
 
-static const char* quit_swm[] = {"swmctl", "quit", NULL};
+static const char* quit_srwm[] = {"srwmctl", "quit", NULL};
 static const int new_window_attach_on_end =
     1; /*  1 means the new window will attach on the end; 0 means the new window
           will attach on the front,default is front */
@@ -150,11 +150,11 @@ static const Key keys[] = {
     // screenshot fullscreen and cropped
     {MODKEY | ALTKEY, XK_s, spawn, SHCMD("flameshot full")},
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("flameshot gui")},
-    {MODKEY, XK_space, spawn, SHCMD("swmctl launcher")},
+    {MODKEY, XK_space, spawn, SHCMD("srwmctl launcher")},
     {MODKEY, XK_Return, spawn, SHCMD("alacritty")},
     {MODKEY, XK_l, spawn, SHCMD("slock")},
     {MODKEY, XK_v, spawn, SHCMD("copyq menu")},
-    {MODKEY, XK_BackSpace, spawn, {.v = quit_swm}},  // quit swm MOD+backspace
+    {MODKEY, XK_BackSpace, spawn, {.v = quit_srwm}},  // quit srwm MOD+backspace
     // restart
     {MODKEY | ShiftMask, XK_r, restart, {0}},
 

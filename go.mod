@@ -1,3 +1,3 @@
-module github.com/nixuris/srnwm
+module github.com/nixuris/srwm
 
 go 1.26

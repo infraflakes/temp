@@ -39,9 +39,9 @@ CONFIG_DEF = internal/core/config.def.h
 all: build
 
 build:
-	@echo "Building swm $(VERSION)..."
-	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/swm .
-	upx --best --lzma ./bin/swm
+	@echo "Building srwm $(VERSION)..."
+	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/srwm .
+	upx --best --lzma ./bin/srwm
 
 fmt:
 	@echo "Formatting code..."
@@ -53,9 +53,13 @@ lint:
 
 clean:
 	@echo "Cleaning..."
+<<<<<<< HEAD
 	rm -rf ./bin/swm
 <<<<<<< HEAD
 >>>>>>> f1a06f2 (Flakes)
 =======
+=======
+	rm -rf ./bin/srwm
+>>>>>>> 269cb88 (Renaming to srwm)
 	rm -f $(CONFIG_H)
 >>>>>>> 2430b91 (Initial scaffolding)

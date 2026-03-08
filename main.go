@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/nixuris/srnwm/internal/core"
+	"github.com/nixuris/srwm/internal/core"
 )
 
 // Version is set at build time via -ldflags.
@@ -21,16 +21,16 @@ func main() {
 	case "start":
 		runWM()
 	case "version":
-		fmt.Printf("swm %s\n", Version)
+		fmt.Printf("srwm %s\n", Version)
 	default:
-		fmt.Fprintf(os.Stderr, "swm: unknown command %q\n", os.Args[1])
+		fmt.Fprintf(os.Stderr, "srwm: unknown command %q\n", os.Args[1])
 		printUsage()
 		os.Exit(1)
 	}
 }
 
 func printUsage() {
-	fmt.Fprintln(os.Stderr, "Usage: swm <command>")
+	fmt.Fprintln(os.Stderr, "Usage: srwm <command>")
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "Commands:")
 	fmt.Fprintln(os.Stderr, "  start     Start the window manager")
@@ -38,7 +38,7 @@ func printUsage() {
 }
 
 func runWM() {
-	log.SetPrefix("swm: ")
+	log.SetPrefix("srwm: ")
 	log.SetFlags(0)
 
 	for {
