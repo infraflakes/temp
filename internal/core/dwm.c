@@ -494,7 +494,7 @@ int applysizehints(Client* c, int* x, int* y, int* w, int* h, int interact) {
   }
   if (*h < bh) *h = bh;
   if (*w < bh) *w = bh;
-  if (resizehints || c->isfloating) {
+  if (c->isfloating) {
     if (!c->hintsvalid) updatesizehints(c);
     /* see last two sentences in ICCCM 4.1.2.3 */
     baseismin = c->basew == c->minw && c->baseh == c->minh;
@@ -1426,7 +1426,7 @@ void focusin(XEvent* e) {
 void focusstack(const Arg* arg) {
   Client *c = NULL, *i;
 
-  if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen)) return;
+  if (!selmon->sel) return;
   if (arg->i > 0) {
     for (c = selmon->sel->next; c && (!ISVISIBLE(c) || HIDDEN(c)); c = c->next);
     if (!c)

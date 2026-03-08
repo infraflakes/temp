@@ -6,21 +6,14 @@
 
 /* appearance */
 static const unsigned int borderpx = 0; /* border pixel of windows */
-static const unsigned int default_border =
-    0; /* to switch back to default border after dynamic border resizing via
-          keybinds */
+static const unsigned int default_border = 0; /* to switch back to default border after dynamic border resizing via keybinds */
 static const unsigned int snap = 32;     /* snap pixel */
 static const unsigned int gap_value = 0; /* horiz inner gap between windows */
-static const unsigned int gappih =
-    gap_value; /* horiz inner gap between windows */
-static const unsigned int gappiv =
-    gap_value; /* vert inner gap between windows */
-static const unsigned int gappoh =
-    gap_value; /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov =
-    gap_value; /* vert outer gap between windows and screen edge */
-static const int smartgaps =
-    0; /* 1 means no outer gap when there is only one window */
+static const unsigned int gappih = gap_value; /* horiz inner gap between windows */
+static const unsigned int gappiv = gap_value; /* vert inner gap between windows */
+static const unsigned int gappoh = gap_value; /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov = gap_value; /* vert outer gap between windows and screen edge */
+static const int smartgaps = 0; /* 1 means no outer gap when there is only one window */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2; /* systray spacing */
 static const int showsystray = 1; /* 0 means no systray */
@@ -34,24 +27,16 @@ static const int horizpadtabi = 15;
 static const int horizpadtabo = 15;
 static const int scalepreview = 4;
 static const int tag_preview = 0; /* 1 means enable, 0 is off */
-static const int colorfultag =
-    1; /* 0 means use SchemeSel for selected non vacant tag */
-
-static const char* volup[] = {"srwmctl", "volume", "up", "2", NULL};
-static const char* voldown[] = {"srwmctl", "volume", "down", "2", NULL};
-static const char* volmute[] = {"srwmctl", "volume", "mute", NULL};
-static const char* brightup[] = {"srwmctl", "brightness", "up", "5", NULL};
-static const char* brightdown[] = {"srwmctl", "brightness", "down", "5", NULL};
-
-static const char* quit_srwm[] = {"srwmctl", "quit", NULL};
-static const int new_window_attach_on_end =
-    1; /*  1 means the new window will attach on the end; 0 means the new window
-          will attach on the front,default is front */
+static const int colorfultag = 1; /* 0 means use SchemeSel for selected non vacant tag */
+static const unsigned int ulinepad = 5; /* horizontal padding between the underline and tag */
+static const unsigned int ulinestroke = 2; /* thickness / height of the underline */
+static const unsigned int ulinevoffset = 0; /* how far above the bottom of the bar the line should appear */
+static const int ulineall = 0; /* 1 to show underline on all tags, 0 for just the active ones */
+static const int new_window_attach_on_end = 1; /*  1 means the new window will attach on the end; 0 means the new window will attach on the front,default is front */
 #define ICONSIZE 20   /* icon size */
 #define ICONSPACING 8 /* space between icon and title */
 
 static const char* fonts[] = {"JetBrainsMonoNerdFont:size=13"};
-
 static const char* colors[][3] = {
     /*            fg       bg      border */
     [SchemeNorm] = {gray3, black, gray2},
@@ -75,15 +60,6 @@ static const int tagschemes[] = {SchemeTag1, SchemeTag2, SchemeTag3,
                                  SchemeTag2, SchemeTag1, SchemeTag2,
                                  SchemeTag3, SchemeTag1, SchemeTag2};
 
-static const unsigned int ulinepad =
-    5; /* horizontal padding between the underline and tag */
-static const unsigned int ulinestroke =
-    2; /* thickness / height of the underline */
-static const unsigned int ulinevoffset =
-    0; /* how far above the bottom of the bar the line should appear */
-static const int ulineall =
-    0; /* 1 to show underline on all tags, 0 for just the active ones */
-
 static const Rule rules[] = {
     /* xprop(1):
      *	WM_CLASS(STRING) = instance, class
@@ -96,14 +72,7 @@ static const Rule rules[] = {
     { "Chromium", NULL,       "Picture-in-Picture",   0,         1,          -1 },
 };
 
-/* layout(s) */
-static const int resizehints =
-    0; /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen =
-    1; /* 1 will force focus on the fullscreen window */
-
 #include "functions.h"
-
 /* function declarations */
 static void tagtonext(const Arg* arg);
 static void tagtoprev(const Arg* arg);
@@ -122,24 +91,16 @@ static unsigned int prevtag(void);
       {MODKEY | ControlMask | ShiftMask, KEY, toggletag, {.ui = 1 << TAG}},
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd)                                 \
-  {                                                \
-    .v = (const char*[]) { "sh", "-c", cmd, NULL } \
-  }
+#define SHCMD(cmd) {.v = (const char*[]) { "sh", "-c", cmd, NULL }}
 
 /* commands */
-
 static const Key keys[] = {
-    /* modifier                         key         function        argument */
-
-    // screenshot fullscreen and cropped
     {MODKEY | ALTKEY, XK_s, spawn, SHCMD("flameshot full")},
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("flameshot gui")},
     {MODKEY, XK_space, spawn, SHCMD("srwmctl launcher")},
     {MODKEY, XK_Return, spawn, SHCMD("alacritty")},
     {MODKEY, XK_l, spawn, SHCMD("slock")},
     {MODKEY, XK_v, spawn, SHCMD("copyq menu")},
-    {MODKEY, XK_BackSpace, spawn, {.v = quit_srwm}},  // quit srwm MOD+backspace
     // restart
     {MODKEY | ShiftMask, XK_r, restart, {0}},
 
@@ -158,15 +119,19 @@ static const Key keys[] = {
     {MODKEY | ControlMask, XK_Right, tagtonext, {0}},
     {MODKEY, XK_Tab, view, {0}},
 
-    // { MODKEY|ControlMask,               XK_i,       incrgaps,       {.i = +10 } },
-    // { MODKEY|ControlMask,               XK_d,       incrgaps,       {.i = -10 } },
+    { MODKEY|ControlMask,               XK_i,       incrgaps,       {.i = +10 } },
+    { MODKEY|ControlMask,               XK_d,       incrgaps,       {.i = -10 } },
 
-    // kill window
-    {MODKEY, XK_q, killclient, {0}},
-
-    TAGKEYS(XK_1, 0) TAGKEYS(XK_2, 1) TAGKEYS(XK_3, 2) TAGKEYS(XK_4, 3)
-        TAGKEYS(XK_5, 4) TAGKEYS(XK_6, 5) TAGKEYS(XK_7, 6) TAGKEYS(XK_8, 7)
-            TAGKEYS(XK_9, 8)};
+    TAGKEYS(XK_1, 0)
+    TAGKEYS(XK_2, 1) 
+    TAGKEYS(XK_3, 2) 
+    TAGKEYS(XK_4, 3)
+    TAGKEYS(XK_5, 4) 
+    TAGKEYS(XK_6, 5) 
+    TAGKEYS(XK_7, 6) 
+    TAGKEYS(XK_8, 7)
+    TAGKEYS(XK_9, 8)
+};
 
 /* button definitions */
 static const Button buttons[] = {
