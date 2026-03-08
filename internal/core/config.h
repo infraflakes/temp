@@ -13,7 +13,6 @@ static const unsigned int gappih = gap_value; /* horiz inner gap between windows
 static const unsigned int gappiv = gap_value; /* vert inner gap between windows */
 static const unsigned int gappoh = gap_value; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov = gap_value; /* vert outer gap between windows and screen edge */
-static const int smartgaps = 0; /* 1 means no outer gap when there is only one window */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2; /* systray spacing */
 static const int showsystray = 1; /* 0 means no systray */
@@ -76,8 +75,6 @@ static const Rule rules[] = {
 /* function declarations */
 static void tagtonext(const Arg* arg);
 static void tagtoprev(const Arg* arg);
-static void viewnext(const Arg* arg);
-static void viewprev(const Arg* arg);
 static unsigned int nexttag(void);
 static unsigned int prevtag(void);
 
@@ -92,9 +89,8 @@ static unsigned int prevtag(void);
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) {.v = (const char*[]) { "sh", "-c", cmd, NULL }}
-
-/* commands */
 static const Key keys[] = {
+
     {MODKEY | ALTKEY, XK_s, spawn, SHCMD("flameshot full")},
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("flameshot gui")},
     {MODKEY, XK_space, spawn, SHCMD("srwmctl launcher")},
@@ -118,6 +114,8 @@ static const Key keys[] = {
     {MODKEY | ControlMask, XK_Left, tagtoprev, {0}},
     {MODKEY | ControlMask, XK_Right, tagtonext, {0}},
     {MODKEY, XK_Tab, view, {0}},
+    {MODKEY|ShiftMask, XK_comma,  move_tag_to_monitor, {.i = -1 } },
+    {MODKEY|ShiftMask, XK_period, move_tag_to_monitor, {.i = +1 } },
 
     { MODKEY|ControlMask,               XK_i,       incrgaps,       {.i = +10 } },
     { MODKEY|ControlMask,               XK_d,       incrgaps,       {.i = -10 } },

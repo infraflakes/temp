@@ -250,7 +250,8 @@ static Monitor* createmon(void);
 static void destroynotify(XEvent* e);
 static void detach(Client* c);
 static void detachstack(Client* c);
-static Monitor* dirtomon(int dir);
+static Monitor* get_neighbor_monitor(int dir);
+void move_tag_to_monitor(const Arg *arg);
 static void drawbar(Monitor* m);
 static void drawbars(void);
 static int drawstatusbar(Monitor* m, int bh, char* text);
@@ -266,11 +267,10 @@ static Atom getatomprop(Client* c, Atom prop);
 static Picture geticonprop(Window w, unsigned int* icw, unsigned int* ich);
 static int getrootptr(int* x, int* y);
 static long getstate(Window w);
-static unsigned int getsystraywidth();
+static unsigned int getsystraywidth(void);
 static int gettextprop(Window w, Atom atom, char* text, unsigned int size);
 static void grabbuttons(Client* c, int focused);
 void grabkeys(void);
-static void hide(Client* c);
 static void keypress(XEvent* e);
 static void killclient(const Arg* arg);
 static void manage(Window w, XWindowAttributes* wa);
@@ -281,7 +281,6 @@ static void movemouse(const Arg* arg);
 static void moveorplace(const Arg* arg);
 static Client* nexttiled(Client* c);
 static void placemouse(const Arg* arg);
-static void pop(Client* c);
 static void propertynotify(XEvent* e);
 static void restart(const Arg* arg);
 static Client* recttoclient(int x, int y, int w, int h);
@@ -309,7 +308,6 @@ static void setnumdesktops(void);
 void setup(void);
 static void setviewport(void);
 static void seturgent(Client* c, int urg);
-static void show(Client* c);
 static void showhide(Client* c);
 static void showtagpreview(int tag);
 static void spawn(const Arg* arg);
@@ -322,8 +320,6 @@ static void togglefullscr(const Arg* arg);
 static void toggletag(const Arg* arg);
 static void toggleview(const Arg* arg);
 static void freeicon(Client* c);
-static void hidewin(const Arg* arg);
-static void restorewin(const Arg* arg);
 static void unfocus(Client* c, int setfocus);
 static void unmanage(Client* c, int destroyed);
 static void unmapnotify(XEvent* e);
@@ -386,10 +382,6 @@ Display* dpy;
 static Drw* drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
-
-#define hiddenWinStackMax 100
-static int hiddenWinStackTop = -1;
-static Client* hiddenWinStack[hiddenWinStackMax];
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -695,7 +687,6 @@ void cleanup(void) {
   drw_free(drw);
   drw = NULL;
   mons = selmon = NULL;
-  hiddenWinStackTop = -1;
   XSync(dpy, False);
   XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
   XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -948,18 +939,6 @@ void detachstack(Client* c) {
     for (t = c->mon->stack; t && !ISVISIBLE(t); t = t->snext);
     c->mon->sel = t;
   }
-}
-
-Monitor* dirtomon(int dir) {
-  Monitor* m = NULL;
-
-  if (dir > 0) {
-    if (!(m = selmon->next)) m = mons;
-  } else if (selmon == mons)
-    for (m = mons; m->next; m = m->next);
-  else
-    for (m = mons; m->next != selmon; m = m->next);
-  return m;
 }
 
 int drawstatusbar(Monitor* m, int bh, char* stext) {
@@ -1500,7 +1479,7 @@ long getstate(Window w) {
   return result;
 }
 
-unsigned int getsystraywidth() {
+unsigned int getsystraywidth(void) {
   unsigned int w = 0;
   Client* i;
   if (showsystray)
@@ -1587,29 +1566,6 @@ void freeicon(Client* c) {
     XRenderFreePicture(dpy, c->icon);
     c->icon = None;
   }
-}
-
-void hide(Client* c) {
-  if (!c || HIDDEN(c)) return;
-
-  Window w = c->win;
-  static XWindowAttributes ra, ca;
-
-  // more or less taken directly from blackbox's hide() function
-  XGrabServer(dpy);
-  XGetWindowAttributes(dpy, root, &ra);
-  XGetWindowAttributes(dpy, w, &ca);
-  // prevent UnmapNotify events
-  XSelectInput(dpy, root, ra.your_event_mask & ~SubstructureNotifyMask);
-  XSelectInput(dpy, w, ca.your_event_mask & ~StructureNotifyMask);
-  XUnmapWindow(dpy, w);
-  setclientstate(c, IconicState);
-  XSelectInput(dpy, root, ra.your_event_mask);
-  XSelectInput(dpy, w, ca.your_event_mask);
-  XUngrabServer(dpy);
-
-  focus(c->snext);
-  arrange(c->mon);
 }
 
 #ifdef XINERAMA
@@ -1997,13 +1953,6 @@ void placemouse(const Arg* arg) {
 
   if (nx != -9999) resize(c, nx, ny, c->w, c->h, 0);
   arrangemon(c->mon);
-}
-
-void pop(Client* c) {
-  detach(c);
-  attach(c);
-  focus(c);
-  arrange(c->mon);
 }
 
 void propertynotify(XEvent* e) {
@@ -2501,14 +2450,6 @@ void seturgent(Client* c, int urg) {
   XFree(wmh);
 }
 
-void show(Client* c) {
-  if (!c || !HIDDEN(c)) return;
-
-  XMapWindow(dpy, c->win);
-  setclientstate(c, NormalState);
-  arrange(c->mon);
-}
-
 void showhide(Client* c) {
   if (!c) return;
   if (ISVISIBLE(c)) {
@@ -2682,31 +2623,6 @@ void toggleview(const Arg* arg) {
   updatecurrentdesktop();
 }
 
-void hidewin(const Arg* arg) {
-  if (!selmon->sel) return;
-  Client* c = (Client*)selmon->sel;
-  hide(c);
-  hiddenWinStack[++hiddenWinStackTop] = c;
-}
-
-void restorewin(const Arg* arg) {
-  int i = hiddenWinStackTop;
-  while (i > -1) {
-    if (HIDDEN(hiddenWinStack[i]) &&
-        hiddenWinStack[i]->tags == selmon->tagset[selmon->seltags]) {
-      show(hiddenWinStack[i]);
-      focus(hiddenWinStack[i]);
-      restack(selmon);
-      for (int j = i; j < hiddenWinStackTop; ++j) {
-        hiddenWinStack[j] = hiddenWinStack[j + 1];
-      }
-      --hiddenWinStackTop;
-      return;
-    }
-    --i;
-  }
-}
-
 void unfocus(Client* c, int setfocus) {
   if (!c) return;
   grabbuttons(c, 0);
@@ -2820,7 +2736,7 @@ void updatebarpos(Monitor* m) {
   }
 }
 
-void updateclientlist() {
+void updateclientlist(void) {
   Client* c;
   Monitor* m;
 
@@ -3227,6 +3143,24 @@ Monitor* systraytomon(Monitor* m) {
   if (i >= n) i = 0;
   for (t = mons; t && i > 0; i--, t = t->next);
   return t ? t : mons;
+}
+
+Monitor* get_neighbor_monitor(int dir) {
+  Monitor* m = NULL;
+
+  if (dir > 0) {
+    if (!(m = selmon->next)) m = mons;
+  } else if (selmon == mons)
+    for (m = mons; m->next; m = m->next);
+  else
+    for (m = mons; m->next != selmon; m = m->next);
+  return m;
+}
+
+void move_tag_to_monitor(const Arg *arg) {
+	if (!selmon->sel || !mons->next)
+		return;
+	sendmon(selmon->sel, get_neighbor_monitor(arg->i));
 }
 
 /* main() removed — Go owns the entry point.
