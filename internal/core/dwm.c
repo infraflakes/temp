@@ -668,12 +668,18 @@ void cleanup(void) {
     XUnmapWindow(dpy, systray->win);
     XDestroyWindow(dpy, systray->win);
     free(systray);
+    systray = NULL;
   }
   for (i = 0; i < CurLast; i++) drw_cur_free(drw, cursor[i]);
   for (i = 0; i < LENGTH(colors) + 1; i++) free(scheme[i]);
   free(scheme);
+  scheme = NULL;
   XDestroyWindow(dpy, wmcheckwin);
+  wmcheckwin = None;
   drw_free(drw);
+  drw = NULL;
+  mons = selmon = NULL;
+  hiddenWinStackTop = -1;
   XSync(dpy, False);
   XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
   XDeleteProperty(dpy, root, netatom[NetActiveWindow]);

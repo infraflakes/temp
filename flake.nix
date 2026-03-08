@@ -34,6 +34,7 @@
 
         nativeBuildInputs = with pkgs; [
           go_1_26
+          golangci-lint
           zig
           pkg-config
           upx
