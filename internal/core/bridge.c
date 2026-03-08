@@ -9,10 +9,17 @@
 /* Internal flag: distinguishes restart (running=0) from quit */
 static int restart_requested = 0;
 
+KeySym srwm_string_to_keysym(const char *name) {
+  return XStringToKeysym(name);
+}
+
 int srwm_init(void) {
   /* Reset for re-init on restart */
   running = 1;
   restart_requested = 0;
+
+  /* Initialize threads for multi-threaded Xlib access (Lua handles keys) */
+  XInitThreads();
 
   if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
     fputs("warning: no locale support\n", stderr);
@@ -56,4 +63,21 @@ void srwm_set_status(const char *text) {
 void srwm_request_restart(void) {
   restart_requested = 1;
   running = 0;
+}
+
+/* Dynamic keys defined in dwm.c */
+extern void add_dynamic_key(unsigned int mod, KeySym keysym, int id);
+extern void clear_dynamic_keys(void);
+extern void grabkeys(void);
+
+void srwm_add_keybinding(unsigned int mod, KeySym keysym, int id) {
+  add_dynamic_key(mod, keysym, id);
+}
+
+void srwm_clear_keybindings(void) {
+  clear_dynamic_keys();
+}
+
+void srwm_grabkeys(void) {
+  grabkeys();
 }

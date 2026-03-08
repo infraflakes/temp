@@ -199,6 +199,29 @@ typedef struct {
 } Key;
 
 typedef struct {
+  unsigned int mod;
+  KeySym keysym;
+  int id;
+} DynamicKey;
+
+#define MAX_DYNAMIC_KEYS 256
+static DynamicKey dkeys[MAX_DYNAMIC_KEYS];
+static int dkeys_len = 0;
+
+void add_dynamic_key(unsigned int mod, KeySym keysym, int id) {
+  if (dkeys_len < MAX_DYNAMIC_KEYS) {
+    dkeys[dkeys_len].mod = mod;
+    dkeys[dkeys_len].keysym = keysym;
+    dkeys[dkeys_len].id = id;
+    dkeys_len++;
+  }
+}
+
+void clear_dynamic_keys(void) {
+  dkeys_len = 0;
+}
+
+typedef struct {
   const char* class;
   const char* instance;
   const char* title;
@@ -253,7 +276,7 @@ static long getstate(Window w);
 static unsigned int getsystraywidth();
 static int gettextprop(Window w, Atom atom, char* text, unsigned int size);
 static void grabbuttons(Client* c, int focused);
-static void grabkeys(void);
+void grabkeys(void);
 static void hide(Client* c);
 static void keypress(XEvent* e);
 static void killclient(const Arg* arg);
@@ -1544,13 +1567,25 @@ void grabkeys(void) {
     XDisplayKeycodes(dpy, &start, &end);
     syms = XGetKeyboardMapping(dpy, start, end - start + 1, &skip);
     if (!syms) return;
-    for (k = start; k <= end; k++)
-      for (i = 0; i < LENGTH(keys); i++)
+    for (k = start; k <= end; k++) {
+      for (i = 0; i < LENGTH(keys); i++) {
         /* skip modifier codes, we do that ourselves */
-        if (keys[i].keysym == syms[(k - start) * skip])
-          for (j = 0; j < LENGTH(modifiers); j++)
+        if (keys[i].keysym == syms[(k - start) * skip]) {
+          for (j = 0; j < LENGTH(modifiers); j++) {
             XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
                      GrabModeAsync, GrabModeAsync);
+          }
+        }
+      }
+      for (i = 0; i < dkeys_len; i++) {
+        if (dkeys[i].keysym == syms[(k - start) * skip]) {
+          for (j = 0; j < LENGTH(modifiers); j++) {
+            XGrabKey(dpy, k, dkeys[i].mod | modifiers[j], root, True,
+                     GrabModeAsync, GrabModeAsync);
+          }
+        }
+      }
+    }
     XFree(syms);
   }
 }
@@ -1603,10 +1638,19 @@ void keypress(XEvent* e) {
 
   ev = &e->xkey;
   keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
+  
+  // Check static keys
   for (i = 0; i < LENGTH(keys); i++)
     if (keysym == keys[i].keysym &&
         CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
       keys[i].func(&(keys[i].arg));
+      
+  // Check dynamic keys
+  for (i = 0; i < dkeys_len; i++)
+    if (keysym == dkeys[i].keysym &&
+        CLEANMASK(dkeys[i].mod) == CLEANMASK(ev->state)) {
+      srwm_handle_key(dkeys[i].id);
+    }
 }
 
 void killclient(const Arg* arg) {

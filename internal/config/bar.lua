@@ -1,6 +1,6 @@
--- Default status bar logic for srwm
+local M = {}
 
-local theme = {
+M.theme = {
 	purple = "#bebeda",
 	darkpurple = "#aeaed1",
 	black = "#252530",
@@ -17,7 +17,7 @@ local theme = {
 }
 
 -- helper to read the first line of a file/command
-local function read_first_line(cmd)
+function M.read_first_line(cmd)
 	local f = io.popen(cmd)
 	if not f then
 		return ""
@@ -28,7 +28,7 @@ local function read_first_line(cmd)
 end
 
 -- helper to read all output
-local function read_all(cmd)
+function M.read_all(cmd)
 	local f = io.popen(cmd)
 	if not f then
 		return ""
@@ -39,15 +39,15 @@ local function read_all(cmd)
 end
 
 local function battery()
-	local cap = read_first_line("cat /sys/class/power_supply/BAT0/capacity 2>/dev/null")
+	local cap = M.read_first_line("cat /sys/class/power_supply/BAT0/capacity 2>/dev/null")
 	if cap == "" then
 		return ""
 	end
-	return string.format("^c%s^ ^b%s^ 󱐋 ^b%s^ %s ", theme.black, theme.yellow, theme.darkyellow, cap)
+	return string.format("^c%s^ ^b%s^ 󱐋 ^b%s^ %s ", M.theme.black, M.theme.yellow, M.theme.darkyellow, cap)
 end
 
 local function brightness()
-	local b = read_first_line("cat /sys/class/backlight/*/brightness 2>/dev/null")
+	local b = M.read_first_line("cat /sys/class/backlight/*/brightness 2>/dev/null")
 	if b == "" then
 		return ""
 	end
@@ -55,13 +55,13 @@ local function brightness()
 	if not pct then
 		pct = 0
 	end
-	return string.format("^c%s^^b%s^   ^b%s^ %d%%", theme.black, theme.red, theme.darkred, pct)
+	return string.format("^c%s^^b%s^   ^b%s^ %d%%", M.theme.black, M.theme.red, M.theme.darkred, pct)
 end
 
 local function volume()
-	local wp_info = read_first_line("wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null")
+	local wp_info = M.read_first_line("wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null")
 	if wp_info == "" then
-		return string.format("^c%s^ ^b%s^ 󰝟 Error", theme.black, theme.red)
+		return string.format("^c%s^ ^b%s^ 󰝟 Error", M.theme.black, M.theme.red)
 	end
 
 	local vol_raw = string.match(wp_info, "Volume:%s*(%d%.%d+)")
@@ -72,7 +72,7 @@ local function volume()
 
 	local is_muted = string.match(wp_info, "%[MUTED%]")
 	if is_muted then
-		return string.format("^c%s^ ^b%s^ 󰝟 Muted", theme.black, theme.red)
+		return string.format("^c%s^ ^b%s^ 󰝟 Muted", M.theme.black, M.theme.red)
 	end
 
 	local icon = "󰕾"
@@ -84,40 +84,40 @@ local function volume()
 		icon = "󰖀"
 	end
 
-	return string.format("^c%s^ ^b%s^ %s ^b%s^ %d%%", theme.black, theme.green, icon, theme.darkgreen, vol_int)
+	return string.format("^c%s^ ^b%s^ %s ^b%s^ %d%%", M.theme.black, M.theme.green, icon, M.theme.darkgreen, vol_int)
 end
 
 local function wlan()
 	-- Get interface name
-	local iface = read_first_line("find /sys/class/net -name 'wl*' -type l | head -1 | xargs basename 2>/dev/null")
+	local iface = M.read_first_line("find /sys/class/net -name 'wl*' -type l | head -1 | xargs basename 2>/dev/null")
 	if iface == "" then
 		return ""
 	end
 
-	local state = read_first_line("cat /sys/class/net/" .. iface .. "/operstate 2>/dev/null")
+	local state = M.read_first_line("cat /sys/class/net/" .. iface .. "/operstate 2>/dev/null")
 	if state == "down" or state == "" then
-		return string.format("^c%s^ ^b%s^ 󰤭  ^b%s^ Disconnected", theme.black, theme.blue, theme.darkblue)
+		return string.format("^c%s^ ^b%s^ 󰤭  ^b%s^ Disconnected", M.theme.black, M.theme.blue, M.theme.darkblue)
 	end
 
-	local iw_info = read_all("iw dev " .. iface .. " info 2>/dev/null")
+	local iw_info = M.read_all("iw dev " .. iface .. " info 2>/dev/null")
 	local ssid = string.match(iw_info, "ssid ([^\n]+)")
 	if not ssid then
 		ssid = "Unknown"
 	end
 
-	return string.format("^c%s^ ^b%s^ 󰤨  ^b%s^ %s", theme.black, theme.blue, theme.darkblue, ssid)
+	return string.format("^c%s^ ^b%s^ 󰤨  ^b%s^ %s", M.theme.black, M.theme.blue, M.theme.darkblue, ssid)
 end
 
 local function clock()
 	local t = os.date("%H:%M:%S")
-	return string.format("^c%s^ ^b%s^ 󱑆  ^b%s^ %s", theme.black, theme.purple, theme.darkpurple, t)
+	return string.format("^c%s^ ^b%s^ 󱑆  ^b%s^ %s", M.theme.black, M.theme.purple, M.theme.darkpurple, t)
 end
 
 local function gap()
-	return string.format("^c%s^ ^b%s^", theme.black, theme.black)
+	return string.format("^c%s^ ^b%s^", M.theme.black, M.theme.black)
 end
 
-local function refresh()
+function M.refresh()
 	local parts = {
 		brightness(),
 		gap(),
@@ -139,7 +139,11 @@ local function refresh()
 	srwm.set_status(text)
 end
 
-while true do
-	refresh()
-	srwm.sleep(1)
+function M.run()
+	while true do
+		M.refresh()
+		srwm.sleep(1)
+	end
 end
+
+return M
