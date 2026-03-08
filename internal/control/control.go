@@ -1,0 +1,85 @@
+// Package control provides Lua-facing lifecycle and process management
+// functions for the srwm window manager.
+//
+// This package exposes srwm.spawn, srwm.restart, and srwm.quit to Lua.
+// These are "WM control" operations that are orthogonal to the status bar
+// and keybinding subsystems, so they live in their own package to keep
+// responsibilities cleanly separated.
+package control
+
+import (
+	"log"
+	"os/exec"
+
+	"github.com/nixuris/srwm/internal/core"
+	lua "github.com/yuin/gopher-lua"
+)
+
+// refreshNotifier is a callback set by the config package to trigger a
+// bar refresh after a spawn completes. This avoids a direct dependency
+// on internal/config from this package.
+var refreshNotifier func()
+
+// SetRefreshNotifier registers a callback that is invoked after every
+// srwm.spawn command completes. Typically wired to config.NotifyBarRefresh.
+func SetRefreshNotifier(fn func()) {
+	refreshNotifier = fn
+}
+
+// RegisterAPI injects lifecycle and process management functions into
+// the srwm Lua module table:
+//
+//   - srwm.spawn(cmd)    — run a shell command in the background,
+//     then trigger a bar refresh on completion.
+//   - srwm.restart()     — signal the WM to soft-restart (reload config).
+//   - srwm.quit()        — signal the WM to exit cleanly.
+func RegisterAPI(L *lua.LState, srwmMod *lua.LTable) {
+	L.SetField(srwmMod, "spawn", L.NewFunction(luaSpawn))
+	L.SetField(srwmMod, "restart", L.NewFunction(luaRestart))
+	L.SetField(srwmMod, "quit", L.NewFunction(luaQuit))
+}
+
+// luaSpawn runs a shell command asynchronously.
+//
+// Lua signature: srwm.spawn(cmd: string)
+//
+// The command is executed in a background goroutine via "sh -c <cmd>".
+// After the command exits (success or failure), the bar refresh callback
+// is invoked so the status bar can immediately reflect any changes
+// (e.g. updated volume level after wpctl).
+func luaSpawn(L *lua.LState) int {
+	cmd := L.CheckString(1)
+	go func() {
+		out, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+		if err != nil {
+			log.Printf("srwm.spawn: %q failed: %v (output: %s)", cmd, err, out)
+		}
+		if refreshNotifier != nil {
+			refreshNotifier()
+		}
+	}()
+	return 0
+}
+
+// luaRestart signals the C core to perform a soft restart.
+//
+// Lua signature: srwm.restart()
+//
+// This sets the restart flag and stops the X11 event loop. The Go
+// lifecycle loop in cmd/start.go will then re-init the C core and
+// reload the Lua configuration.
+func luaRestart(L *lua.LState) int {
+	core.Restart()
+	return 0
+}
+
+// luaQuit signals the C core to cleanly exit.
+//
+// Lua signature: srwm.quit()
+//
+// This stops the X11 event loop without setting the restart flag,
+// causing the Go lifecycle loop to break and the process to terminate.
+func luaQuit(L *lua.LState) int {
+	core.Quit()
+	return 0
+}

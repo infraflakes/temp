@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/nixuris/srwm/internal/config"
+	"github.com/nixuris/srwm/internal/control"
 	"github.com/nixuris/srwm/internal/core"
 	"github.com/nixuris/srwm/internal/ipc"
 	"github.com/spf13/cobra"
@@ -26,6 +27,10 @@ func init() {
 func runWM(socketPath string) {
 	log.SetPrefix("srwm: ")
 	log.SetFlags(0)
+
+	// Wire the control package's spawn-refresh callback to the
+	// config package's bar refresh channel.
+	control.SetRefreshNotifier(config.NotifyBarRefresh)
 
 	// Start IPC server
 	go func() {
