@@ -8,23 +8,69 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
-// RegisterKeybindAPI injects key-related functions and constants into the srwm module.
-func RegisterKeybindAPI(L *lua.LState, srwmMod *lua.LTable) {
-	// Modifiers (keep raw constants available)
-	L.SetField(srwmMod, "Mod1", lua.LNumber(8))  // Mod1Mask (Alt)
-	L.SetField(srwmMod, "Mod4", lua.LNumber(64)) // Mod4Mask (Super)
-	L.SetField(srwmMod, "Shift", lua.LNumber(1)) // ShiftMask
-	L.SetField(srwmMod, "Ctrl", lua.LNumber(4))  // ControlMask
+// X11 modifier mask constants.
+// These mirror the X11 <X11/X.h> definitions and are exposed to Lua
+// as srwm.Mod1, srwm.Mod4, etc. for use with srwm.key.set().
+const (
+	ShiftMask   = 1 << 0 // 1  — Shift key
+	ControlMask = 1 << 2 // 4  — Ctrl key
+	Mod1Mask    = 1 << 3 // 8  — Alt / Meta
+	Mod4Mask    = 1 << 6 // 64 — Super / Win
+)
 
-	// Key namespace
+// modifierAliases maps human-readable modifier names (lowercase) to
+// their X11 mask values. Used by parseModifiers to convert strings
+// like "Mod4+Shift" into the corresponding bitmask.
+var modifierAliases = map[string]int{
+	"shift":   ShiftMask,
+	"ctrl":    ControlMask,
+	"control": ControlMask,
+	"mod1":    Mod1Mask,
+	"alt":     Mod1Mask,
+	"mod4":    Mod4Mask,
+	"super":   Mod4Mask,
+	"win":     Mod4Mask,
+}
+
+// RegisterKeybindAPI injects key-related functions and modifier
+// constants into the srwm Lua module table:
+//
+//   - srwm.key.bind(mods, key, fn) — register a keybinding using
+//     human-readable strings (e.g. "Mod4+Shift", "Return").
+//   - srwm.key.set(mod, keysym, fn) — register a keybinding using
+//     raw numeric modifier and keysym values.
+//   - srwm.Mod1, srwm.Mod4, srwm.Shift, srwm.Ctrl — modifier
+//     constants for use with srwm.key.set().
+func RegisterKeybindAPI(L *lua.LState, srwmMod *lua.LTable) {
+	// Expose raw modifier constants for srwm.key.set().
+	L.SetField(srwmMod, "Mod1", lua.LNumber(Mod1Mask))
+	L.SetField(srwmMod, "Mod4", lua.LNumber(Mod4Mask))
+	L.SetField(srwmMod, "Shift", lua.LNumber(ShiftMask))
+	L.SetField(srwmMod, "Ctrl", lua.LNumber(ControlMask))
+
+	// Build the srwm.key namespace table.
 	keyTable := L.NewTable()
-	L.SetField(keyTable, "set", L.NewFunction(luaKeySet))   // hex version
-	L.SetField(keyTable, "bind", L.NewFunction(luaKeyBind)) // string version
+	L.SetField(keyTable, "bind", L.NewFunction(luaKeyBind))
+	L.SetField(keyTable, "set", L.NewFunction(luaKeySet))
 	L.SetField(srwmMod, "key", keyTable)
 }
 
-// luaKeyBind registers a dynamic keybinding using strings.
-// srwm.key.bind("Mod4+Shift", "Return", callback)
+// luaKeyBind registers a dynamic keybinding using human-readable strings.
+//
+// Lua signature: srwm.key.bind(modifiers: string, keyname: string, callback: function)
+//
+// Examples:
+//
+//	srwm.key.bind("Mod4+Shift", "Return", function() ... end)
+//	srwm.key.bind("",           "XF86AudioMute", function() ... end)
+//
+// The modifier string is a "+"-separated list of modifier names
+// (case-insensitive). Supported names: Mod1, Alt, Mod4, Super, Win,
+// Shift, Ctrl, Control. An empty string means no modifier.
+//
+// The key name is passed to XStringToKeysym for resolution, so any
+// standard X11 keysym name is valid (e.g. "a", "Return", "space",
+// "XF86AudioRaiseVolume").
 func luaKeyBind(L *lua.LState) int {
 	modStr := L.CheckString(1)
 	keyName := L.CheckString(2)
@@ -34,7 +80,7 @@ func luaKeyBind(L *lua.LState) int {
 	keysym := core.StringToKeysym(keyName)
 
 	if keysym == 0 {
-		L.RaiseError("invalid keysym name: %s", keyName)
+		L.RaiseError("srwm.key.bind: invalid key name %q (XStringToKeysym returned NoSymbol)", keyName)
 		return 0
 	}
 
@@ -42,8 +88,11 @@ func luaKeyBind(L *lua.LState) int {
 	return 0
 }
 
-// luaKeySet registers a dynamic keybinding using hex codes.
-// srwm.key.set(mod, keysym, callback)
+// luaKeySet registers a dynamic keybinding using raw numeric values.
+//
+// Lua signature: srwm.key.set(modifier: number, keysym: number, callback: function)
+//
+// This is the low-level API. Most users should prefer srwm.key.bind().
 func luaKeySet(L *lua.LState) int {
 	mod := L.CheckNumber(1)
 	keysym := L.CheckNumber(2)
@@ -53,8 +102,11 @@ func luaKeySet(L *lua.LState) int {
 	return 0
 }
 
+// registerBinding is the shared implementation for luaKeyBind and
+// luaKeySet. It creates a Go closure that will invoke the Lua callback
+// in a coroutine, registers the keybinding in the C core, and
+// immediately re-grabs all keys so the binding takes effect.
 func registerBinding(L *lua.LState, mod uint, keysym uint, callback *lua.LFunction) {
-	// Capture the Lua state thread locally for this callback.
 	co, _ := L.NewThread()
 
 	goCb := func() {
@@ -69,24 +121,24 @@ func registerBinding(L *lua.LState, mod uint, keysym uint, callback *lua.LFuncti
 	}
 
 	core.AddKeybinding(mod, keysym, goCb)
-	core.GrabKeys() // Commit grabbed keys to X11 immediately.
+	core.GrabKeys()
 }
 
+// parseModifiers converts a "+"-separated modifier string into the
+// corresponding X11 modifier bitmask.
+//
+// Examples:
+//
+//	parseModifiers("Mod4+Shift")  → Mod4Mask | ShiftMask = 65
+//	parseModifiers("")            → 0 (no modifiers)
+//	parseModifiers("Alt+Ctrl")   → Mod1Mask | ControlMask = 12
 func parseModifiers(s string) int {
-	var mod int
-	parts := strings.Split(s, "+")
-	for _, p := range parts {
-		p = strings.TrimSpace(strings.ToLower(p))
-		switch p {
-		case "mod1", "alt":
-			mod |= 8
-		case "mod4", "super", "win":
-			mod |= 64
-		case "shift":
-			mod |= 1
-		case "ctrl", "control":
-			mod |= 4
+	var mask int
+	for _, part := range strings.Split(s, "+") {
+		name := strings.TrimSpace(strings.ToLower(part))
+		if val, ok := modifierAliases[name]; ok {
+			mask |= val
 		}
 	}
-	return mod
+	return mask
 }

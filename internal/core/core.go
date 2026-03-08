@@ -3,9 +3,11 @@
 // The C core handles all X11 state and event processing. This package
 // exposes lifecycle control (Init, Run, Cleanup) and a status bar setter.
 //
-// IMPORTANT: Init() calls runtime.LockOSThread(). All subsequent calls
-// to Run(), Cleanup(), SetStatus(), and Quit() MUST happen on the same
-// goroutine that called Init(). X11 is not thread-safe.
+// Thread safety: Init() calls runtime.LockOSThread(). The core lifecycle
+// functions (Run, Cleanup, Quit) MUST be called from the same goroutine
+// that called Init(). However, SetStatus() and GrabKeys() are safe to
+// call from other goroutines because the C core calls XInitThreads()
+// during initialization.
 package core
 
 /*
@@ -62,18 +64,25 @@ func ShouldRestart() bool {
 }
 
 // Restart signals the C event loop to stop and triggers a restart.
+// The Go lifecycle loop in cmd/start.go will re-init the core and
+// reload the Lua VM.
 func Restart() {
 	C.srwm_request_restart()
 }
 
-// SetStatus sets the X root window name, which dwm reads as the status
-// bar text. This replaces the old `xsetroot -name` approach.
+// SetStatus sets the X root window name, which dwm renders as the
+// status bar text. Thread-safe (guarded by XInitThreads).
 func SetStatus(text string) {
 	cs := C.CString(text)
 	defer C.free(unsafe.Pointer(cs))
 	C.srwm_set_status(cs)
 }
 
+// StringToKeysym converts a human-readable X11 keysym name (e.g.
+// "Return", "space", "XF86AudioMute") into its numeric KeySym value.
+// Returns 0 (NoSymbol) if the name is not recognized.
+//
+// This is a thin wrapper around XStringToKeysym(3).
 func StringToKeysym(name string) uint {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
