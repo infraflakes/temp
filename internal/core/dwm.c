@@ -402,6 +402,7 @@ struct Monitor {
   Client* sel;
   Client* stack;
   Monitor* next;
+  Monitor* prev;
   Window barwin;
   Window tabwin;
   Window tagwin;
@@ -690,11 +691,13 @@ void cleanupmon(Monitor* mon) {
   Monitor* m;
   size_t i;
 
-  if (mon == mons)
+  if (mon == mons) {
     mons = mons->next;
-  else {
+    if (mons) mons->prev = NULL;
+  } else {
     for (m = mons; m && m->next != mon; m = m->next);
     m->next = mon->next;
+    if (m->next) m->next->prev = m;
   }
   for (i = 0; i < LENGTH(tags); i++) {
     if (mon->tagmap[i]) XFreePixmap(dpy, mon->tagmap[i]);
@@ -888,6 +891,7 @@ Monitor* createmon(void) {
   m->colorfultag = colorfultag ? colorfultag : 0;
   m->gap = gaps;
   m->borderpx = borderpx;
+  m->prev = NULL;
   for (i = 0; i < LENGTH(tags); i++) m->tagmap[i] = 0;
   m->previewshow = 0;
   m->pertag = ecalloc(1, sizeof(Pertag));
@@ -2739,10 +2743,12 @@ int updategeom(void) {
     /* new monitors if nn > n */
     for (i = n; i < nn; i++) {
       for (m = mons; m && m->next; m = m->next);
-      if (m)
+      if (m) {
         m->next = createmon();
-      else
+        m->next->prev = m;
+      } else {
         mons = createmon();
+      }
     }
     for (i = 0, m = mons; i < nn && m; m = m->next, i++)
       if (i >= n || unique[i].x_org != m->mx || unique[i].y_org != m->my ||
@@ -3105,12 +3111,11 @@ Monitor* systraytomon(Monitor* m) {
 }
 
 Monitor* get_neighbor_monitor(int dir) {
-  Monitor* m = NULL;
   if (dir > 0) {
-    if (!(m = selmon->next)) m = mons;} 
-  else if (selmon == mons) for (m = mons; m->next; m = m->next);
-  else for (m = mons; m->next != selmon; m = m->next);
-  return m;
+    return selmon->next ? selmon->next : mons;
+  } else {
+    return selmon->prev ? selmon->prev : mons;
+  }
 }
 
 void move_tag_to_monitor(const Arg *arg) {
