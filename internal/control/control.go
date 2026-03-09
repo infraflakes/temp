@@ -10,10 +10,15 @@ package control
 import (
 	"log"
 	"os/exec"
+	"sync"
 
 	"github.com/nixuris/srwm/internal/core"
 	lua "github.com/yuin/gopher-lua"
 )
+
+// spawnedOnce tracks commands that have already been executed via
+// spawn_once during the lifetime of the Go process.
+var spawnedOnce sync.Map
 
 // refreshNotifier is a callback set by the config package to trigger a
 // bar refresh after a spawn completes. This avoids a direct dependency
@@ -29,14 +34,39 @@ func SetRefreshNotifier(fn func()) {
 // RegisterAPI injects lifecycle and process management functions into
 // the srwm Lua module table:
 //
-//   - srwm.spawn(cmd)    — run a shell command in the background,
+//   - srwm.spawn(cmd)      — run a shell command in the background,
 //     then trigger a bar refresh on completion.
-//   - srwm.restart()     — signal the WM to soft-restart (reload config).
-//   - srwm.quit()        — signal the WM to exit cleanly.
+//   - srwm.spawn_once(cmd) — like spawn, but only runs once per WM
+//     lifetime (survives soft restarts). Does not trigger bar refresh.
+//   - srwm.restart()       — signal the WM to soft-restart (reload config).
+//   - srwm.quit()          — signal the WM to exit cleanly.
 func RegisterAPI(L *lua.LState, srwmMod *lua.LTable) {
 	L.SetField(srwmMod, "spawn", L.NewFunction(luaSpawn))
+	L.SetField(srwmMod, "spawn_once", L.NewFunction(luaSpawnOnce))
 	L.SetField(srwmMod, "restart", L.NewFunction(luaRestart))
 	L.SetField(srwmMod, "quit", L.NewFunction(luaQuit))
+}
+
+// luaSpawnOnce runs a shell command asynchronously, only if it hasn't
+// already been run during the lifetime of the WM process.
+//
+// Lua signature: srwm.spawn_once(cmd: string)
+//
+// This is ideal for startup applications (compositor, wallpaper) that
+// should not be relaunched when the WM soft-restarts.
+func luaSpawnOnce(L *lua.LState) int {
+	cmd := L.CheckString(1)
+	if _, loaded := spawnedOnce.LoadOrStore(cmd, true); loaded {
+		return 0 // Already spawned in this WM lifetime
+	}
+
+	go func() {
+		out, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+		if err != nil {
+			log.Printf("srwm.spawn_once: %q failed: %v (output: %s)", cmd, err, string(out))
+		}
+	}()
+	return 0
 }
 
 // luaSpawn runs a shell command asynchronously.

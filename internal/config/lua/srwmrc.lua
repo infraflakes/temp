@@ -1,9 +1,20 @@
--- Main configuration for srwm
+-- Example configuration for srwm!
 local bar = require("bar")
+
+--------------------------------------------------------------------------------
+-- Startups
+--------------------------------------------------------------------------------
+
+-- srwm.spawn_once("picom -b")
+-- srwm.spawn_once("feh --bg-scale ~/wallpaper.jpg")
+-- srwm.spawn_once("nm-applet &")
 
 --------------------------------------------------------------------------------
 -- Keybindings
 --------------------------------------------------------------------------------
+
+-- Mod4 = SUPER
+-- Mod1 = Alt
 
 -- Volume Control
 srwm.key.bind("", "XF86AudioRaiseVolume", function()
