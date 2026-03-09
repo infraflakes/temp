@@ -7,8 +7,7 @@
 
 local M = {}
 
--- The default "vague" color scheme. Override individual values or
--- replace the entire table from srwmrc.lua if desired.
+-- The default "vague" color scheme.
 M.theme = {
 	purple = "#bebeda",
 	darkpurple = "#aeaed1",

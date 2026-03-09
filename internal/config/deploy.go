@@ -23,14 +23,14 @@ import (
 // starting point they can edit.
 //
 //go:embed lua/srwmrc.lua
-var defaultSrwmrcScript []byte
+var DefaultSrwmrcScript []byte
 
-// defaultBarModule is the embedded default bar.lua, deployed alongside
+// DefaultBarModule is the embedded default bar.lua, deployed alongside
 // srwmrc.lua. It provides the status bar implementation as a Lua module
 // that srwmrc.lua loads via require("bar").
 //
 //go:embed lua/bar.lua
-var defaultBarModule []byte
+var DefaultBarModule []byte
 
 // StartConfig boots the Lua runtime in a background goroutine.
 //
@@ -46,25 +46,28 @@ func StartConfig(ctx context.Context) {
 
 // runLuaConfig is the main Lua configuration goroutine. It:
 //  1. Resolves the config directory (~/.config/srwm/).
-//  2. Deploys default srwmrc.lua and bar.lua if missing.
+//  2. Requires srwmrc.lua to exist (no auto-deploy).
 //  3. Creates and configures the Lua VM.
 //  4. Registers the srwm.* API surface.
 //  5. Executes srwmrc.lua (which blocks in the bar loop).
 func runLuaConfig(ctx context.Context) {
-	srwmDir := resolveConfigDir()
+	srwmDir := ResolveConfigDir()
 	if srwmDir == "" {
 		return
 	}
 
 	rcPath := filepath.Join(srwmDir, "srwmrc.lua")
-	barLuaPath := filepath.Join(srwmDir, "bar.lua")
 
 	if err := os.MkdirAll(srwmDir, 0755); err != nil {
 		log.Printf("lua: failed to create config dir: %v", err)
 		return
 	}
-	deployDefault(rcPath, defaultSrwmrcScript)
-	deployDefault(barLuaPath, defaultBarModule)
+
+	if _, err := os.Stat(rcPath); os.IsNotExist(err) {
+		log.Printf("lua: config not found at %s", rcPath)
+		log.Printf("lua: run 'srwm kickstart' to deploy default config")
+		return
+	}
 
 	L := lua.NewState()
 	L.OpenLibs()
@@ -87,7 +90,7 @@ func runLuaConfig(ctx context.Context) {
 	// Preload bar.lua as a require-able module so the user can do:
 	//   local bar = require("bar")
 	L.PreloadModule("bar", func(L *lua.LState) int {
-		if err := L.DoString(string(defaultBarModule)); err != nil {
+		if err := L.DoString(string(DefaultBarModule)); err != nil {
 			L.RaiseError("failed to load bar.lua: %v", err)
 		}
 		return 1
@@ -101,7 +104,7 @@ func runLuaConfig(ctx context.Context) {
 
 // resolveConfigDir returns the srwm config directory path
 // (~/.config/srwm), respecting XDG_CONFIG_HOME.
-func resolveConfigDir() string {
+func ResolveConfigDir() string {
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
 		home, err := os.UserHomeDir()
