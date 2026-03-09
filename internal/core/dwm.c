@@ -2296,15 +2296,6 @@ void setup(void) {
   int i;
   XSetWindowAttributes wa;
   Atom utf8string;
-  struct sigaction sa;
-  /* do not transform children into zombies when they terminate */
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
-  sa.sa_handler = SIG_IGN;
-  sigaction(SIGCHLD, &sa, NULL);
-
-  /* clean up any zombies (inherited from .xinitrc etc) immediately */
-  while (waitpid(-1, NULL, WNOHANG) > 0);
 
   /* init screen */
   screen = DefaultScreen(dpy);

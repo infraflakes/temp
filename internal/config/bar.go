@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -31,8 +32,9 @@ type barState struct {
 	widgets  map[string]string // name → absolute script path
 	layout   []string          // ordered widget names
 	interval float64           // polling interval in seconds
-	configDir string           // resolved config dir for relative paths
-	themePath string           // path to theme.sh
+	configDir string            // resolved config dir for relative paths
+	themePath string            // path to theme.sh (now deprecated)
+	themeRepl *strings.Replacer // theme variable substitutor
 }
 
 // RegisterBarAPI creates the srwm.bar namespace and populates it with
@@ -41,7 +43,7 @@ type barState struct {
 //   - srwm.bar.widget(name, path) — register a named widget script
 //   - srwm.bar.layout(name, ...)  — set the display order
 //   - srwm.bar.interval(seconds)  — set the polling interval
-//   - srwm.bar.separator(name)    — set the separator widget name
+//   - srwm.bar.theme({name="#hex"}) — configure string replacement variables
 //   - srwm.bar.run()              — enter the Go-managed polling loop
 func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 	state := &barState{
@@ -49,6 +51,7 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 		interval:  1.0,
 		configDir: configDir,
 		themePath: filepath.Join(configDir, "widgets", "theme.sh"),
+		themeRepl: strings.NewReplacer(),
 	}
 
 	barTable := L.NewTable()
@@ -66,11 +69,29 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 		return 0
 	}))
 
+	barTable.RawSetString("theme", L.NewFunction(func(L *lua.LState) int {
+		return luaBarTheme(L, state)
+	}))
+
 	barTable.RawSetString("run", L.NewFunction(func(L *lua.LState) int {
 		return luaBarRun(L, state)
 	}))
 
 	L.SetField(srwmMod, "bar", barTable)
+}
+
+// luaBarTheme registers theme variables that will be string-replaced in
+// the widget outputs (e.g. {purple} -> #bebeda).
+//
+// Lua signature: srwm.bar.theme({ name = "#hex", ... })
+func luaBarTheme(L *lua.LState, state *barState) int {
+	themeTable := L.CheckTable(1)
+	var replacements []string
+	themeTable.ForEach(func(k, v lua.LValue) {
+		replacements = append(replacements, "{"+k.String()+"}", v.String())
+	})
+	state.themeRepl = strings.NewReplacer(replacements...)
+	return 0
 }
 
 // luaBarWidget registers a named widget pointing to a shell script.
@@ -110,10 +131,8 @@ func luaBarLayout(L *lua.LState, state *barState) int {
 //
 // On each tick (or instant refresh), Go iterates over the layout,
 // executes each widget's shell script, concatenates the output,
+// replaces theme variables via template string expansion,
 // and calls core.SetStatus().
-//
-// The SRWM_THEME environment variable is set to the theme.sh path
-// so widget scripts can source it for color variables.
 //
 // The loop exits when the Lua VM's context is cancelled.
 // This function blocks the calling Lua thread.
@@ -132,11 +151,13 @@ func luaBarRun(L *lua.LState, state *barState) int {
 			}
 
 			cmd := exec.Command("sh", scriptPath)
-			cmd.Env = append(cmd.Environ(), "SRWM_THEME="+state.themePath)
+			// Avoid propagating ugly env vars to the widgets.
+			cmd.Env = os.Environ()
 
-			out, err := cmd.Output()
+			out, err := cmd.CombinedOutput()
 			if err != nil {
-				continue // skip failed widgets silently
+				log.Printf("srwm.bar: widget %q failed: %v (output: %s)", name, err, string(out))
+				continue
 			}
 
 			text := strings.TrimRight(string(out), "\n\r")
@@ -145,7 +166,9 @@ func luaBarRun(L *lua.LState, state *barState) int {
 			}
 		}
 
-		core.SetStatus(strings.Join(parts, ""))
+		finalStatus := strings.Join(parts, "")
+		finalStatus = state.themeRepl.Replace(finalStatus)
+		core.SetStatus(finalStatus)
 
 		// Interruptible sleep
 		select {

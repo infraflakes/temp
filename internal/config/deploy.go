@@ -36,9 +36,6 @@ var widgetClock []byte
 //go:embed widgets/gap.sh
 var widgetGap []byte
 
-//go:embed widgets/theme.sh
-var widgetTheme []byte
-
 //go:embed widgets/volume.sh
 var widgetVolume []byte
 
@@ -51,7 +48,6 @@ var defaultWidgets = map[string][]byte{
 	"brightness.sh": widgetBrightness,
 	"clock.sh":      widgetClock,
 	"gap.sh":        widgetGap,
-	"theme.sh":      widgetTheme,
 	"volume.sh":     widgetVolume,
 	"wifi.sh":       widgetWifi,
 }
