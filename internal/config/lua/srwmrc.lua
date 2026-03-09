@@ -58,6 +58,23 @@ end)
 -- Status Bar Setup
 --------------------------------------------------------------------------------
 
+-- Define theme variables for widget template replacement (e.g. {purple} -> #hex)
+srwm.bar.theme({
+	purple     = "#bebeda",
+	darkpurple = "#aeaed1",
+	black      = "#252530",
+	green      = "#99b782",
+	darkgreen  = "#7fa563",
+	white      = "#d7d7d7",
+	grey       = "#606079",
+	blue       = "#8ba9c1",
+	darkblue   = "#6e94b2",
+	red        = "#e08398",
+	darkred    = "#d8647e",
+	yellow     = "#f5cb96",
+	darkyellow = "#f3be7c",
+})
+
 -- Register widget shell scripts (paths are relative to ~/.config/srwm/)
 srwm.bar.widget("brightness", "widgets/brightness.sh")
 srwm.bar.widget("volume",     "widgets/volume.sh")
