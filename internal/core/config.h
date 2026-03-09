@@ -7,7 +7,7 @@
 /* appearance */
 static const unsigned int borderpx = 0; /* border pixel of windows */
 static const unsigned int default_border = 0; /* to switch back to default border after dynamic border resizing via keybinds */
-static const unsigned int snap = 32;     /* snap pixel */
+static const unsigned int attach_to_screen_edge_px = 32;     /* snap pixel */
 static const unsigned int gaps = 0; /* set up gaps */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2; /* systray spacing */

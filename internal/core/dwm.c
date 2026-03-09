@@ -1797,15 +1797,15 @@ void movemouse(const Arg* arg) {
 
         nx = ocx + (ev.xmotion.x - x);
         ny = ocy + (ev.xmotion.y - y);
-        if (abs(selmon->wx - nx) < snap)
+        if (abs(selmon->wx - nx) < attach_to_screen_edge_px)
           nx = selmon->wx;
-        else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap)
+        else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < attach_to_screen_edge_px)
           nx = selmon->wx + selmon->ww - WIDTH(c);
-        if (abs(selmon->wy - ny) < snap)
+        if (abs(selmon->wy - ny) < attach_to_screen_edge_px)
           ny = selmon->wy;
-        else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
+        else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < attach_to_screen_edge_px)
           ny = selmon->wy + selmon->wh - HEIGHT(c);
-        if (!c->isfloating && (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+        if (!c->isfloating && (abs(nx - c->x) > attach_to_screen_edge_px || abs(ny - c->y) > attach_to_screen_edge_px))
           togglefloating(NULL);
         if (c->isfloating) resize(c, nx, ny, c->w, c->h, 1);
         break;
@@ -1870,7 +1870,7 @@ void placemouse(const Arg* arg) {
         nx = ocx + (ev.xmotion.x - x);
         ny = ocy + (ev.xmotion.y - y);
 
-        if (!freemove && (abs(nx - ocx) > snap || abs(ny - ocy) > snap))
+        if (!freemove && (abs(nx - ocx) > attach_to_screen_edge_px || abs(ny - ocy) > attach_to_screen_edge_px))
           freemove = 1;
 
         if (freemove) XMoveWindow(dpy, c->win, nx, ny);
@@ -2105,7 +2105,7 @@ void resizemouse(const Arg* arg) {
             c->mon->wy + nh >= selmon->wy &&
             c->mon->wy + nh <= selmon->wy + selmon->wh) {
           if (!c->isfloating &&
-              (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
+              (abs(nw - c->w) > attach_to_screen_edge_px || abs(nh - c->h) > attach_to_screen_edge_px))
             togglefloating(NULL);
         }
         if (c->isfloating) resize(c, c->x, c->y, nw, nh, 1);
