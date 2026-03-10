@@ -4,72 +4,45 @@
 // theme
 #include "themes/vague.h"
 
-/* appearance */
-static const unsigned int borderpx = 0; /* border pixel of windows */
-static const unsigned int px_till_snapping_to_screen_edge = 32;     /* snap pixel */
-static const unsigned int gaps = 0; /* set up gaps */
-static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
-static const unsigned int systrayspacing = 2; /* systray spacing */
-static const int systray_enable = 1; /* 0 means no systray */
-static const int showbar = 1;     /* 0 means no bar */
-static const int bar_horizontal_padding = 10;
-static const int bar_vertical_padding= 0;
-static const int tab_vertical_padding = 35;
-static const int tab_in_horizontal_padding = 15;
-static const int tab_out_horizontal_padding = 15;
-static const int tag_preview_size = 4;
-static const int tag_preview_enable = 0; /* 1 means enable, 0 is off */
-static const unsigned int tag_underline_padding = 5; /* horizontal padding between the underline and tag */
-static const unsigned int tag_underline_size = 2; /* thickness / height of the underline */
-static const unsigned int tag_underline_offset_from_bar_bottom = 0; /* how far above the bottom of the bar the line should appear */
-static const int tag_underline_for_all_tags = 0; /* 1 to show underline on all tags, 0 for just the active ones */
+/* appearance - configurable via Lua */
+extern unsigned int borderpx;
+extern unsigned int px_till_snapping_to_screen_edge;
+extern unsigned int gaps;
+extern unsigned int systraypinning;
+extern unsigned int systrayspacing;
+extern int systray_enable;
+extern int showbar;
+extern int bar_horizontal_padding;
+extern int bar_vertical_padding;
+extern int tab_vertical_padding;
+extern int tab_in_horizontal_padding;
+extern int tab_out_horizontal_padding;
+extern int tag_preview_size;
+extern int tag_preview_enable;
+extern unsigned int tag_underline_padding;
+extern unsigned int tag_underline_size;
+extern unsigned int tag_underline_offset_from_bar_bottom;
+extern int tag_underline_for_all_tags;
 
 // Needs refactor
-static const int toptab = 1;   /* 0 means bottom tab */
-static const int topbar = 1;   /* 0 means bottom bar */
+extern int toptab;
+extern int topbar;
 
 // TODO: Make this option hardcoded in source code
-static const int new_window_appear_on_end = 1; /*  1 means the new window will attach on the end; 0 means the new window will attach on the front,default is front */
+extern int new_window_appear_on_end;
 
 // Theming
-#define ICONSIZE 20   /* icon size */
-#define ICONSPACING 8 /* space between icon and title */
-static const int colorfultag = 1; /* 0 means use SchemeSel for selected non vacant tag */
-static const char* fonts[] = {"JetBrainsMonoNerdFont:size=13"};
-static const char* colors[][3] = {
-    /*            fg       bg      border */
-    [SchemeNorm] = {gray3, black, gray2},
-    [SchemeSel] = {gray3, blue, blue},
-    [SchemeTitle] = {white, black, black},  // active window title
-    [TabSel] = {black, purple, black},
-    [TabNorm] = {gray3, black, black},
-    [SchemeTag] = {gray2, black, black},
-    [SchemeTag1] = {blue, black, black},
-    [SchemeTag2] = {purple, black, black},
-    [SchemeTag3] = {pink, black, black},
-    [SchemeBtnPrev] = {green, black, black},
-    [SchemeBtnNext] = {yellow, black, black},
-    [SchemeBtnClose] = {red, black, black},
-};
+#define ICONSIZE 20
+#define ICONSPACING 8
+extern int colorfultag;
+extern const char* fonts[];
+extern const char* colors[][3];
 
-/* tagging */
-static char* tags[] = {"1", "2", "3", "4", "5"};
+// tagging
+extern char* tags[];
+extern const int tagschemes[];
 
-static const int tagschemes[] = {SchemeTag1, SchemeTag2, SchemeTag3,
-                                 SchemeTag2, SchemeTag1, SchemeTag2,
-                                 SchemeTag3, SchemeTag1, SchemeTag2};
-
-static const Rule rules[] = {
-    /* xprop(1):
-     *	WM_CLASS(STRING) = instance, class
-     *	WM_NAME(STRING) = title
-     */
-    /* class      instance    title       tags mask     iscentered   isfloating
-       monitor */
-    { "Toolkit",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
-    { "firefox",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
-    { "Chromium", NULL,       "Picture-in-Picture",   0,         1,          -1 },
-};
+extern const Rule rules[];
 
 #include "functions.h"
 /* function declarations */

@@ -5,6 +5,47 @@
 -- without .lua extension
 
 --------------------------------------------------------------------------------
+-- Configuration
+--------------------------------------------------------------------------------
+-- Note: These take effect on restart (srwm.restart())
+
+-- Appearance
+srwm.cfg.borderpx(0)
+srwm.cfg.gaps(0)
+srwm.cfg.showbar(true)
+srwm.cfg.topbar(true)
+srwm.cfg.toptab(true)
+srwm.cfg.colorfultag(true)
+
+-- Bar
+srwm.cfg.bar_horizontal_padding(10)
+srwm.cfg.bar_vertical_padding(0)
+
+-- Tab
+srwm.cfg.tab_vertical_padding(35)
+srwm.cfg.tab_in_horizontal_padding(15)
+srwm.cfg.tab_out_horizontal_padding(15)
+
+-- Systray
+srwm.cfg.systray_enable(true)
+srwm.cfg.systray_spacing(2)
+srwm.cfg.systray_pinning(0)
+
+-- Tag preview
+srwm.cfg.tag_preview_size(4)
+srwm.cfg.tag_preview_enable(false)
+
+-- Tag underline
+srwm.cfg.tag_underline_padding(5)
+srwm.cfg.tag_underline_size(2)
+srwm.cfg.tag_underline_offset_from_bar_bottom(0)
+srwm.cfg.tag_underline_for_all_tags(false)
+
+-- Misc
+srwm.cfg.px_till_snapping_to_screen_edge(32)
+srwm.cfg.new_window_appear_on_end(true)
+
+--------------------------------------------------------------------------------
 -- Startups
 --------------------------------------------------------------------------------
 
