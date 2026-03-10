@@ -54,11 +54,9 @@ static unsigned int prevtag(void);
 /* key definitions */
 #define MODKEY Mod4Mask
 #define ALTKEY Mod1Mask
-#define TAGKEYS(KEY, TAG)                                        \
-  {MODKEY, KEY, view, {.ui = 1 << TAG}},                         \
-      {MODKEY | ControlMask, KEY, toggleview, {.ui = 1 << TAG}}, \
-      {MODKEY | ShiftMask, KEY, tag, {.ui = 1 << TAG}},          \
-      {MODKEY | ControlMask | ShiftMask, KEY, toggletag, {.ui = 1 << TAG}},
+#define TAGKEYS(KEY, TAG)                              \
+  {MODKEY, KEY, view, {.ui = 1 << TAG}},               \
+  {MODKEY | ControlMask, KEY, tag, {.ui = 1 << TAG}},  \
 
 static const Key keys[] = {
 
