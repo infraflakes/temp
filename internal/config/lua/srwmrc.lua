@@ -99,8 +99,26 @@ end)
 -- Status Bar Setup
 --------------------------------------------------------------------------------
 
--- Define theme variables for widget template replacement (e.g. {purple} -> #hex)
+-- Set fonts
+srwm.bar.fonts("JetBrainsMonoNerdFont:size=13")
+
+-- Theme: nested tables set WM core colors, simple strings set widget palette
 srwm.bar.theme({
+	-- WM Core colors (fg, bg, border)
+	normal = { fg = "#cdcdcd", bg = "#252530", border = "#606079" },
+	selected = { fg = "#cdcdcd", bg = "#6e94b2", border = "#6e94b2" },
+	title = { fg = "#d7d7d7", bg = "#252530", border = "#252530" },
+	tab_selected = { fg = "#252530", bg = "#aeaed1", border = "#aeaed1" },
+	tab_normal = { fg = "#cdcdcd", bg = "#252530", border = "#252530" },
+	tag = { fg = "#606079", bg = "#252530", border = "#252530" },
+	tag1 = { fg = "#6e94b2", bg = "#252530", border = "#252530" },
+	tag2 = { fg = "#aeaed1", bg = "#252530", border = "#252530" },
+	tag3 = { fg = "#bb9dbd", bg = "#252530", border = "#252530" },
+	button_prev = { fg = "#7fa563", bg = "#252530", border = "#252530" },
+	button_next = { fg = "#f3be7c", bg = "#252530", border = "#252530" },
+	button_close = { fg = "#d8647e", bg = "#252530", border = "#252530" },
+
+	-- Widget palette (used as {name} in shell scripts)
 	purple = "#bebeda",
 	darkpurple = "#aeaed1",
 	black = "#252530",

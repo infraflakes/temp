@@ -60,8 +60,6 @@ static unsigned int prevtag(void);
       {MODKEY | ShiftMask, KEY, tag, {.ui = 1 << TAG}},          \
       {MODKEY | ControlMask | ShiftMask, KEY, toggletag, {.ui = 1 << TAG}},
 
-/* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) {.v = (const char*[]) { "sh", "-c", cmd, NULL }}
 static const Key keys[] = {
 
     {MODKEY, XK_q, killclient, {0}},
@@ -96,7 +94,6 @@ static const Key keys[] = {
 
 /* button definitions */
 static const Button buttons[] = {
-    {ClkStatusText, 0, Button2, spawn, SHCMD("ghostty")},
     {ClkClientWin, MODKEY, Button1, moveorplace, {.i = 0}},
     {ClkClientWin, MODKEY, Button2, togglefloating, {0}},
     {ClkClientWin, MODKEY, Button3, resizemouse, {0}},

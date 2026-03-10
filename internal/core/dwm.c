@@ -307,7 +307,6 @@ static void setviewport(void);
 static void seturgent(Client* c, int urg);
 static void showhide(Client* c);
 static void showtagpreview(int tag);
-static void spawn(const Arg* arg);
 static void switchtag(void);
 static Monitor* systraytomon(Monitor* m);
 static void tag(const Arg* arg);
@@ -2478,20 +2477,6 @@ void showtagpreview(int tag) {
     XMapWindow(dpy, selmon->tagwin);
   } else
     XUnmapWindow(dpy, selmon->tagwin);
-}
-
-void spawn(const Arg* arg) {
-  struct sigaction sa;
-  if (fork() == 0) {
-    if (dpy) close(ConnectionNumber(dpy));
-    setsid();
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sa.sa_handler = SIG_DFL;
-    sigaction(SIGCHLD, &sa, NULL);
-    execvp(((char**)arg->v)[0], (char**)arg->v);
-    die("dwm: execvp '%s' failed:", ((char**)arg->v)[0]);
-  }
 }
 
 void setclienttagprop(Client* c) {

@@ -85,16 +85,59 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 	L.SetField(srwmMod, "bar", barTable)
 }
 
-// luaBarTheme registers theme variables that will be string-replaced in
-// the widget outputs (e.g. {purple} -> #bebeda).
+// luaBarTheme registers theme variables.
 //
-// Lua signature: srwm.bar.theme({ name = "#hex", ... })
+// Nested tables (e.g. normal = { fg = "#hex", bg = "#hex", border = "#hex" })
+// set WM core colors via core.SetColor.
+//
+// Simple strings (e.g. purple = "#bebeda") register template replacements
+// for shell-widget output (e.g. {purple} -> #bebeda).
 func luaBarTheme(L *lua.LState, state *barState) int {
 	themeTable := L.CheckTable(1)
 	var replacements []string
+
+	schemeMap := map[string]core.Scheme{
+		"normal":       core.SchemeNorm,
+		"selected":     core.SchemeSel,
+		"title":        core.SchemeTitle,
+		"tag":          core.SchemeTag,
+		"tag1":         core.SchemeTag1,
+		"tag2":         core.SchemeTag2,
+		"tag3":         core.SchemeTag3,
+		"tag4":         core.SchemeTag4,
+		"tag5":         core.SchemeTag5,
+		"tab_selected": core.TabSel,
+		"tab_normal":   core.TabNorm,
+		"button_prev":  core.SchemeBtnPrev,
+		"button_next":  core.SchemeBtnNext,
+		"button_close": core.SchemeBtnClose,
+	}
+
 	themeTable.ForEach(func(k, v lua.LValue) {
-		replacements = append(replacements, "{"+k.String()+"}", v.String())
+		key := k.String()
+
+		// Nested table → WM core color
+		if tbl, ok := v.(*lua.LTable); ok {
+			scheme, exists := schemeMap[key]
+			if !exists {
+				return
+			}
+			if fg := tbl.RawGetString("fg"); fg.Type() == lua.LTString {
+				core.SetColor(scheme, 0, fg.String())
+			}
+			if bg := tbl.RawGetString("bg"); bg.Type() == lua.LTString {
+				core.SetColor(scheme, 1, bg.String())
+			}
+			if border := tbl.RawGetString("border"); border.Type() == lua.LTString {
+				core.SetColor(scheme, 2, border.String())
+			}
+			return
+		}
+
+		// Simple string → widget template replacement
+		replacements = append(replacements, "{"+key+"}", v.String())
 	})
+
 	state.themeRepl = strings.NewReplacer(replacements...)
 	return 0
 }

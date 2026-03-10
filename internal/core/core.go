@@ -271,6 +271,32 @@ func SetFont(font string) {
 	C.srwm_set_font(cs)
 }
 
+// Scheme mirrors the C enum in dwm.c — order must match exactly.
+type Scheme int
+
+const (
+	SchemeNorm     Scheme = 0
+	SchemeSel      Scheme = 1
+	SchemeTitle    Scheme = 2
+	SchemeTag      Scheme = 3
+	SchemeTag1     Scheme = 4
+	SchemeTag2     Scheme = 5
+	SchemeTag3     Scheme = 6
+	SchemeTag4     Scheme = 7
+	SchemeTag5     Scheme = 8
+	TabSel         Scheme = 9
+	TabNorm        Scheme = 10
+	SchemeBtnPrev  Scheme = 11
+	SchemeBtnNext  Scheme = 12
+	SchemeBtnClose Scheme = 13
+)
+
+func SetColor(scheme Scheme, slot int, hex string) {
+	cs := C.CString(hex)
+	// intentionally not freed — C core holds the pointer
+	C.srwm_set_color(C.int(scheme), C.int(slot), cs)
+}
+
 func b2i(b bool) int {
 	if b {
 		return 1
