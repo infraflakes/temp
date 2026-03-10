@@ -653,8 +653,8 @@ void buttonpress(XEvent* e) {
     }
     i = x = 0;
     do x += TEXTW(tags[i]);
-    while (ev->x >= x && ++i < LENGTH(tags));
-    if (i < LENGTH(tags)) {
+    while (ev->x >= x && ++i < TAGSLENGTH);
+    if (i < TAGSLENGTH) {
       click = ClkTagBar;
       arg.ui = 1 << i;
       goto execute_handler;
@@ -759,7 +759,7 @@ void cleanupmon(Monitor* mon) {
     m->next = mon->next;
     if (m->next) m->next->prev = m;
   }
-  for (i = 0; i < LENGTH(tags); i++) {
+  for (i = 0; i < TAGSLENGTH; i++) {
     if (mon->tagmap[i]) XFreePixmap(dpy, mon->tagmap[i]);
   }
   XUnmapWindow(dpy, mon->barwin);
@@ -1106,12 +1106,12 @@ int drawstatusbar(Monitor* m, int bh, char* stext) {
 // Move window to next tag
 unsigned int nexttag(void) {
   unsigned int seltag = selmon->tagset[selmon->seltags];
-  return seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
+  return seltag == (1 << (TAGSLENGTH - 1)) ? 1 : seltag << 1;
 }
 
 unsigned int prevtag(void) {
   unsigned int seltag = selmon->tagset[selmon->seltags];
-  return seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
+  return seltag == 1 ? (1 << (TAGSLENGTH - 1)) : seltag >> 1;
 }
 
 void tagtonext(const Arg* arg) {
@@ -1162,7 +1162,7 @@ void drawbar(Monitor* m) {
     if (c->isurgent) urg |= c->tags;
   }
   x = borderpx;
-  for (i = 0; i < LENGTH(tags); i++) {
+  for (i = 0; i < TAGSLENGTH; i++) {
     w = TEXTW(tags[i]);
     drw_setscheme(
         drw, scheme[occ & 1 << i ? (m->colorfultag ? tagschemes[i] : SchemeSel)
@@ -1786,8 +1786,8 @@ void motionnotify(XEvent* e) {
   if (ev->window == selmon->barwin) {
     i = x = 0;
     do x += TEXTW(tags[i]);
-    while (ev->x >= x && ++i < LENGTH(tags));
-    if (i < LENGTH(tags)) {
+    while (ev->x >= x && ++i < TAGSLENGTH);
+    if (i < TAGSLENGTH) {
       if ((i + 1) != selmon->previewshow &&
           !(selmon->tagset[selmon->seltags] & 1 << i)) {
         selmon->previewshow = i + 1;
@@ -2505,7 +2505,7 @@ void switchtag(void) {
   Imlib_Image image;
 
   for (c = selmon->clients; c; c = c->next) occ |= c->tags;
-  for (i = 0; i < LENGTH(tags); i++) {
+  for (i = 0; i < TAGSLENGTH; i++) {
     if (selmon->tagset[selmon->seltags] & 1 << i) {
       if (selmon->tagmap[i] != 0) {
         XFreePixmap(dpy, selmon->tagmap[i]);
