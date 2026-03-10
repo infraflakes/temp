@@ -61,6 +61,7 @@ make build
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## Acknowledgements
 
 Special thanks to:
@@ -74,8 +75,17 @@ Special thanks to:
 >>>>>>> b63f90c (Create README.md for Serein Window Manager)
 =======
 # Start
+=======
+# Starting the WM
+>>>>>>> 24b86de (Update README)
 
-You can start the window manager with `srwm start` for example with `sx`:
+You can generate the default config with `srwm kickstart`:
+
+```bash
+srwm kickstart
+```
+
+Then start the window manager with `srwm start` and any X11 graphical sessions launcher, for example with `sx`:
 ```bash
 sx srwm start
 ```
