@@ -383,6 +383,55 @@ static Window root, wmcheckwin;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
+/* Default configuration values - can be overridden via Lua */
+unsigned int borderpx = 0;
+unsigned int px_till_snapping_to_screen_edge = 32;
+unsigned int gaps = 0;
+unsigned int systraypinning = 0;
+unsigned int systrayspacing = 2;
+int systray_enable = 1;
+int showbar = 1;
+int bar_horizontal_padding = 10;
+int bar_vertical_padding = 0;
+int tab_vertical_padding = 35;
+int tab_in_horizontal_padding = 15;
+int tab_out_horizontal_padding = 15;
+int tag_preview_size = 4;
+int tag_preview_enable = 0;
+unsigned int tag_underline_padding = 5;
+unsigned int tag_underline_size = 2;
+unsigned int tag_underline_offset_from_bar_bottom = 0;
+int tag_underline_for_all_tags = 0;
+int toptab = 1;
+int topbar = 1;
+int new_window_appear_on_end = 1;
+int colorfultag = 1;
+const char* fonts[] = {"JetBrainsMonoNerdFont:size=13"};
+const char* colors[][3] = {
+    [SchemeNorm] = {gray3, black, gray2},
+    [SchemeSel] = {gray3, blue, blue},
+    [SchemeTitle] = {white, black, black},
+    [TabSel] = {black, purple, black},
+    [TabNorm] = {gray3, black, black},
+    [SchemeTag] = {gray2, black, black},
+    [SchemeTag1] = {blue, black, black},
+    [SchemeTag2] = {purple, black, black},
+    [SchemeTag3] = {pink, black, black},
+    [SchemeBtnPrev] = {green, black, black},
+    [SchemeBtnNext] = {yellow, black, black},
+    [SchemeBtnClose] = {red, black, black},
+};
+char* tags[] = {"1", "2", "3", "4", "5"};
+const int tagschemes[] = {SchemeTag1, SchemeTag2, SchemeTag3,
+                         SchemeTag2, SchemeTag1, SchemeTag2,
+                         SchemeTag3, SchemeTag1, SchemeTag2};
+
+const Rule rules[] = {
+    { "Toolkit",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
+    { "firefox",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
+    { "Chromium", NULL,       "Picture-in-Picture",   0,         1,          -1 },
+};
+
 typedef struct Pertag Pertag;
 struct Monitor {
   int num;

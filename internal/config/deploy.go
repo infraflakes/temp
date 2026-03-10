@@ -119,6 +119,7 @@ func runLuaConfig(ctx context.Context) {
 
 	RegisterBarAPI(L, srwmMod, srwmDir)
 	RegisterKeybindAPI(L, srwmMod)
+	RegisterConfigAPI(L, srwmMod)
 	control.RegisterAPI(L, srwmMod)
 
 	log.Printf("lua: executing %s", rcPath)
