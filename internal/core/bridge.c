@@ -170,3 +170,6 @@ void srwm_set_new_window_appear_on_end(int v) { new_window_appear_on_end = v; }
 
 int srwm_get_colorfultag(void) { return colorfultag; }
 void srwm_set_colorfultag(int v) { colorfultag = v; }
+
+extern const char* fonts[];
+void srwm_set_font(const char* font) { fonts[0] = font; }

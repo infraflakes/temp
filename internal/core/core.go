@@ -265,6 +265,12 @@ func SetColorfulTag(v bool) {
 	C.srwm_set_colorfultag(C.int(b2i(v)))
 }
 
+func SetFont(font string) {
+	cs := C.CString(font)
+	// Note: intentionally not freed — C core holds this pointer for the WM lifetime
+	C.srwm_set_font(cs)
+}
+
 func b2i(b bool) int {
 	if b {
 		return 1

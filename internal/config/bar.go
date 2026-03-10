@@ -69,6 +69,11 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 		return 0
 	}))
 
+	barTable.RawSetString("fonts", L.NewFunction(func(L *lua.LState) int {
+		core.SetFont(L.CheckString(1))
+		return 0
+	}))
+
 	barTable.RawSetString("theme", L.NewFunction(func(L *lua.LState) int {
 		return luaBarTheme(L, state)
 	}))

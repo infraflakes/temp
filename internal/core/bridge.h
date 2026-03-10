@@ -81,6 +81,7 @@ int srwm_get_new_window_appear_on_end(void);
 void srwm_set_new_window_appear_on_end(int);
 int srwm_get_colorfultag(void);
 void srwm_set_colorfultag(int);
+void srwm_set_font(const char* font);
 
 /* Called from C -> Go when a dynamic key is pressed */
 extern void srwm_handle_key(int id);
