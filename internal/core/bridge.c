@@ -173,3 +173,8 @@ void srwm_set_colorfultag(int v) { colorfultag = v; }
 
 extern const char* fonts[];
 void srwm_set_font(const char* font) { fonts[0] = font; }
+
+extern const char* colors[][3];
+void srwm_set_color(int scheme, int slot, const char* hex) {
+  if (slot >= 0 && slot < 3) colors[scheme][slot] = hex;
+}
