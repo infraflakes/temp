@@ -127,6 +127,7 @@ func runLuaConfig(ctx context.Context) {
 	RegisterBarAPI(L, srwmMod, srwmDir)
 	RegisterKeybindAPI(L, srwmMod)
 	RegisterConfigAPI(L, srwmMod)
+	RegisterActionsAPI(L, srwmMod)
 	control.RegisterAPI(L, srwmMod)
 
 	// srwm.workspaces.set("1,2,3,4,5")

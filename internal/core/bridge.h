@@ -84,6 +84,20 @@ void srwm_set_tag(int idx, const char* name);
 void srwm_set_tags_len(int len);
 void srwm_set_tagscheme(int idx, int scheme_idx);
 
+/* Actions (Go -> C wrappers for internal static functions) */
+void srwm_action_killclient(void);
+void srwm_action_togglefloating(void);
+void srwm_action_togglefullscr(void);
+void srwm_action_focusstack(int dir);
+void srwm_action_shiftview(int dir);
+void srwm_action_tagtoprev(void);
+void srwm_action_tagtonext(void);
+void srwm_action_move_tag_to_monitor(int dir);
+void srwm_action_view(unsigned int mask);
+void srwm_action_toggleview(unsigned int mask);
+void srwm_action_tag(unsigned int mask);
+void srwm_action_toggletag(unsigned int mask);
+
 /* Called from C -> Go when a dynamic key is pressed */
 extern void srwm_handle_key(int id);
 

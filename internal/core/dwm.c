@@ -3172,3 +3172,17 @@ void move_tag_to_monitor(const Arg *arg) {
 /* main() removed — Go owns the entry point.
  * Lifecycle is driven via bridge.c: srwm_init() → srwm_run() → srwm_cleanup()
  */
+
+/* srwm_action bindings mapping primitives to internal Arg structs */
+void srwm_action_killclient(void) { killclient(&(Arg){0}); }
+void srwm_action_togglefloating(void) { togglefloating(&(Arg){0}); }
+void srwm_action_togglefullscr(void) { togglefullscr(&(Arg){0}); }
+void srwm_action_focusstack(int dir) { focusstack(&(Arg){.i = dir}); }
+void srwm_action_shiftview(int dir) { shiftview(&(Arg){.i = dir}); }
+void srwm_action_tagtoprev(void) { tagtoprev(&(Arg){0}); }
+void srwm_action_tagtonext(void) { tagtonext(&(Arg){0}); }
+void srwm_action_move_tag_to_monitor(int dir) { move_tag_to_monitor(&(Arg){.i = dir}); }
+void srwm_action_view(unsigned int mask) { view(&(Arg){.ui = mask}); }
+void srwm_action_toggleview(unsigned int mask) { toggleview(&(Arg){.ui = mask}); }
+void srwm_action_tag(unsigned int mask) { tag(&(Arg){.ui = mask}); }
+void srwm_action_toggletag(unsigned int mask) { toggletag(&(Arg){.ui = mask}); }

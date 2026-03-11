@@ -22,9 +22,13 @@ func srwm_handle_key(id C.int) {
 	cb, ok := keyCallbacks[int(id)]
 	keyMutex.RUnlock()
 
+	log.Printf("[C->GO] srwm_handle_key hit: id=%d, found=%v", id, ok)
+
 	if ok && cb != nil {
 		// Execute the callback in a goroutine so X11/C doesn't block
 		go func() {
+			log.Printf("[GO] Executing goroutine callback for key %d", id)
+
 			defer func() {
 				if r := recover(); r != nil {
 					log.Printf("srwm: recovered from panic in key callback %d: %v", id, r)
