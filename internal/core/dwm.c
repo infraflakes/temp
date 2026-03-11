@@ -388,7 +388,7 @@ static Window root, wmcheckwin;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
-/* Default configuration values - can be overridden via Lua */
+/* Default configuration fallback values - can be overridden via Lua */
 unsigned int borderpx = 0;
 unsigned int px_till_snapping_to_screen_edge = 32;
 unsigned int gaps = 0;

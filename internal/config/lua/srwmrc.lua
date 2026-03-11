@@ -13,8 +13,8 @@
 srwm.cfg.borderpx(0)
 srwm.cfg.gaps(0)
 srwm.cfg.showbar(true)
-srwm.cfg.topbar(true)
-srwm.cfg.toptab(true)
+srwm.cfg.topbar(true) -- need reimplementation
+srwm.cfg.toptab(true) -- need reimplementation
 srwm.cfg.colorfultag(true) -- should be hardcoded to source code
 
 -- Bar
