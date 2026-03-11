@@ -9,6 +9,9 @@
 --------------------------------------------------------------------------------
 -- Note: These take effect on restart (srwm.restart())
 
+-- Define workspace names (tags)
+srwm.tags.set("1,2,3,4,5,6")
+
 -- Appearance
 srwm.cfg.borderpx(0)
 srwm.cfg.gaps(0)
@@ -57,41 +60,6 @@ srwm.cfg.px_till_snapping_to_screen_edge(32)
 
 -- Mod4 = SUPER
 -- Mod1 = Alt
-
--- Volume Control
-srwm.key.bind("", "XF86AudioRaiseVolume", function()
-	srwm.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+")
-end)
-
-srwm.key.bind("", "XF86AudioLowerVolume", function()
-	srwm.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-")
-end)
-
-srwm.key.bind("", "XF86AudioMute", function()
-	srwm.spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
-end)
-
--- Brightness Control
-srwm.key.bind("", "XF86MonBrightnessUp", function()
-	srwm.spawn("brightnessctl set 5%+")
-end)
-
-srwm.key.bind("", "XF86MonBrightnessDown", function()
-	srwm.spawn("brightnessctl set 5%-")
-end)
-
--- General WM Control
-srwm.key.bind("Mod4+Shift", "r", function()
-	srwm.restart()
-end)
-
-srwm.key.bind("Mod4", "BackSpace", function()
-	srwm.quit()
-end)
-
-srwm.key.bind("Mod4", "Return", function()
-	srwm.spawn("alacritty")
-end)
 
 --------------------------------------------------------------------------------
 -- Window Management
@@ -146,17 +114,50 @@ for i = 1, 9 do
 	local key = tostring(i)
 	srwm.key.bind("Mod4", key, function()
 		srwm.tag.view(i)
-	end)
-	srwm.key.bind("Mod4+Ctrl", key, function()
-		srwm.tag.toggle_view(i)
-	end)
+	end) -- SUPER + <numbers> to change tags
 	srwm.key.bind("Mod4+Shift", key, function()
-		srwm.tag.set(i)
-	end)
-	srwm.key.bind("Mod4+Shift+Ctrl", key, function()
-		srwm.tag.toggle(i)
-	end)
+		srwm.tag.move_window_to(i)
+	end) -- SUPER + SHIFT + <numbers> to move windows to specified tags
 end
+
+--------------------------------------------------------------------------------
+--- Misc
+--------------------------------------------------------------------------------
+
+-- Volume Control
+srwm.key.bind("", "XF86AudioRaiseVolume", function()
+	srwm.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+")
+end)
+
+srwm.key.bind("", "XF86AudioLowerVolume", function()
+	srwm.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-")
+end)
+
+srwm.key.bind("", "XF86AudioMute", function()
+	srwm.spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+end)
+
+-- Brightness Control
+srwm.key.bind("", "XF86MonBrightnessUp", function()
+	srwm.spawn("brightnessctl set 5%+")
+end)
+
+srwm.key.bind("", "XF86MonBrightnessDown", function()
+	srwm.spawn("brightnessctl set 5%-")
+end)
+
+-- General WM Control
+srwm.key.bind("Mod4+Shift", "r", function()
+	srwm.restart()
+end)
+
+srwm.key.bind("Mod4", "BackSpace", function()
+	srwm.quit()
+end)
+
+srwm.key.bind("Mod4", "Return", function()
+	srwm.spawn("alacritty")
+end)
 
 --------------------------------------------------------------------------------
 -- Status Bar Setup
@@ -170,16 +171,16 @@ srwm.bar.theme({
 	-- WM Core colors (fg, bg, border)
 	normal = { fg = "#cdcdcd", bg = "#252530", border = "#606079" }, -- should be moved to srwm.theme
 	selected = { fg = "#cdcdcd", bg = "#6e94b2", border = "#6e94b2" }, -- should be moved to srwm.theme
-	title = { fg = "#d7d7d7", bg = "#252530", border = "#252530" },
 	tab_selected = { fg = "#252530", bg = "#aeaed1", border = "#aeaed1" },
+	button_prev = { fg = "#7fa563", bg = "#252530", border = "#252530" },
+	button_next = { fg = "#f3be7c", bg = "#252530", border = "#252530" },
+	button_close = { fg = "#d8647e", bg = "#252530", border = "#252530" },
 	tab_normal = { fg = "#cdcdcd", bg = "#252530", border = "#252530" },
+	title = { fg = "#d7d7d7", bg = "#252530", border = "#252530" },
 	tag = { fg = "#606079", bg = "#252530", border = "#252530" },
 	tag1 = { fg = "#6e94b2", bg = "#252530", border = "#252530" },
 	tag2 = { fg = "#aeaed1", bg = "#252530", border = "#252530" },
 	tag3 = { fg = "#bb9dbd", bg = "#252530", border = "#252530" },
-	button_prev = { fg = "#7fa563", bg = "#252530", border = "#252530" },
-	button_next = { fg = "#f3be7c", bg = "#252530", border = "#252530" },
-	button_close = { fg = "#d8647e", bg = "#252530", border = "#252530" },
 
 	-- Widget palette (used as {name} in shell scripts)
 	purple = "#bebeda",
@@ -199,10 +200,7 @@ srwm.bar.theme({
 })
 
 -- Individual workspace colors (from the palette above)
-srwm.bar.workspaces.colors("blue", "purple", "pink", "purple", "blue", "pink")
-
--- Define workspace names (tags)
-srwm.workspaces.set("1,2,3,4,5,6")
+srwm.bar.tags.colors("blue", "purple", "pink", "purple", "blue", "pink")
 
 -- Register widget shell scripts (paths are relative to ~/.config/srwm/)
 srwm.bar.widget("brightness", "widgets/brightness.sh")

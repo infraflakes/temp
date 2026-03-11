@@ -77,18 +77,8 @@ func RegisterActionsAPI(L *lua.LState, srwmMod *lua.LTable) {
 		return 0
 	}))
 
-	L.SetField(tagTable, "toggle_view", L.NewFunction(func(L *lua.LState) int {
-		core.ActionToggleView(indexToMask(L))
-		return 0
-	}))
-
-	L.SetField(tagTable, "set", L.NewFunction(func(L *lua.LState) int {
+	L.SetField(tagTable, "move_window_to", L.NewFunction(func(L *lua.LState) int {
 		core.ActionTag(indexToMask(L))
-		return 0
-	}))
-
-	L.SetField(tagTable, "toggle", L.NewFunction(func(L *lua.LState) int {
-		core.ActionToggleTag(indexToMask(L))
 		return 0
 	}))
 

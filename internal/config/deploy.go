@@ -130,9 +130,9 @@ func runLuaConfig(ctx context.Context) {
 	RegisterActionsAPI(L, srwmMod)
 	control.RegisterAPI(L, srwmMod)
 
-	// srwm.workspaces.set("1,2,3,4,5")
-	wsTable := L.NewTable()
-	wsTable.RawSetString("set", L.NewFunction(func(L *lua.LState) int {
+	// srwm.tags.set("1,2,3,4,5")
+	tagsTable := L.NewTable()
+	tagsTable.RawSetString("set", L.NewFunction(func(L *lua.LState) int {
 		input := L.CheckString(1)
 		parts := strings.Split(input, ",")
 
@@ -148,7 +148,7 @@ func runLuaConfig(ctx context.Context) {
 		core.SetTagsLen(count)
 		return 0
 	}))
-	L.SetField(srwmMod, "workspaces", wsTable)
+	L.SetField(srwmMod, "tags", tagsTable)
 
 	log.Printf("lua: executing %s", rcPath)
 	if err := L.DoFile(rcPath); err != nil {
