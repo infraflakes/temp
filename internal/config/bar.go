@@ -86,12 +86,12 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) {
 		return luaBarRun(L, state)
 	}))
 
-	// Nested workspaces table
-	wsTable := L.NewTable()
-	wsTable.RawSetString("colors", L.NewFunction(func(L *lua.LState) int {
-		return luaBarWorkspacesColors(L, state)
+	// Nested tags table
+	tagTable := L.NewTable()
+	tagTable.RawSetString("colors", L.NewFunction(func(L *lua.LState) int {
+		return luaBarTagsColors(L, state)
 	}))
-	barTable.RawSetString("workspaces", wsTable)
+	barTable.RawSetString("tags", tagTable)
 
 	L.SetField(srwmMod, "bar", barTable)
 }
@@ -153,7 +153,7 @@ func luaBarTheme(L *lua.LState, state *barState) int {
 	return 0
 }
 
-func luaBarWorkspacesColors(L *lua.LState, state *barState) int {
+func luaBarTagsColors(L *lua.LState, state *barState) int {
 	n := L.GetTop()
 	for i := 1; i <= n && i <= 9; i++ {
 		colorName := L.CheckString(i)
