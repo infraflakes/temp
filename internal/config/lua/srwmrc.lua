@@ -94,6 +94,71 @@ srwm.key.bind("Mod4", "Return", function()
 end)
 
 --------------------------------------------------------------------------------
+-- Window Management
+--------------------------------------------------------------------------------
+
+srwm.key.bind("Mod4", "q", function()
+	srwm.window.kill()
+end)
+srwm.key.bind("Mod4", "w", function()
+	srwm.window.toggle_floating()
+end)
+srwm.key.bind("Mod4", "f", function()
+	srwm.window.toggle_fullscreen()
+end)
+srwm.key.bind("Mod4", "Down", function()
+	srwm.window.focus(1)
+end)
+srwm.key.bind("Mod4", "Up", function()
+	srwm.window.focus(-1)
+end)
+
+--------------------------------------------------------------------------------
+-- Tag Management
+--------------------------------------------------------------------------------
+
+srwm.key.bind("Mod4", "Left", function()
+	srwm.tag.shift_view(-1)
+end)
+srwm.key.bind("Mod4", "Right", function()
+	srwm.tag.shift_view(1)
+end)
+srwm.key.bind("Mod4+Ctrl", "Left", function()
+	srwm.tag.view_prev()
+end)
+srwm.key.bind("Mod4+Ctrl", "Right", function()
+	srwm.tag.view_next()
+end)
+srwm.key.bind("Mod4+Shift", "comma", function()
+	srwm.tag.move_to_monitor(-1)
+end)
+srwm.key.bind("Mod4+Shift", "period", function()
+	srwm.tag.move_to_monitor(1)
+end)
+
+-- View previous tag
+srwm.key.bind("Mod4", "Tab", function()
+	srwm.tag.view(0)
+end)
+
+-- Workspaces 1-9
+for i = 1, 9 do
+	local key = tostring(i)
+	srwm.key.bind("Mod4", key, function()
+		srwm.tag.view(i)
+	end)
+	srwm.key.bind("Mod4+Ctrl", key, function()
+		srwm.tag.toggle_view(i)
+	end)
+	srwm.key.bind("Mod4+Shift", key, function()
+		srwm.tag.set(i)
+	end)
+	srwm.key.bind("Mod4+Shift+Ctrl", key, function()
+		srwm.tag.toggle(i)
+	end)
+end
+
+--------------------------------------------------------------------------------
 -- Status Bar Setup
 --------------------------------------------------------------------------------
 

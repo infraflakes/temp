@@ -1,0 +1,66 @@
+package core
+
+/*
+#include "bridge.h"
+*/
+import "C"
+
+// ActionKillClient kills the currently focused client.
+func ActionKillClient() {
+	C.srwm_action_killclient()
+}
+
+// ActionToggleFloating toggles the floating state of the currently focused client.
+func ActionToggleFloating() {
+	C.srwm_action_togglefloating()
+}
+
+// ActionToggleFullscreen toggles the fullscreen state of the currently focused client.
+func ActionToggleFullscreen() {
+	C.srwm_action_togglefullscr()
+}
+
+// ActionFocus focuses the next (+1) or previous (-1) client in the stack.
+func ActionFocus(dir int) {
+	C.srwm_action_focusstack(C.int(dir))
+}
+
+// ActionShiftView shifts the view to the next (+1) or previous (-1) active tag.
+func ActionShiftView(dir int) {
+	C.srwm_action_shiftview(C.int(dir))
+}
+
+// ActionTagToPrev moves the currently focused client to the previous tag.
+func ActionTagToPrev() {
+	C.srwm_action_tagtoprev()
+}
+
+// ActionTagToNext moves the currently focused client to the next tag.
+func ActionTagToNext() {
+	C.srwm_action_tagtonext()
+}
+
+// ActionMoveTagToMonitor moves the currently focused client to the next (+1) or previous (-1) monitor.
+func ActionMoveTagToMonitor(dir int) {
+	C.srwm_action_move_tag_to_monitor(C.int(dir))
+}
+
+// ActionView views the tags matching the given bitmask.
+func ActionView(mask uint) {
+	C.srwm_action_view(C.uint(mask))
+}
+
+// ActionToggleView toggles the tags matching the given bitmask into the current view.
+func ActionToggleView(mask uint) {
+	C.srwm_action_toggleview(C.uint(mask))
+}
+
+// ActionTag tags the currently focused client with the given bitmask.
+func ActionTag(mask uint) {
+	C.srwm_action_tag(C.uint(mask))
+}
+
+// ActionToggleTag toggles the given bitmask on the currently focused client's tags.
+func ActionToggleTag(mask uint) {
+	C.srwm_action_toggletag(C.uint(mask))
+}

@@ -55,33 +55,6 @@ static unsigned int prevtag(void);
   {MODKEY | ControlMask, KEY, tag, {.ui = 1 << TAG}},  \
 
 static const Key keys[] = {
-
-    {MODKEY, XK_q, killclient, {0}},
-
-    // toggle stuff
-    {MODKEY, XK_w, togglefloating, {0}},
-    {MODKEY, XK_f, togglefullscr, {0}},
-
-    {MODKEY, XK_Down, focusstack, {.i = +1}},
-    {MODKEY, XK_Up, focusstack, {.i = -1}},
-
-    // shift view
-    {MODKEY, XK_Left, shiftview, {.i = -1}},
-    {MODKEY, XK_Right, shiftview, {.i = +1}},
-
-    {MODKEY | ControlMask, XK_Left, tagtoprev, {0}},
-    {MODKEY | ControlMask, XK_Right, tagtonext, {0}},
-    {MODKEY, XK_Tab, view, {0}},
-    {MODKEY|ShiftMask, XK_comma,  move_tag_to_monitor, {.i = -1 } },
-    {MODKEY|ShiftMask, XK_period, move_tag_to_monitor, {.i = +1 } },
-
-    TAGKEYS(XK_1, 0)
-    TAGKEYS(XK_2, 1) 
-    TAGKEYS(XK_3, 2) 
-    TAGKEYS(XK_4, 3)
-    TAGKEYS(XK_5, 4) 
-    TAGKEYS(XK_6, 5) 
-    TAGKEYS(XK_7, 6) 
-    TAGKEYS(XK_8, 7)
-    TAGKEYS(XK_9, 8)
+    /* Dummy key to satisfy C array semantics. Real keys are registered dynamically via Lua. */
+    {0, 0, NULL, {0}},
 };
