@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/nixuris/srwm/internal/core"
+	"github.com/infraflakes/srwm/internal/core"
 	lua "github.com/yuin/gopher-lua"
 )
 

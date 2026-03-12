@@ -609,9 +609,11 @@ void arrangemon(Monitor* m) {
   XMoveWindow(dpy, m->tagwin, m->wx + m->gap, m->by);
 
   /* Position tab bar - always below status bar */
-  m->ty = m->my + bh;
-  m->wy = m->my + bh + th + m->gap;
-  m->wh = m->mh - bh - th - m->gap;
+  int bar_offset = m->showbar ? bh : 0;  
+  m->ty = m->my + bar_offset;  
+  m->wy = m->my + bar_offset + th + m->gap;  
+  m->wh = m->mh - bar_offset - th - m->gap;
+
   XMoveResizeWindow(dpy, m->tabwin, m->wx + m->gap, m->ty,
                     m->ww - 2 * m->gap, th);
 

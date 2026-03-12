@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nixuris/srwm/internal/config"
+	"github.com/infraflakes/srwm/internal/config"
 	"github.com/spf13/cobra"
 )
 
