@@ -63,6 +63,7 @@ func runWM(socketPath string) {
 		if !core.ShouldRestart() {
 			break // clean exit, not restart
 		}
+		core.ClearKeybindings() // Reset keybindings before re-registering from Lua
 		// loop back -> re-init for hot-reload
 	}
 }
