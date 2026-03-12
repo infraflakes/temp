@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nixuris/srwm/internal/control"
-	"github.com/nixuris/srwm/internal/core"
+	"github.com/infraflakes/srwm/internal/control"
+	"github.com/infraflakes/srwm/internal/core"
 	lua "github.com/yuin/gopher-lua"
 )
 

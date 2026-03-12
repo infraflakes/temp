@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/nixuris/srwm/internal/config"
-	"github.com/nixuris/srwm/internal/control"
-	"github.com/nixuris/srwm/internal/core"
-	"github.com/nixuris/srwm/internal/ipc"
+	"github.com/infraflakes/srwm/internal/config"
+	"github.com/infraflakes/srwm/internal/control"
+	"github.com/infraflakes/srwm/internal/core"
+	"github.com/infraflakes/srwm/internal/ipc"
 	"github.com/spf13/cobra"
 )
 

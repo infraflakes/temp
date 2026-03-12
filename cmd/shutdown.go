@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/nixuris/srwm/internal/ipc"
+	"github.com/infraflakes/srwm/internal/ipc"
 	"github.com/spf13/cobra"
 )
 

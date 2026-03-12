@@ -1,4 +1,4 @@
-module github.com/nixuris/srwm
+module github.com/infraflakes/srwm
 
 go 1.26
 

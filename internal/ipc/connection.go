@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/nixuris/srwm/internal/config"
-	"github.com/nixuris/srwm/internal/core"
+	"github.com/infraflakes/srwm/internal/config"
+	"github.com/infraflakes/srwm/internal/core"
 )
 
 func handleConnection(conn net.Conn) {
