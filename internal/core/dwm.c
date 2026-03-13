@@ -498,11 +498,6 @@ struct Pertag {
   int showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
 };
 
-/* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags {
-  char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
-};
-
 /* function implementations */
 void applyrules(Client* c) {
   const char* class, *instance;
@@ -1667,20 +1662,11 @@ void keypress(XEvent* e) {
   unsigned int i;
   KeySym keysym;
   XKeyEvent* ev;
-
   ev = &e->xkey;
   keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
-  
-  // Check static keys
-  for (i = 0; i < LENGTH(keys); i++)
-    if (keysym == keys[i].keysym &&
-        CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func)
-      keys[i].func(&(keys[i].arg));
-      
-  // Check dynamic keys
+
   for (i = 0; i < dkeys_len; i++)
-    if (keysym == dkeys[i].keysym &&
-        CLEANMASK(dkeys[i].mod) == CLEANMASK(ev->state)) {
+    if (keysym == dkeys[i].keysym && CLEANMASK(dkeys[i].mod) == CLEANMASK(ev->state)) {
       srwm_handle_key(dkeys[i].id);
     }
 }
