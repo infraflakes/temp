@@ -14,11 +14,11 @@ shiftview(const Arg *arg) {
  
   if(arg->i > 0) // left circular shift
     shifted.ui = (selmon->tagset[selmon->seltags] << arg->i)
-      | (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
+      | (selmon->tagset[selmon->seltags] >> (TAGSLENGTH - arg->i));
  
   else // right circular shift
     shifted.ui = selmon->tagset[selmon->seltags] >> (- arg->i)
-      | selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i);
- 
+      | selmon->tagset[selmon->seltags] << (TAGSLENGTH + arg->i);
+  shifted.ui &= TAGMASK; //ensures bits beyond tags_len are zeroed out
   view(&shifted);
 }

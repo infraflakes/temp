@@ -17,8 +17,6 @@
  * client.
  *
  * Keys and tagging rules are organized as arrays and defined in config.h.
- *
- * To understand everything else, start reading main().
  */
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -453,7 +451,6 @@ static const Button buttons[] = {
     {ClkTagBar, 0, Button3, toggleview, {0}},
     {ClkTagBar, MODKEY, Button1, tag, {0}},
     {ClkTagBar, MODKEY, Button3, toggletag, {0}},
-    {ClkTabBar, 0, Button1, focuswin, {0}},
     {ClkTabBar, 0, Button1, focuswin, {0}},
     {ClkTabPrev, 0, Button1, movestack, {.i = -1}},
     {ClkTabNext, 0, Button1, movestack, {.i = +1}},
@@ -1155,7 +1152,6 @@ void tagtoprev(const Arg* arg) {
 void drawbar(Monitor* m) {
   int x, y = borderpx, w, stw = 0;
   int bh_n = bh - borderpx * 2;
-  int mw = m->ww - m->gap * 2 - borderpx * 2;
   int boxs = drw->fonts->h / 9;
   int boxw = drw->fonts->h / 6 + 2;
   unsigned int i, occ = 0, urg = 0;
@@ -1317,10 +1313,7 @@ void drawtabs(void) {
 }
 
 static int cmpint(const void* p1, const void* p2) {
-  /* The actual arguments to this function are "pointers to
-     pointers to char", but strcmp(3) arguments are "pointers
-     to char", hence the following cast plus dereference */
-  return *((int*)p1) > *(int*)p2;
+  return *(const int*)p1 - *(const int*)p2;
 }
 
 void drawtab(Monitor* m) {
