@@ -17,8 +17,6 @@ extern int bar_vertical_padding;
 extern int tab_vertical_padding;
 extern int tab_in_horizontal_padding;
 extern int tab_out_horizontal_padding;
-extern int tag_preview_size;
-extern int tag_preview_enable;
 extern unsigned int tag_underline_padding;
 extern unsigned int tag_underline_size;
 extern unsigned int tag_underline_offset_from_bar_bottom;

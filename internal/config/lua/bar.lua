@@ -32,9 +32,5 @@ srwm.bar.systray(true)
 srwm.bar.systray_spacing(2)
 srwm.bar.systray_pinning(0) -- value is monitors order, 0 is first monitor
 
--- Tag preview
-srwm.bar.tag_preview_size(4)
-srwm.bar.tag_preview(true)
-
 -- Set polling interval (seconds)
 srwm.bar.interval(1)

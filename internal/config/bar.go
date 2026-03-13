@@ -207,24 +207,6 @@ func RegisterBarAPI(L *lua.LState, srwmMod *lua.LTable, configDir string) func()
 		return 1
 	}))
 
-	barTable.RawSetString("tag_preview_size", L.NewFunction(func(L *lua.LState) int {
-		if L.GetTop() == 1 {
-			core.SetTagPreviewSize(L.CheckInt(1))
-		} else {
-			L.Push(lua.LNumber(core.GetTagPreviewSize()))
-		}
-		return 1
-	}))
-
-	barTable.RawSetString("tag_preview", L.NewFunction(func(L *lua.LState) int {
-		if L.GetTop() == 1 {
-			core.SetTagPreviewEnable(L.CheckBool(1))
-		} else {
-			L.Push(lua.LBool(core.GetTagPreviewEnable()))
-		}
-		return 1
-	}))
-
 	barTable.RawSetString("theme", L.NewFunction(func(L *lua.LState) int {
 		return luaBarTheme(L, state)
 	}))

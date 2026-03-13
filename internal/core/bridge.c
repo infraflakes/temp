@@ -97,8 +97,6 @@ extern int bar_vertical_padding;
 extern int tab_vertical_padding;
 extern int tab_in_horizontal_padding;
 extern int tab_out_horizontal_padding;
-extern int tag_preview_size;
-extern int tag_preview_enable;
 extern unsigned int tag_underline_padding;
 extern unsigned int tag_underline_size;
 extern unsigned int tag_underline_offset_from_bar_bottom;
@@ -141,12 +139,6 @@ void srwm_set_tab_in_horizontal_padding(int v) { tab_in_horizontal_padding = v; 
 
 int srwm_get_tab_out_horizontal_padding(void) { return tab_out_horizontal_padding; }
 void srwm_set_tab_out_horizontal_padding(int v) { tab_out_horizontal_padding = v; }
-
-int srwm_get_tag_preview_size(void) { return tag_preview_size; }
-void srwm_set_tag_preview_size(int v) { tag_preview_size = v; }
-
-int srwm_get_tag_preview_enable(void) { return tag_preview_enable; }
-void srwm_set_tag_preview_enable(int v) { tag_preview_enable = v; }
 
 unsigned int srwm_get_tag_underline_padding(void) { return tag_underline_padding; }
 void srwm_set_tag_underline_padding(unsigned int v) { tag_underline_padding = v; }
