@@ -470,6 +470,7 @@ struct Monitor {
   unsigned int seltags;
   unsigned int tagset[2];
   unsigned int colorfultag;
+  unsigned int occ, urg;
   int showbar;
   int topbar, toptab;
   Client* clients;
@@ -645,6 +646,7 @@ void attach(Client* c) {
         c->mon->clients = c;
     }
     c->mon->tail = c;
+    c->mon->occ |= c->tags;
 }
 
 void attachstack(Client* c) {
@@ -1012,6 +1014,10 @@ void detach(Client* c) {
       c->mon->tail = NULL;
     }
   }
+  // Recompute occ (can't just clear bits — other clients may share tags)
+  c->mon->occ = 0;
+  for (Client* t = c->mon->clients; t; t = t->next)
+  c->mon->occ |= t->tags;
 }
 
 void detachstack(Client* c) {
@@ -1170,7 +1176,6 @@ void drawbar(Monitor* m) {
   int boxs = drw->fonts->h / 9;
   int boxw = drw->fonts->h / 6 + 2;
   unsigned int i, occ = 0, urg = 0;
-  Client* c;
 
   XSetForeground(drw->dpy, drw->gc, clrborder.pixel);
   XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, m->ww - m->gap * 2,
@@ -1186,10 +1191,8 @@ void drawbar(Monitor* m) {
   }
 
   resizebarwin(m);
-  for (c = m->clients; c; c = c->next) {
-    occ |= c->tags;
-    if (c->isurgent) urg |= c->tags;
-  }
+  occ = m->occ;
+  urg = m->urg;
   x = borderpx;
   for (i = 0; i < TAGSLENGTH; i++) {
     w = TEXTW(tags[i]);
@@ -2527,6 +2530,12 @@ void seturgent(Client* c, int urg) {
   wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
   XSetWMHints(dpy, c->win, wmh);
   XFree(wmh);
+  if (urg) c->mon->urg |= c->tags;
+  else {
+    c->mon->urg = 0;
+    for (Client* t = c->mon->clients; t; t = t->next)
+    if (t->isurgent) c->mon->urg |= t->tags;
+  }
 }
 
 void showhide(Client* c) {
