@@ -191,22 +191,6 @@ func SetTabOutHorizontalPadding(v int) {
 	C.srwm_set_tab_out_horizontal_padding(C.int(v))
 }
 
-func GetTagPreviewSize() int {
-	return int(C.srwm_get_tag_preview_size())
-}
-
-func SetTagPreviewSize(v int) {
-	C.srwm_set_tag_preview_size(C.int(v))
-}
-
-func GetTagPreviewEnable() bool {
-	return C.srwm_get_tag_preview_enable() != 0
-}
-
-func SetTagPreviewEnable(v bool) {
-	C.srwm_set_tag_preview_enable(C.int(b2i(v)))
-}
-
 func GetTagUnderlinePadding() uint {
 	return uint(C.srwm_get_tag_underline_padding())
 }
