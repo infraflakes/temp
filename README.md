@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Serein Window Manager
 A floating, zooming X11 window manager. Built with Rust, C and Lua.
 
@@ -43,6 +44,8 @@ Current the project only supports building with [dagger](https://dagger.io/).
 =======
 > This project is still unconventionally usable for now
 
+=======
+>>>>>>> 0c0d789 (Update README)
 # Serein Window Manager
 A fully statically linked dynamic X11 window manager with CGO
 
