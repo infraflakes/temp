@@ -58,7 +58,7 @@
   (MAX(0, MIN((x) + (w), (z)->x + (z)->w) - MAX((x), (z)->x)) * \
    MAX(0, MIN((y) + (h), (z)->y + (z)->h) - MAX((y), (z)->y)))
 #define ISVISIBLE(C) ((C->tags & C->mon->tagset[C->mon->seltags]))
-#define HIDDEN(C) ((getstate(C->win) == IconicState))
+#define HIDDEN(C) ((C)->ishidden) //cache iconic state on Client
 #define LENGTH(X) (sizeof X / sizeof X[0])
 #define MOUSEMASK (BUTTONMASK | PointerMotionMask)
 #define WIDTH(X) ((X)->w + 2 * (X)->bw)
@@ -175,6 +175,7 @@ struct Client {
   int oldx, oldy, oldw, oldh;
   int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
   int bw, oldbw;
+  int ishidden;
   unsigned int tags;
   int isfixed, iscentered, isfloating, isurgent, neverfocus, oldstate,
       isfullscreen;
@@ -1738,6 +1739,7 @@ void manage(Window w, XWindowAttributes* wa) {
   XWindowChanges wc;
 
   c = ecalloc(1, sizeof(Client));
+  c->ishidden = 0; //new windows are not hidden
   c->win = w;
   win_ht_insert(c->win, c);
   /* geometry */
@@ -2325,6 +2327,8 @@ void setclientstate(Client* c, long state) {
 
   XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
                   PropModeReplace, (unsigned char*)data, 2);
+
+  c->ishidden = (state == IconicState);
 }
 
 void setcurrentdesktop(void) {
