@@ -472,6 +472,7 @@ struct Monitor {
   int showbar;
   int topbar, toptab;
   Client* clients;
+  Client* tail; // last client in list, for O(1) append
   Client* sel;
   Client* stack;
   Monitor* next;
@@ -636,9 +637,13 @@ void arrangemon(Monitor* m) {
 }
 
 void attach(Client* c) {
-    Client** tmp = &c->mon->clients;
-    while (*tmp) tmp = &(*tmp)->next;
-    *tmp = c;
+    c->next = NULL;
+    if (c->mon->tail) {
+        c->mon->tail->next = c;
+    } else {
+        c->mon->clients = c;
+    }
+    c->mon->tail = c;
 }
 
 void attachstack(Client* c) {
@@ -994,9 +999,18 @@ void destroynotify(XEvent* e) {
 
 void detach(Client* c) {
   Client** tc;
-
   for (tc = &c->mon->clients; *tc && *tc != c; tc = &(*tc)->next);
   *tc = c->next;
+  if (c == c->mon->tail) {
+    // Find new tail (previous node or NULL)
+    if (c->mon->clients) {
+      Client* t = c->mon->clients;
+      while (t->next) t = t->next;
+      c->mon->tail = t;
+    } else {
+      c->mon->tail = NULL;
+    }
+  }
 }
 
 void detachstack(Client* c) {
@@ -1197,6 +1211,7 @@ void drawbar(Monitor* m) {
 
   // CHANGE TITLE LENGTH
   w = 850;
+  // w = m->ww - x - stw - 2 * m->gap; //TODO: this overlay the widgets
   if (w > bh_n) {
     if (m->sel) {
       drw_setscheme(drw, scheme[m == selmon ? SchemeTitle : SchemeNorm]);
@@ -1365,7 +1380,6 @@ void drawtab(Monitor* m) {
       tot_width += sorted_label_widths[i];
     }
     maxsize = (mw - tot_width) / (m->ntabs - i);
-    maxsize = (m->ww - tot_width) / (m->ntabs - i);
   } else {
     maxsize = mw;
   }
