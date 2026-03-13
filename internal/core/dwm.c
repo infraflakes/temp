@@ -1589,15 +1589,6 @@ void grabkeys(void) {
     syms = XGetKeyboardMapping(dpy, start, end - start + 1, &skip);
     if (!syms) return;
     for (k = start; k <= end; k++) {
-      for (i = 0; i < LENGTH(keys); i++) {
-        /* skip modifier codes, we do that ourselves */
-        if (keys[i].keysym == syms[(k - start) * skip]) {
-          for (j = 0; j < LENGTH(modifiers); j++) {
-            XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
-                     GrabModeAsync, GrabModeAsync);
-          }
-        }
-      }
       for (i = 0; i < dkeys_len; i++) {
         if (dkeys[i].keysym == syms[(k - start) * skip]) {
           for (j = 0; j < LENGTH(modifiers); j++) {

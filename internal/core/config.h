@@ -51,8 +51,3 @@ static unsigned int prevtag(void);
 #define TAGKEYS(KEY, TAG)                              \
   {MODKEY, KEY, view, {.ui = 1 << TAG}},               \
   {MODKEY | ControlMask, KEY, tag, {.ui = 1 << TAG}},  \
-
-static const Key keys[] = {
-    /* Dummy key to satisfy C array semantics. Real keys are registered dynamically via Lua. */
-    {0, 0, NULL, {0}},
-};
