@@ -266,6 +266,8 @@ static void focus(Client* c);
 static void focusin(XEvent* e);
 static void focusstack(const Arg* arg);
 static void focuswin(const Arg* arg);
+static void movestack(const Arg* arg);
+static void shiftview(const Arg* arg);
 static Atom getatomprop(Client* c, Atom prop);
 static Picture geticonprop(Window w, unsigned int* icw, unsigned int* ich);
 static int getrootptr(int* x, int* y);
@@ -474,8 +476,6 @@ struct Monitor {
   Monitor* prev;
   Window barwin;
   Window tabwin;
-  Window tagwin;
-  Pixmap tagmap[LENGTH(tags)];
   int ntabs;
   int tab_widths[MAXTABS];
   int tab_btn_w[3];
@@ -483,8 +483,53 @@ struct Monitor {
   unsigned int showbar_mask;  // bit i set = showbar enabled for tag i
 };
 
-#include "movestack.inc"
-#include "shiftview.inc"
+void movestack(const Arg *arg) {
+	Client *c = NULL, *p = NULL, *pc = NULL, *i;
+
+	if(arg->i > 0) {
+		/* find the client after selmon->sel */
+		for(c = selmon->sel->next; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
+		if(!c)
+			for(c = selmon->clients; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
+
+	}
+	else {
+		/* find the client before selmon->sel */
+		for(i = selmon->clients; i != selmon->sel; i = i->next)
+			if(ISVISIBLE(i) && !i->isfloating)
+				c = i;
+		if(!c)
+			for(; i; i = i->next)
+				if(ISVISIBLE(i) && !i->isfloating)
+					c = i;
+	}
+	/* find the client before selmon->sel and c */
+	for(i = selmon->clients; i && (!p || !pc); i = i->next) {
+		if(i->next == selmon->sel)
+			p = i;
+		if(i->next == c)
+			pc = i;
+	}
+
+	/* swap c and selmon->sel selmon->clients in the selmon->clients list */
+	if(c && c != selmon->sel) {
+		Client *temp = selmon->sel->next==c?selmon->sel:selmon->sel->next;
+		selmon->sel->next = c->next==selmon->sel?c:c->next;
+		c->next = temp;
+
+		if(p && p != c)
+			p->next = c;
+		if(pc && pc != selmon->sel)
+			pc->next = selmon->sel;
+
+		if(selmon->sel == selmon->clients)
+			selmon->clients = c;
+		else if(c == selmon->clients)
+			selmon->clients = selmon->sel;
+
+		arrange(selmon);
+	}
+}
 
 /* function implementations */
 void applyrules(Client* c) {
@@ -589,11 +634,6 @@ void arrangemon(Monitor* m) {
 
   updatebarpos(m);
   updatesystray();
-  /* Position tag preview relative to bar */
-  if (m->topbar)
-    XMoveWindow(dpy, m->tagwin, m->wx + m->gap, m->by + bh);
-  else
-    XMoveWindow(dpy, m->tagwin, m->wx + m->gap, m->by - m->mh / 4);
 
   /* Position tab bar respecting topbar and toptab */
   if (m->toptab) {
@@ -3102,6 +3142,20 @@ void move_tag_to_monitor(const Arg *arg) {
 /* main() removed — Go owns the entry point.
  * Lifecycle is driven via bridge.c: srwm_init() → srwm_run() → srwm_cleanup()
  */
+
+void shiftview(const Arg *arg) {
+  Arg shifted;
+ 
+  if(arg->i > 0) // left circular shift
+    shifted.ui = (selmon->tagset[selmon->seltags] << arg->i)
+      | (selmon->tagset[selmon->seltags] >> (TAGSLENGTH - arg->i));
+ 
+  else // right circular shift
+    shifted.ui = selmon->tagset[selmon->seltags] >> (- arg->i)
+      | selmon->tagset[selmon->seltags] << (TAGSLENGTH + arg->i);
+  shifted.ui &= TAGMASK; //ensures bits beyond tags_len are zeroed out
+  view(&shifted);
+}
 
 /* srwm_action bindings mapping primitives to internal Arg structs */
 void srwm_action_killclient(void) { killclient(&(Arg){0}); }

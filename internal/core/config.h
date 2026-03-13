@@ -38,7 +38,6 @@ extern int tagschemes[];
 
 extern const Rule rules[];
 
-#include "functions.h"
 /* function declarations */
 static void tagtonext(const Arg* arg);
 static void tagtoprev(const Arg* arg);
