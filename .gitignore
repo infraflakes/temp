@@ -2,7 +2,11 @@
 bin/
 build.log
 <<<<<<< HEAD
+<<<<<<< HEAD
 result
 target/
 =======
 >>>>>>> f1a06f2 (Flakes)
+=======
+result
+>>>>>>> ba9c6a5 (Refine CI/CD, add checksum, fix nix build)

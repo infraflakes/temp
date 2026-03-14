@@ -11,6 +11,7 @@
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
+        version = "0.0.1";
         pkgs = import nixpkgs {inherit system;};
         # Use pkgsStatic to get X11 libs compiled against musl
         staticPkgs = pkgs.pkgsStatic;
@@ -55,31 +56,34 @@
       in {
         devShells.default = pkgs.mkShell {
           inherit nativeBuildInputs buildInputs;
+          hardeningDisable = ["fortify"];
 
           shellHook = ''
             export CGO_ENABLED=1
+            export ZIG_GLOBAL_CACHE_DIR="/tmp"
             export CC="zig cc -target x86_64-linux-musl"
-            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2) -DVERSION=\"$(VERSION)\""
+            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2)"
             export CGO_LDFLAGS="$(pkg-config --libs --static x11 x11-xcb xcb-shm xinerama xft xrender imlib2)"
             echo "srwm dev shell ready. Run 'make build' to build."
           '';
         };
 
-        packages.default = pkgs.buildGoModule {
+        packages.default = (pkgs.buildGoModule.override {go = pkgs.go_1_26;}) {
           pname = "srwm";
-          version = "0.1.0";
+          version = "${version}";
+          hardeningDisable = ["fortify"]; # This tells Nix not to inject -D_FORTIFY_SOURCE=2 into the compiler flags, so fprintf stays as fprintf and links correctly against musl
           src = ./.;
-          vendorHash = null;
+          vendorHash = "sha256-cy/ECWJDjlUnIpPNYRWGMkyP+WV1JxzUHrV0pzGoF1o=";
+          env = {
+            CGO_ENABLED = "1";
+            CC = "zig cc -target x86_64-linux-musl";
+            ZIG_GLOBAL_CACHE_DIR = "/tmp";
+          };
 
           inherit nativeBuildInputs buildInputs;
 
-          CGO_ENABLED = 1;
-          CC = "zig cc -target x86_64-linux-musl";
-
           preBuild = ''
-            export CGO_ENABLED=1
-            export CC="zig cc -target x86_64-linux-musl"
-            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2) -DVERSION=\"$(VERSION)\""
+            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2)"
             export CGO_LDFLAGS="$(pkg-config --libs --static x11 x11-xcb xcb-shm xinerama xft xrender imlib2)"
           '';
 
@@ -87,8 +91,9 @@
             "-w"
             "-s"
             "-linkmode external"
+            "-extld 'zig cc -target x86_64-linux-musl'"
             "-extldflags '-static'"
-            "-X main.Version=0.1.0"
+            "-X github.com/infraflakes/srwm/cmd.Version=${version}"
           ];
           tags = ["netgo"];
           postInstall = ''

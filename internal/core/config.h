@@ -50,4 +50,4 @@ static unsigned int prevtag(void);
 #define ALTKEY Mod1Mask
 #define TAGKEYS(KEY, TAG)                              \
   {MODKEY, KEY, view, {.ui = 1 << TAG}},               \
-  {MODKEY | ControlMask, KEY, tag, {.ui = 1 << TAG}},  \
+  {MODKEY | ControlMask, KEY, tag, {.ui = 1 << TAG}},
