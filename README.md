@@ -49,6 +49,8 @@ Current the project only supports building with [dagger](https://dagger.io/).
 # Serein Window Manager
 A fully statically linked X11 window manager. Built with a Go core and a high-performance C engine via CGO.
 
+![Preview](./assets/screenshot_default.png)
+
 ## Installation
 
 <<<<<<< HEAD
