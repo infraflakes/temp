@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Version is set at build time via -ldflags in Makefile.
+// Version is set at build time via -ldflags.
 var Version = "dev"
 
 var versionCmd = &cobra.Command{
