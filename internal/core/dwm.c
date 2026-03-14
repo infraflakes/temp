@@ -395,9 +395,10 @@ int systray_enable = 1;
 int showbar = 1;
 int bar_horizontal_padding = 10;
 int bar_vertical_padding = 0;
-int tab_vertical_padding = 35;
-int tab_in_horizontal_padding = 15;
-int tab_out_horizontal_padding = 15;
+int tab_height = 35;
+int tab_tile_vertical_padding = 5;
+int tab_tile_inner_padding_horizontal = 15;
+int tab_tile_outer_padding_horizontal = 15;
 unsigned int tag_underline_padding = 5;
 unsigned int tag_underline_size = 2;
 unsigned int tag_underline_offset_from_bar_bottom = 0;
@@ -1374,9 +1375,9 @@ void drawtab(Monitor* m) {
   int x = 0;
   int w = 0;
   int mw = m->ww - 2 * m->gap;
-  buttons_w += TEXTW(btn_prev) - lrpad + tab_out_horizontal_padding;
-  buttons_w += TEXTW(btn_next) - lrpad + tab_out_horizontal_padding;
-  buttons_w += TEXTW(btn_close) - lrpad + tab_out_horizontal_padding;
+  buttons_w += TEXTW(btn_prev) - lrpad + tab_tile_outer_padding_horizontal;
+  buttons_w += TEXTW(btn_next) - lrpad + tab_tile_outer_padding_horizontal;
+  buttons_w += TEXTW(btn_close) - lrpad + tab_tile_outer_padding_horizontal;
   tot_width = buttons_w;
 
   /* Calculates number of labels and their width */
@@ -1384,7 +1385,7 @@ void drawtab(Monitor* m) {
   for (c = m->clients; c; c = c->next) {
     if (!ISVISIBLE(c)) continue;
     m->tab_widths[m->ntabs] =
-        MIN(TEXTW(c->name) - lrpad + tab_in_horizontal_padding + tab_out_horizontal_padding, 250);
+        MIN(TEXTW(c->name) - lrpad + tab_tile_inner_padding_horizontal + tab_tile_outer_padding_horizontal, 250);
     tot_width += m->tab_widths[m->ntabs];
     ++m->ntabs;
     if (m->ntabs >= MAXTABS) break;
@@ -1414,8 +1415,7 @@ void drawtab(Monitor* m) {
     if (m->tab_widths[i] > maxsize) m->tab_widths[i] = maxsize;
     w = m->tab_widths[i];
     drw_setscheme(drw, scheme[(c == m->sel) ? TabSel : TabNorm]);
-    drw_text(drw, x + tab_out_horizontal_padding / 2, bar_vertical_padding / 2, w - tab_out_horizontal_padding,
-             th - bar_vertical_padding, tab_in_horizontal_padding / 2, c->name, 0);
+    drw_text(drw, x + tab_tile_outer_padding_horizontal / 2, tab_tile_vertical_padding / 2, w - tab_tile_outer_padding_horizontal, th - tab_tile_vertical_padding, tab_tile_inner_padding_horizontal / 2, c->name, 0);
     x += w;
     ++i;
   }
@@ -1423,24 +1423,20 @@ void drawtab(Monitor* m) {
   w = mw - buttons_w - x;
   x += w;
   drw_setscheme(drw, scheme[SchemeBtnPrev]);
-  w = TEXTW(btn_prev) - lrpad + tab_out_horizontal_padding;
+  w = TEXTW(btn_prev) - lrpad + tab_tile_outer_padding_horizontal;
   m->tab_btn_w[0] = w;
-  drw_text(drw, x + tab_out_horizontal_padding / 2, bar_vertical_padding / 2, w, th - bar_vertical_padding, 0,
-           btn_prev, 0);
+  drw_text(drw, x + tab_tile_outer_padding_horizontal / 2, tab_tile_vertical_padding / 2, w, th - tab_tile_vertical_padding, 0, btn_prev, 0);
   x += w;
   drw_setscheme(drw, scheme[SchemeBtnNext]);
-  w = TEXTW(btn_next) - lrpad + tab_out_horizontal_padding;
+  w = TEXTW(btn_next) - lrpad + tab_tile_outer_padding_horizontal;
   m->tab_btn_w[1] = w;
-  drw_text(drw, x + tab_out_horizontal_padding / 2, bar_vertical_padding / 2, w, th - bar_vertical_padding, 0,
-           btn_next, 0);
+  drw_text(drw, x + tab_tile_outer_padding_horizontal / 2, tab_tile_vertical_padding / 2, w, th - tab_tile_vertical_padding, 0, btn_next, 0);
   x += w;
   drw_setscheme(drw, scheme[SchemeBtnClose]);
-  w = TEXTW(btn_close) - lrpad + tab_out_horizontal_padding;
+  w = TEXTW(btn_close) - lrpad + tab_tile_outer_padding_horizontal;
   m->tab_btn_w[2] = w;
-  drw_text(drw, x + tab_out_horizontal_padding / 2, bar_vertical_padding / 2, w, th - bar_vertical_padding, 0,
-           btn_close, 0);
+  drw_text(drw, x + tab_tile_outer_padding_horizontal / 2, tab_tile_vertical_padding / 2, w, th - tab_tile_vertical_padding, 0, btn_close, 0);
   x += w;
-
   drw_map(drw, m->tabwin, 0, 0, m->ww, th);
 }
 
@@ -2409,8 +2405,8 @@ void setup(void) {
     die("no fonts could be loaded.");
   lrpad = drw->fonts->h;
   bh = drw->fonts->h + 2 + bar_vertical_padding + borderpx * 2;
-  th = tab_vertical_padding;
-  // bh_n = tab_vertical_padding;
+  th = tab_height;
+  // bh_n = tab_height;
   updategeom();
   /* init atoms */
   utf8string = XInternAtom(dpy, "UTF8_STRING", False);

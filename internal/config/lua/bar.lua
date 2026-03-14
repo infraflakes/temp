@@ -7,14 +7,15 @@ srwm.bar.padding_horizontal(0)
 srwm.bar.padding_vertical(15)
 
 -- Tab
-srwm.bar.tab_padding_vertical(35) -- set to 0 to disable tab bar
-srwm.bar.tab_padding_inner_horizontal(15)
-srwm.bar.tab_padding_outer_horizontal(15)
+srwm.bar.tab_top(true)
+srwm.bar.tab_height(35) -- set to 0 to disable tab bar
+srwm.bar.tab_tile_vertical_padding(15)
+srwm.bar.tab_tile_inner_padding_horizontal(15)
+srwm.bar.tab_tile_outer_padding_horizontal(15)
 
 -- Looks
 srwm.bar.show(true)
 srwm.bar.top(true)
-srwm.bar.tab_top(true)
 
 -- Set fonts (use fc-list to find the name of your font)
 srwm.bar.fonts("JetBrainsMonoNerdFont:size=13")
