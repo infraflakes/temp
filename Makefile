@@ -49,6 +49,7 @@ fmt:
 
 lint:
 	@echo "Linting..."
+	go vet ./...
 	golangci-lint run
 
 clean:
@@ -60,6 +61,9 @@ clean:
 =======
 =======
 	rm -rf ./bin/srwm
+<<<<<<< HEAD
 >>>>>>> 269cb88 (Renaming to srwm)
 	rm -f $(CONFIG_H)
 >>>>>>> 2430b91 (Initial scaffolding)
+=======
+>>>>>>> 6b251de (Add CI/CD)
