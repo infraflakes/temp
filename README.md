@@ -1,6 +1,8 @@
 # Serein Window Manager
 A fully statically linked X11 window manager. Built with a Go core and a high-performance C engine via CGO.
 
+![Preview](./assets/screenshot_default.png)
+
 ## Installation
 
 ### Download Binary (Recommended)
