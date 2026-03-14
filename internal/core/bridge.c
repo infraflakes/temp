@@ -94,9 +94,10 @@ extern int systray_enable;
 extern int showbar;
 extern int bar_horizontal_padding;
 extern int bar_vertical_padding;
-extern int tab_vertical_padding;
-extern int tab_in_horizontal_padding;
-extern int tab_out_horizontal_padding;
+extern int tab_height;
+extern int tab_tile_vertical_padding;
+extern int tab_tile_inner_padding_horizontal;
+extern int tab_tile_outer_padding_horizontal;
 extern unsigned int tag_underline_padding;
 extern unsigned int tag_underline_size;
 extern unsigned int tag_underline_offset_from_bar_bottom;
@@ -131,14 +132,17 @@ void srwm_set_bar_horizontal_padding(int v) { bar_horizontal_padding = v; }
 int srwm_get_bar_vertical_padding(void) { return bar_vertical_padding; }
 void srwm_set_bar_vertical_padding(int v) { bar_vertical_padding = v; }
 
-int srwm_get_tab_vertical_padding(void) { return tab_vertical_padding; }
-void srwm_set_tab_vertical_padding(int v) { tab_vertical_padding = v; }
+int srwm_get_tab_height(void) { return tab_height; }
+void srwm_set_tab_height(int v) { tab_height = v; }
 
-int srwm_get_tab_in_horizontal_padding(void) { return tab_in_horizontal_padding; }
-void srwm_set_tab_in_horizontal_padding(int v) { tab_in_horizontal_padding = v; }
+int srwm_get_tab_tile_vertical_padding(void) { return tab_tile_vertical_padding; }
+void srwm_set_tab_tile_vertical_padding(int v) { tab_tile_vertical_padding = v; }
 
-int srwm_get_tab_out_horizontal_padding(void) { return tab_out_horizontal_padding; }
-void srwm_set_tab_out_horizontal_padding(int v) { tab_out_horizontal_padding = v; }
+int srwm_get_tab_tile_inner_padding_horizontal(void) { return tab_tile_inner_padding_horizontal; }
+void srwm_set_tab_tile_inner_padding_horizontal(int v) { tab_tile_inner_padding_horizontal = v; }
+
+int srwm_get_tab_tile_outer_padding_horizontal(void) { return tab_tile_outer_padding_horizontal; }
+void srwm_set_tab_tile_outer_padding_horizontal(int v) { tab_tile_outer_padding_horizontal = v; }
 
 unsigned int srwm_get_tag_underline_padding(void) { return tag_underline_padding; }
 void srwm_set_tag_underline_padding(unsigned int v) { tag_underline_padding = v; }
