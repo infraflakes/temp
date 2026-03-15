@@ -64,3 +64,28 @@ func ActionTag(mask uint) {
 func ActionToggleTag(mask uint) {
 	C.srwm_action_toggletag(C.uint(mask))
 }
+
+// ActionToggleCanvas toggles infinite canvas mode on the current monitor.
+func ActionToggleCanvas() {
+	C.srwm_action_togglecanvas()
+}
+
+// ActionMoveCanvas pans the canvas: 0=left, 1=right, 2=up, 3=down.
+func ActionMoveCanvas(dir int) {
+	C.srwm_action_movecanvas(C.int(dir))
+}
+
+// ActionHomeCanvas resets the canvas viewport to origin.
+func ActionHomeCanvas() {
+	C.srwm_action_homecanvas()
+}
+
+// ActionCenterWindowOnCanvas centers the canvas on the focused window.
+func ActionCenterWindowOnCanvas() {
+	C.srwm_action_centerwindowoncanvas()
+}
+
+// ActionManuallyMoveCanvas starts mouse-drag canvas panning.
+func ActionManuallyMoveCanvas() {
+	C.srwm_action_manuallymovecanvas()
+}

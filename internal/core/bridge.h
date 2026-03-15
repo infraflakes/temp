@@ -97,6 +97,13 @@ void srwm_action_toggleview(unsigned int mask);
 void srwm_action_tag(unsigned int mask);
 void srwm_action_toggletag(unsigned int mask);
 
+/* Canvas mode actions */  
+void srwm_action_togglecanvas(void);  
+void srwm_action_movecanvas(int dir);  
+void srwm_action_homecanvas(void);  
+void srwm_action_centerwindowoncanvas(void);  
+void srwm_action_manuallymovecanvas(void);
+
 /* Called from C -> Go when a dynamic key is pressed */
 extern void srwm_handle_key(int id);
 

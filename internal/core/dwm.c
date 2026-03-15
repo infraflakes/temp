@@ -166,10 +166,17 @@ typedef struct {
 } Button;
 
 typedef struct Monitor Monitor;
+typedef struct {
+    int cx, cy;           /* current canvas offset */
+    int saved_cx, saved_cy; /* saved offset for layout transitions */
+} CanvasOffset;
 typedef struct Client Client;
 struct Client {
   char name[256];
   float mina, maxa;
+  int saved_cx, saved_cy;   /* saved canvas position */
+  int saved_cw, saved_ch;   /* saved canvas size */
+  int was_on_canvas;         /* was this client on the canvas? */
   int x, y, w, h;
   int oldx, oldy, oldw, oldh;
   int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
@@ -345,6 +352,12 @@ static Client* wintosystrayicon(Window w);
 static int xerror(Display* dpy, XErrorEvent* ee);
 static int xerrordummy(Display* dpy, XErrorEvent* ee);
 static int xerrorstart(Display* dpy, XErrorEvent* ee);
+static void manuallymovecanvas(const Arg *arg);
+static void centerwindowoncanvas(const Arg *arg);
+static void homecanvas(const Arg *arg);
+static void movecanvas(const Arg *arg);
+static void togglecanvas(const Arg *arg);
+static int getcurrenttag(Monitor *m);
 
 /* variables */
 static Systray* systray = NULL;
@@ -467,6 +480,8 @@ struct Monitor {
   unsigned int tagset[2];
   unsigned int colorfultag;
   unsigned int occ, urg;
+  int canvas_mode;           /* 1 = infinite canvas active, 0 = normal tiling */  
+  CanvasOffset *canvas;      /* per-tag canvas offsets, allocated in createmon() */
   int showbar;
   int topbar, toptab;
   Client* clients;
@@ -651,6 +666,10 @@ void arrangemon(Monitor* m) {
   XMoveResizeWindow(dpy, m->tabwin, m->wx + m->gap, m->ty,
                     m->ww - 2 * m->gap, th);
   }
+
+  /* Skip tiling in canvas mode — all windows are floating */  
+  if (m->canvas_mode) return;
+
   /* Arrange all tiled windows in fullscreen style */
   for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
     newx = m->wx + m->gap - c->bw;
@@ -809,6 +828,7 @@ void cleanupmon(Monitor* mon) {
   XUnmapWindow(dpy, mon->tabwin);
   XDestroyWindow(dpy, mon->tabwin);
   }
+  free(mon->canvas);
   free(mon);
 }
 
@@ -994,6 +1014,8 @@ Monitor* createmon(void) {
   m->prev = NULL;
   m->curtag = m->prevtag = 1;
   m->showbar_mask = showbar ? ~0u : 0u;
+  m->canvas_mode = 0;  
+  m->canvas = ecalloc(9, sizeof(CanvasOffset)); /* one per tag, max 9 */
 
   return m;
 }
@@ -1800,6 +1822,10 @@ void manage(Window w, XWindowAttributes* wa) {
                    StructureNotifyMask);
   grabbuttons(c, 0);
   if (!c->isfloating) c->isfloating = c->oldstate = trans != None || c->isfixed;
+  /* In canvas mode, all new windows are floating */  
+  if (c->mon->canvas_mode && !c->isfloating) {  
+     c->isfloating = 1;  
+  }
   if (c->isfloating) XRaiseWindow(dpy, c->win);
   attach(c);
   attachstack(c);
@@ -3176,3 +3202,188 @@ void srwm_action_toggletag(unsigned int mask) { toggletag(&(Arg){.ui = mask}); }
 void srwm_set_tag_colorful_occupied_only(int val) {
   tag_colorful_occupied_only = val;
 }
+
+static int getcurrenttag(Monitor *m) {  
+    unsigned int i;  
+    for (i = 0; i < TAGSLENGTH && !(m->tagset[m->seltags] & (1 << i)); i++);  
+    return i < TAGSLENGTH ? i : 0;  
+}  
+  
+/* Toggle canvas mode on/off for the current monitor */  
+static void togglecanvas(const Arg *arg) {  
+    if (!selmon->canvas_mode) {  
+        /* Entering canvas mode: save positions, make all tiled windows floating */  
+        selmon->canvas_mode = 1;  
+        int tagidx = getcurrenttag(selmon);  
+        Client *c;  
+        for (c = selmon->clients; c; c = c->next) {  
+            if (ISVISIBLE(c)) {  
+                c->saved_cx = c->x;  
+                c->saved_cy = c->y;  
+                c->saved_cw = c->w;  
+                c->saved_ch = c->h;  
+                c->was_on_canvas = 1;  
+                if (!c->isfloating) {  
+                    c->isfloating = 1;  
+                }  
+            }  
+        }  
+        selmon->canvas[tagidx].cx = 0;  
+        selmon->canvas[tagidx].cy = 0;  
+    } else {  
+        /* Leaving canvas mode: restore tiled layout */  
+        selmon->canvas_mode = 0;  
+        Client *c;  
+        for (c = selmon->clients; c; c = c->next) {  
+            if (ISVISIBLE(c) && c->was_on_canvas) {  
+                c->isfloating = 0;  
+                c->was_on_canvas = 0;  
+            }  
+        }  
+    }  
+    arrange(selmon);  
+}  
+  
+static void movecanvas(const Arg *arg) {  
+    if (!selmon->canvas_mode)  
+        return;  
+  
+    int tagidx = getcurrenttag(selmon);  
+    int dx = 0, dy = 0;  
+    int step = 120; /* MOVE_CANVAS_STEP */  
+  
+    switch(arg->i) {  
+        case 0: dx = -step; break; /* left */  
+        case 1: dx =  step; break; /* right */  
+        case 2: dy = -step; break; /* up */  
+        case 3: dy =  step; break; /* down */  
+    }  
+  
+    selmon->canvas[tagidx].cx -= dx;  
+    selmon->canvas[tagidx].cy -= dy;  
+  
+    Client *c;  
+    for (c = selmon->clients; c; c = c->next) {  
+        if (ISVISIBLE(c)) {  
+            c->x -= dx;  
+            c->y -= dy;  
+            XMoveWindow(dpy, c->win, c->x, c->y);  
+        }  
+    }  
+    drawbar(selmon);  
+}  
+  
+static void homecanvas(const Arg *arg) {  
+    if (!selmon->canvas_mode)  
+        return;  
+  
+    int tagidx = getcurrenttag(selmon);  
+    int cx = selmon->canvas[tagidx].cx;  
+    int cy = selmon->canvas[tagidx].cy;  
+  
+    Client *c;  
+    for (c = selmon->clients; c; c = c->next) {  
+        if (ISVISIBLE(c)) {  
+            c->x -= cx;  
+            c->y -= cy;  
+            XMoveWindow(dpy, c->win, c->x, c->y);  
+        }  
+    }  
+  
+    selmon->canvas[tagidx].cx = 0;  
+    selmon->canvas[tagidx].cy = 0;  
+    drawbar(selmon);  
+    XFlush(dpy);  
+}  
+  
+static void centerwindowoncanvas(const Arg *arg) {  
+    Client *c = selmon->sel;  
+    if (!c || !selmon->canvas_mode)  
+        return;  
+  
+    Monitor *m = c->mon;  
+    int tagidx = getcurrenttag(m);  
+  
+    int screen_center_x = m->wx + (m->ww / 2);  
+    int screen_center_y = m->wy + (m->wh / 2);  
+    int win_center_x = c->x + (c->w + 2 * c->bw) / 2;  
+    int win_center_y = c->y + (c->h + 2 * c->bw) / 2;  
+  
+    int dx = screen_center_x - win_center_x;  
+    int dy = screen_center_y - win_center_y;  
+  
+    if (dx == 0 && dy == 0)  
+        return;  
+  
+    Client *tmp;  
+    for (tmp = m->clients; tmp; tmp = tmp->next) {  
+        if (ISVISIBLE(tmp)) {  
+            tmp->x += dx;  
+            tmp->y += dy;  
+            XMoveWindow(dpy, tmp->win, tmp->x, tmp->y);  
+        }  
+    }  
+  
+    m->canvas[tagidx].cx += dx;  
+    m->canvas[tagidx].cy += dy;  
+    drawbar(m);  
+}  
+  
+static void manuallymovecanvas(const Arg *arg) {  
+    if (!selmon->canvas_mode)  
+        return;  
+  
+    int start_x, start_y;  
+    Window dummy;  
+    int di;  
+    unsigned int dui;  
+    int tagidx = getcurrenttag(selmon);  
+    Time lasttime = 0;  
+  
+    if (selmon->sel && selmon->sel->isfullscreen)  
+        return;  
+    if (!XQueryPointer(dpy, root, &dummy, &dummy, &start_x, &start_y, &di, &di, &dui))  
+        return;  
+    if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,  
+        None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)  
+        return;  
+  
+    XEvent ev;  
+    do {  
+        XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);  
+        switch (ev.type) {  
+        case MotionNotify:  
+        {  
+            if ((ev.xmotion.time - lasttime) <= (1000 / 60))  
+                continue;  
+            lasttime = ev.xmotion.time;  
+  
+            int nx = ev.xmotion.x - start_x;  
+            int ny = ev.xmotion.y - start_y;  
+  
+            Client *c;  
+            for (c = selmon->clients; c; c = c->next) {  
+                if (c->tags & (1 << tagidx)) {  
+                    c->x += nx;  
+                    c->y += ny;  
+                    XMoveWindow(dpy, c->win, c->x, c->y);  
+                }  
+            }  
+  
+            selmon->canvas[tagidx].cx += nx;
+            selmon->canvas[tagidx].cy += ny;
+            drawbar(selmon);
+            start_x = ev.xmotion.x;
+            start_y = ev.xmotion.y;
+        }   break;
+        }
+    } while (ev.type != ButtonRelease);
+
+    XUngrabPointer(dpy, CurrentTime);
+}
+
+void srwm_action_togglecanvas(void) { togglecanvas(&(Arg){0}); }  
+void srwm_action_movecanvas(int dir) { movecanvas(&(Arg){.i = dir}); }  
+void srwm_action_homecanvas(void) { homecanvas(&(Arg){0}); }  
+void srwm_action_centerwindowoncanvas(void) { centerwindowoncanvas(&(Arg){0}); }  
+void srwm_action_manuallymovecanvas(void) { manuallymovecanvas(&(Arg){0}); }
