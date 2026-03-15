@@ -52,6 +52,7 @@
 
           # Automatically set the environment build command
           shellHook = ''
+            go env -w GOPATH=$HOME/.local/share/go
             export CGO_ENABLED=1
             export CC="zig cc -target x86_64-linux-musl"
             export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft)"
@@ -73,6 +74,7 @@
           CC = "zig cc -target x86_64-linux-musl";
 
           preBuild = ''
+            go env -w GOPATH=$HOME/.local/share/go
             export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft xrender imlib2)"
             export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft xrender imlib2)"
           '';
