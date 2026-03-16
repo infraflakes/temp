@@ -31,3 +31,11 @@ end)
 srwm.key.bind("Mod4+Shift", "space", function()
 	srwm.canvas.drag()
 end)
+
+-- Zoom in/out canvas
+srwm.key.bind("Mod4", "equal", function()
+	srwm.canvas.zoom(1)
+end)
+srwm.key.bind("Mod4", "minus", function()
+	srwm.canvas.zoom(-1)
+end)
