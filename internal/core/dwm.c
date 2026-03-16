@@ -2296,6 +2296,13 @@ void restack(Monitor* m) {
       XConfigureWindow(dpy, c->win, CWSibling | CWStackMode, &wc);
       wc.sibling = c->win;
     }
+  /* In canvas mode all windows are floating and can overlap the bar.  
+   Raise bar and tab windows so they stay visible on top. */  
+  if (m->canvas_mode) {  
+      XRaiseWindow(dpy, m->barwin);  
+      if (m->tabwin)  
+          XRaiseWindow(dpy, m->tabwin);  
+  }
   XSync(dpy, False);
   while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
