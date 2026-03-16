@@ -110,5 +110,11 @@ func RegisterActionsAPI(L *lua.LState, srwmMod *lua.LTable) {
 		return 0
 	}))
 
+	L.SetField(canvasTable, "zoom", L.NewFunction(func(L *lua.LState) int {
+		dir := L.CheckInt(1)
+		core.ActionZoomCanvas(dir)
+		return 0
+	}))
+
 	L.SetField(srwmMod, "canvas", canvasTable)
 }

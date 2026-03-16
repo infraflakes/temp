@@ -169,6 +169,7 @@ typedef struct Monitor Monitor;
 typedef struct {
     int cx, cy;           /* current canvas offset */
     int saved_cx, saved_cy; /* saved offset for layout transitions */
+    float zoom;           /* current zoom level, 1.0 = default */
 } CanvasOffset;
 typedef struct Client Client;
 struct Client {
@@ -358,6 +359,7 @@ static void homecanvas(const Arg *arg);
 static void movecanvas(const Arg *arg);
 static void togglecanvas(const Arg *arg);
 static int getcurrenttag(Monitor *m);
+static void zoomcanvas(const Arg *arg);
 
 /* variables */
 static Systray* systray = NULL;
@@ -1016,6 +1018,9 @@ Monitor* createmon(void) {
   m->showbar_mask = showbar ? ~0u : 0u;
   m->canvas_mode = 0;  
   m->canvas = ecalloc(9, sizeof(CanvasOffset)); /* one per tag, max 9 */
+  for (int i = 0; i < 9; i++) {
+    m->canvas[i].zoom = 1.0f;
+  }
 
   return m;
 }
@@ -3230,6 +3235,7 @@ static void togglecanvas(const Arg *arg) {
         }  
         selmon->canvas[tagidx].cx = 0;  
         selmon->canvas[tagidx].cy = 0;  
+        selmon->canvas[tagidx].zoom = 1.0f;
     } else {  
         /* Leaving canvas mode: restore tiled layout */  
         selmon->canvas_mode = 0;  
@@ -3292,6 +3298,23 @@ static void homecanvas(const Arg *arg) {
   
     selmon->canvas[tagidx].cx = 0;  
     selmon->canvas[tagidx].cy = 0;  
+    /* Reset zoom to 1.0 */  
+    float old_zoom = selmon->canvas[tagidx].zoom;  
+    if (old_zoom != 1.0f) {  
+        float scale = 1.0f / old_zoom;  
+        int scx = selmon->wx + selmon->ww / 2;  
+        int scy = selmon->wy + selmon->wh / 2;  
+        for (c = selmon->clients; c; c = c->next) {  
+            if (ISVISIBLE(c)) {  
+                int new_x = scx + (int)((c->x - scx) * scale);  
+                int new_y = scy + (int)((c->y - scy) * scale);  
+                int new_w = MAX(1, (int)(c->w * scale));  
+                int new_h = MAX(1, (int)(c->h * scale));  
+                resizeclient(c, new_x, new_y, new_w, new_h);  
+            }  
+        }  
+        selmon->canvas[tagidx].zoom = 1.0f;  
+    }
     drawbar(selmon);  
     XFlush(dpy);  
 }  
@@ -3382,8 +3405,57 @@ static void manuallymovecanvas(const Arg *arg) {
     XUngrabPointer(dpy, CurrentTime);
 }
 
+#define CANVAS_ZOOM_STEP 1.1f  
+#define CANVAS_ZOOM_MIN  0.2f  
+#define CANVAS_ZOOM_MAX  5.0f  
+  
+static void zoomcanvas(const Arg *arg) {  
+    if (!selmon->canvas_mode)  
+        return;  
+  
+    int tagidx = getcurrenttag(selmon);  
+    float old_zoom = selmon->canvas[tagidx].zoom;  
+    float new_zoom;  
+  
+    if (arg->i > 0)  
+        new_zoom = old_zoom * CANVAS_ZOOM_STEP;  /* zoom in */  
+    else  
+        new_zoom = old_zoom / CANVAS_ZOOM_STEP;  /* zoom out */  
+  
+    /* clamp */  
+    if (new_zoom < CANVAS_ZOOM_MIN) new_zoom = CANVAS_ZOOM_MIN;  
+    if (new_zoom > CANVAS_ZOOM_MAX) new_zoom = CANVAS_ZOOM_MAX;  
+    if (new_zoom == old_zoom)  
+        return;  
+  
+    float scale = new_zoom / old_zoom;  
+  
+    /* zoom relative to screen center */  
+    int cx = selmon->wx + selmon->ww / 2;  
+    int cy = selmon->wy + selmon->wh / 2;  
+  
+    Client *c;  
+    for (c = selmon->clients; c; c = c->next) {  
+        if (ISVISIBLE(c)) {  
+            int new_x = cx + (int)((c->x - cx) * scale);  
+            int new_y = cy + (int)((c->y - cy) * scale);  
+            int new_w = MAX(1, (int)(c->w * scale));  
+            int new_h = MAX(1, (int)(c->h * scale));  
+  
+            resizeclient(c, new_x, new_y, new_w, new_h);  
+        }  
+    }  
+  
+    selmon->canvas[tagidx].cx = (int)(selmon->canvas[tagidx].cx * scale);  
+    selmon->canvas[tagidx].cy = (int)(selmon->canvas[tagidx].cy * scale);  
+    selmon->canvas[tagidx].zoom = new_zoom;  
+  
+    drawbar(selmon);  
+}
+
 void srwm_action_togglecanvas(void) { togglecanvas(&(Arg){0}); }  
 void srwm_action_movecanvas(int dir) { movecanvas(&(Arg){.i = dir}); }  
 void srwm_action_homecanvas(void) { homecanvas(&(Arg){0}); }  
 void srwm_action_centerwindowoncanvas(void) { centerwindowoncanvas(&(Arg){0}); }  
 void srwm_action_manuallymovecanvas(void) { manuallymovecanvas(&(Arg){0}); }
+void srwm_action_zoomcanvas(int dir) { zoomcanvas(&(Arg){.i = dir}); }
