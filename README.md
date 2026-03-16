@@ -47,7 +47,7 @@ Current the project only supports building with [dagger](https://dagger.io/).
 =======
 >>>>>>> 0c0d789 (Update README)
 # Serein Window Manager
-A fully statically linked X11 window manager. Built with a Go core and a high-performance C engine via CGO.
+A fully statically linked X11 floating, zooming window manager. Built with Go, C and Lua.
 
 ![Preview](./assets/screenshot_default.png)
 
@@ -95,12 +95,6 @@ Since `srwm` is built as a zero-dependency static binary, you can run it on almo
    sudo mv srwm-v*-linux-amd64 /usr/local/bin/srwm
    ```
 
-If you use the default config, the bar's widgets depend on some dependencies:
-
-- iw
-- xset
-- bc
-
 ### Getting started
 
 > [!CAUTION]
@@ -120,8 +114,17 @@ sx srwm start
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 6fd8943 (Update README)
 =======
+=======
+If you use the default bar's widgets config, the bar's widgets depend on some dependencies:
+
+- iw
+- xset
+- bc
+
+>>>>>>> 5a70b2a (Update README)
 ### Building from scratch
 
 Current the project only supports building with flakes.
@@ -137,5 +140,17 @@ Or
 nix build .#default
 ```
 
+<<<<<<< HEAD
 >>>>>>> 9836c1a (Update installation)
+=======
+## Acknowledgements
+
+Special thanks to:
+
+- The developers who worked on dwm to make it possible.
+
+- [Siduck](https://github.com/siduck) and other contributors for chadwm which `srwm` originally based on.
+
+- [wh1tepearl](https://codeberg.org/wh1tepearl) for the canvas layout `srwm` based on.
+>>>>>>> 5a70b2a (Update README)
 ---
