@@ -189,6 +189,7 @@ struct Client {
   unsigned int icw, ich;
   Picture icon;
   int beingmoved;
+  int ismapped;    /* WINDOWMAP: tracks whether window is mapped in X11 */
   Client* next;
   Client* snext;
   Monitor* mon;
@@ -359,6 +360,9 @@ static void homecanvas(const Arg *arg);
 static void movecanvas(const Arg *arg);
 static int getcurrenttag(Monitor *m);
 static void zoomcanvas(const Arg *arg);
+static void window_set_state(Window win, long state);  
+static void window_map(Client *c, int deiconify);  
+static void window_unmap(Window win, int iconify);
 
 /* variables */
 static Systray* systray = NULL;
@@ -1763,6 +1767,7 @@ void manage(Window w, XWindowAttributes* wa) {
   XWindowChanges wc;
 
   c = ecalloc(1, sizeof(Client));
+  c->ismapped = 0;
   c->ishidden = 0; //new windows are not hidden
   c->win = w;
   win_ht_insert(c->win, c);
@@ -1863,6 +1868,7 @@ void manage(Window w, XWindowAttributes* wa) {
   c->mon->sel = c;
   arrange(c->mon);
   if (!HIDDEN(c)) XMapWindow(dpy, c->win);
+  if (!HIDDEN(c)) c->ismapped = 1;
   focus(NULL);
 }
 
@@ -1941,7 +1947,7 @@ void movemouse(const Arg* arg) {
         handler[ev.type](&ev);
         break;
       case MotionNotify:
-        if ((ev.xmotion.time - lasttime) <= (1000 / 60)) continue;
+        if ((ev.xmotion.time - lasttime) <= (1000 / 120)) continue;
         lasttime = ev.xmotion.time;
 
         nx = ocx + (ev.xmotion.x - x);
@@ -2565,18 +2571,70 @@ void seturgent(Client* c, int urg) {
   }
 }
 
-void showhide(Client* c) {
-  if (!c) return;
-  if (ISVISIBLE(c)) {
-    /* show clients top down */
-    XMoveWindow(dpy, c->win, c->x, c->y);
-    if (c->isfloating && !c->isfullscreen && !c->mon->canvas_mode) resize(c, c->x, c->y, c->w, c->h, 0);
-    showhide(c->snext);
-  } else {
-    /* hide clients bottom up */
-    showhide(c->snext);
-    XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-  }
+/* WINDOWMAP helpers */  
+static void window_set_state(Window win, long state) {  
+  long data[] = { state, None };  
+  XChangeProperty(dpy, win, wmatom[WMState], wmatom[WMState], 32,  
+    PropModeReplace, (unsigned char*)data, 2);  
+}  
+  
+static void window_map(Client *c, int deiconify) {  
+  Window win = c->win;  
+  if (deiconify)  
+    window_set_state(win, NormalState);  
+  XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);  
+  XSetInputFocus(dpy, win, RevertToPointerRoot, CurrentTime);  
+  XMapWindow(dpy, win);  
+  focus(NULL);  
+}  
+  
+static void window_unmap(Window win, int iconify) {  
+  static XWindowAttributes ca, ra;  
+  XGetWindowAttributes(dpy, root, &ra);  
+  XGetWindowAttributes(dpy, win, &ca);  
+  /* Prevent UnmapNotify events from reaching our handler */  
+  XSelectInput(dpy, root, ra.your_event_mask & ~SubstructureNotifyMask);  
+  XSelectInput(dpy, win, ca.your_event_mask & ~StructureNotifyMask);  
+  XUnmapWindow(dpy, win);  
+  focus(NULL);  
+  if (iconify)  
+    window_set_state(win, IconicState);  
+  XSelectInput(dpy, root, ra.your_event_mask);  
+  XSelectInput(dpy, win, ca.your_event_mask);  
+}
+
+void showhide(Client* c) {  
+  if (!c) return;  
+  
+  /* Grab server on first call to batch all map/unmap operations */  
+  static int grabbed = 0;  
+  if (!grabbed) {  
+    XGrabServer(dpy);  
+    grabbed = 1;  
+  }  
+  
+  if (ISVISIBLE(c)) {  
+    /* show clients top down */  
+    if (!c->ismapped) {  
+      window_map(c, 1);  
+      c->ismapped = 1;  
+    }  
+    showhide(c->snext);  
+  } else {  
+    /* hide clients bottom up */  
+    showhide(c->snext);  
+    if (c->ismapped) {  
+      window_unmap(c->win, 1);  
+      c->ismapped = 0;  
+    }  
+  }  
+  
+  /* Ungrab server after processing the last client in the stack */  
+  if (!c->snext && grabbed) {  
+    XUngrabServer(dpy);  
+    XSync(dpy, False);  
+    grabbed = 0;  
+  }  
 }
 
 void setclienttagprop(Client* c) {
@@ -3373,7 +3431,7 @@ static void manuallymovecanvas(const Arg *arg) {
             lasttime = ev.xmotion.time;  
   
             float zoom = selmon->canvas[tagidx].zoom;
-            float speed = 2.5f;  // base multiplier
+            float speed = 5.0f;  // base multiplier
             int nx = (int)((ev.xmotion.x - start_x) * speed / zoom);
             int ny = (int)((ev.xmotion.y - start_y) * speed / zoom);
   
