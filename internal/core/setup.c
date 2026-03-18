@@ -175,7 +175,7 @@ void setup(void) {
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
                   PropModeReplace, (unsigned char*)&wmcheckwin, 1);
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
-                  PropModeReplace, (unsigned char*)"dwm", 3);
+                  PropModeReplace, (unsigned char*)"srwm", 3);
   XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
                   PropModeReplace, (unsigned char*)&wmcheckwin, 1);
   /* EWMH support per view */
@@ -385,7 +385,7 @@ int xerror(Display* dpy, XErrorEvent* ee) {
       (ee->request_code == X_GrabKey && ee->error_code == BadAccess) ||
       (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
     return 0;
-  fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
+  fprintf(stderr, "srwm: fatal error: request code=%d, error code=%d\n",
           ee->request_code, ee->error_code);
   return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -395,7 +395,7 @@ int xerrordummy(Display* dpy, XErrorEvent* ee) { return 0; }
 /* Startup Error handler to check if another window manager
  * is already running. */
 int xerrorstart(Display* dpy, XErrorEvent* ee) {
-  die("dwm: another window manager is already running");
+  die("srwm: another window manager is already running");
   return -1;
 }
 

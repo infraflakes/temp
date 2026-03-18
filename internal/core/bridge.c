@@ -1,4 +1,3 @@
-/* bridge.c — Thin lifecycle wrapper around dwm.c for Go */
 #include "bridge.h"
 #include "wm.h"
 #include <X11/Xlib.h>
@@ -68,7 +67,7 @@ void srwm_request_restart(void) {
   running = 0;
 }
 
-/* Dynamic keys defined in dwm.c */
+/* Dynamic keys defined in srwm.c */
 extern void add_dynamic_key(unsigned int mod, KeySym keysym, int id);
 extern void clear_dynamic_keys(void);
 extern void grabkeys(void);
