@@ -1,6 +1,22 @@
 #include "wm.h"
 
-void (*handler[LASTEvent])(XEvent*) = { ... };
+void (*handler[LASTEvent])(XEvent*) = {  
+    [ButtonPress] = buttonpress,  
+    [ClientMessage] = clientmessage,  
+    [ConfigureRequest] = configurerequest,  
+    [ConfigureNotify] = configurenotify,  
+    [DestroyNotify] = destroynotify,  
+    [EnterNotify] = enternotify,  
+    [Expose] = expose,  
+    [FocusIn] = focusin,  
+    [KeyPress] = keypress,  
+    [MappingNotify] = mappingnotify,  
+    [MapRequest] = maprequest,  
+    [MotionNotify] = motionnotify,  
+    [PropertyNotify] = propertynotify,  
+    [ResizeRequest] = resizerequest,  
+    [UnmapNotify] = unmapnotify  
+};
 char stext[1024];
 
 void buttonpress(XEvent* e) {

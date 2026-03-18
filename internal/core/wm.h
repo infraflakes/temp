@@ -191,8 +191,8 @@ typedef struct {
 } DynamicKey;
 
 #define MAX_DYNAMIC_KEYS 256
-DynamicKey dkeys[MAX_DYNAMIC_KEYS];
-int dkeys_len = 0;
+extern DynamicKey dkeys[MAX_DYNAMIC_KEYS];
+extern int dkeys_len;
 
 typedef struct {
   const char* class;
@@ -361,12 +361,34 @@ void window_set_state(Window win, long state);
 void window_map(Client *c, int deiconify);  
 void window_unmap(Window win, int iconify);
 
+extern void (*handler[LASTEvent])(XEvent*);
+
+/* From wm.c */  
+void win_ht_insert(Window w, Client* c);  
+void win_ht_remove(Window w);  
+  
+/* From bar.c */  
+void tagtonext(const Arg* arg);  
+void tagtoprev(const Arg* arg);  
+unsigned int nexttag(void);  
+unsigned int prevtag(void);  
+  
+/* From setup.c */  
+int isuniquegeom(XineramaScreenInfo* unique, size_t n, XineramaScreenInfo* info);  
+  
+/* From Go (CGo export) — called in events.c keypress() */  
+extern void srwm_handle_key(int id);
+
 /* From setup.c / wm.c */  
+#define ICONSIZE 20  
+#define ICONSPACING 8  
+#define MODKEY Mod4Mask  
+#define ALTKEY Mod1Mask
 extern int running;  
 extern Display* dpy;  
 extern Systray* systray;  
 extern const char broken[];  
-extern char stext[];  
+extern char stext[1024];
 extern int screen;  
 extern int sw, sh;  
 extern int bh;  
@@ -404,13 +426,27 @@ extern int topbar;
 extern int colorfultag;  
 extern int tag_colorful_occupied_only;  
 extern int layout_mode;  
-extern const char* fonts[];  
-extern const char* colors[][3];  
 extern char* tags[];  
 extern int tagschemes[];  
-extern const Rule rules[];  
-extern const Button buttons[];  
-  
+extern const char* colors[18][3];    // 18 = SchemeBtnClose + 1  
+extern const char* fonts[1];  
+extern const Rule rules[3];  
+extern const Button buttons[12];
+
 /* Dynamic keys */  
 extern DynamicKey dkeys[];  
 extern int dkeys_len;
+
+
+#define black       "#0e0e12"  
+#define gray2       "#373737"  
+#define gray3       "#8c8c8c"  
+#define blue        "#6fa6e7"  
+#define green       "#8fb573"  
+#define red         "#c75c6a"  
+#define orange      "#c7a06f"  
+#define pink        "#c56a97"  
+#define purple      "#9a71db"  
+#define col_borderbar "#0e0e12"  
+#define yellow      "#c7a06f"  
+#define white       "#ffffff"
