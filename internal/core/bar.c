@@ -304,7 +304,7 @@ void updatebars(void) {
       .background_pixmap = ParentRelative,
       .event_mask = ButtonPressMask | ExposureMask | PointerMotionMask};
 
-  XClassHint ch = {"dwm", "dwm"};
+  XClassHint ch = {"srwm", "srwm"};
   for (m = mons; m; m = m->next) {
     if (m->barwin) continue;
     w = m->ww;

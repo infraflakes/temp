@@ -131,7 +131,7 @@ void clientmessage(XEvent* e) {
       XSelectInput(
           dpy, c->win,
           StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-      XClassHint ch = {"dwmsystray", "dwmsystray"};
+      XClassHint ch = {"srwmsystray", "srwmsystray"};
       XSetClassHint(dpy, c->win, &ch);
       XReparentWindow(dpy, c->win, systray->win, 0, 0);
       /* use parents background color */
