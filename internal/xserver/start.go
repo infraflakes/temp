@@ -66,9 +66,11 @@ func Start() (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create xauthority file: %w", err)
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		return nil, fmt.Errorf("cannot close xauthority file: %w", err)
+	}
 
-	os.Setenv("XAUTHORITY", xauthPath)
+	_ = os.Setenv("XAUTHORITY", xauthPath)
 
 	// Generate random cookie
 	cookie := make([]byte, 16)
@@ -100,7 +102,7 @@ func Start() (*Server, error) {
 
 	if err := xorgCmd.Start(); err != nil {
 		// Clean up xauth on failure
-		exec.Command("xauth", "remove", display).Run()
+		_ = exec.Command("xauth", "remove", display).Run()
 		return nil, fmt.Errorf("failed to start Xorg: %w", err)
 	}
 
@@ -109,14 +111,14 @@ func Start() (*Server, error) {
 	case <-usr1Ch:
 		// Xorg is ready
 	case <-time.After(10 * time.Second):
-		xorgCmd.Process.Kill()
-		xorgCmd.Wait()
-		exec.Command("xauth", "remove", display).Run()
+		_ = xorgCmd.Process.Kill()
+		_ = xorgCmd.Wait()
+		_ = exec.Command("xauth", "remove", display).Run()
 		return nil, fmt.Errorf("timed out waiting for Xorg to start")
 	}
 
 	// 7. Set DISPLAY
-	os.Setenv("DISPLAY", display)
+	_ = os.Setenv("DISPLAY", display)
 
 	log.Printf("X server started on %s (vt%s)", display, ttyNum)
 
@@ -131,17 +133,17 @@ func Start() (*Server, error) {
 // Stop kills the Xorg server, removes the xauth entry, and restores terminal state.
 func (s *Server) Stop() {
 	if s.cmd != nil && s.cmd.Process != nil {
-		s.cmd.Process.Signal(syscall.SIGTERM)
-		s.cmd.Wait()
+		_ = s.cmd.Process.Signal(syscall.SIGTERM)
+		_ = s.cmd.Wait()
 	}
 
 	// Remove xauth entry
-	exec.Command("xauth", "remove", s.display).Run()
+	_ = exec.Command("xauth", "remove", s.display).Run()
 
 	// Restore terminal state
 	if s.sttyState != "" {
 		if err := exec.Command("stty", s.sttyState).Run(); err != nil {
-			exec.Command("stty", "sane").Run()
+			_ = exec.Command("stty", "sane").Run()
 		}
 	}
 
