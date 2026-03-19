@@ -54,6 +54,7 @@ lint:
 clean:
 	@echo "Cleaning..."
 <<<<<<< HEAD
+<<<<<<< HEAD
 	rm -rf ./bin/swm
 <<<<<<< HEAD
 >>>>>>> f1a06f2 (Flakes)
@@ -66,3 +67,7 @@ clean:
 >>>>>>> 2430b91 (Initial scaffolding)
 =======
 >>>>>>> 6b251de (Add CI/CD)
+=======
+	rm -rf ./bin
+	rm -rf ./result
+>>>>>>> 9891618 (Add locale fallback)
