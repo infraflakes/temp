@@ -170,7 +170,7 @@ func runLuaConfig(ctx context.Context) {
 		// Map up to 9 tags
 		count := min(len(parts), 9)
 
-		for i := 0; i < count; i++ {
+		for i := range count {
 			core.SetTag(i, strings.TrimSpace(parts[i]))
 		}
 		core.SetTagsLen(count)
