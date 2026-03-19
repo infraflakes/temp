@@ -323,8 +323,13 @@ void setcurrentdesktop(void) {
 }
 void setdesktopnames(void) {
   XTextProperty text;
-  Xutf8TextListToTextProperty(dpy, tags, TAGSLENGTH, XUTF8StringStyle, &text);
+  if (Xutf8TextListToTextProperty(dpy, tags, TAGSLENGTH, XUTF8StringStyle, &text) != Success) {
+    /* Fallback for static musl builds where locale/Xutf8 support is unavailable */
+    if (!XStringListToTextProperty(tags, TAGSLENGTH, &text))
+      return;
+  }
   XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
+  XFree(text.value);
 }
 
 void setnumdesktops(void) {
