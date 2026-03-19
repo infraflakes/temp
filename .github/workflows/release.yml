@@ -25,15 +25,17 @@ jobs:
       - name: Rename and Prepare
         run: |
           mkdir -p dist
-          cp result/bin/srwm dist/srwm-${{ github.ref_name }}-linux-amd64
-          sha256sum dist/srwm-${{ github.ref_name }}-linux-amd64 > dist/checksum.sha256
+          BINARY_NAME="srwm-${{ github.ref_name }}-linux-amd64"
+          cp result/bin/srwm "dist/$BINARY_NAME"
+          cd dist
+          sha256sum "$BINARY_NAME" > "$BINARY_NAME.sha256"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/srwm-*-linux-amd64
-            dist/checksum.sha256
+            dist/srwm-*-linux-amd64.sha256
           generate_release_notes: true
           draft: false
           prerelease: false
