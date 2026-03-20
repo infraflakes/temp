@@ -37,7 +37,6 @@
           zig
           pkg-config
           upx
-          makeWrapper
         ];
         buildInputs = with staticPkgs; [
           libx11
@@ -89,8 +88,6 @@
           tags = ["netgo"];
           postInstall = ''
             upx --best --lzma $out/bin/srwm
-            wrapProgram $out/bin/srwm \
-            --set-default FONTCONFIG_FILE "${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
           '';
         };
       }
