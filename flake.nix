@@ -37,6 +37,7 @@
           zig
           pkg-config
           upx
+          makeWrapper
         ];
         buildInputs = with staticPkgs; [
           libx11
@@ -85,10 +86,11 @@
             "-linkmode external"
             "-extldflags '-static'"
           ];
-
-          preBuild = ''
-            export CGO_CFLAGS="$(pkg-config --cflags x11 xinerama xft)"
-            export CGO_LDFLAGS="$(pkg-config --libs --static x11 xinerama xft)"
+          tags = ["netgo"];
+          postInstall = ''
+            upx --best --lzma $out/bin/srwm
+            wrapProgram $out/bin/srwm \
+            --set-default FONTCONFIG_FILE "${pkgs.fontconfig.out}/etc/fonts/fonts.conf"
           '';
         };
       }
