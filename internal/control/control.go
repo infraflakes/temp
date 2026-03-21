@@ -9,6 +9,7 @@ package control
 
 import (
 	"log"
+	"os"
 	"os/exec"
 	"sync"
 
@@ -34,17 +35,18 @@ func SetRefreshNotifier(fn func()) {
 // RegisterAPI injects lifecycle and process management functions into
 // the srwm Lua module table:
 //
-//   - srwm.spawn(cmd)      — run a shell command in the background,
-//     then trigger a bar refresh on completion.
-//   - srwm.spawn_once(cmd) — like spawn, but only runs once per WM
-//     lifetime (survives soft restarts). Does not trigger bar refresh.
-//   - srwm.restart()       — signal the WM to soft-restart (reload config).
-//   - srwm.quit()          — signal the WM to exit cleanly.
+//   - srwm.spawn(cmd)        — run a shell command in the background
+//   - srwm.spawn_once(cmd)   — like spawn, but only runs once per WM lifetime
+//   - srwm.restart()         — signal the WM to soft-restart (reload config)
+//   - srwm.quit()            — signal the WM to exit cleanly
+//   - srwm.env(key [, value]) — get or set an environment variable
+
 func RegisterAPI(L *lua.LState, srwmMod *lua.LTable) {
 	L.SetField(srwmMod, "spawn", L.NewFunction(luaSpawn))
 	L.SetField(srwmMod, "spawn_once", L.NewFunction(luaSpawnOnce))
 	L.SetField(srwmMod, "restart", L.NewFunction(luaRestart))
 	L.SetField(srwmMod, "quit", L.NewFunction(luaQuit))
+	L.SetField(srwmMod, "env", L.NewFunction(luaEnv))
 }
 
 // luaSpawnOnce runs a shell command asynchronously, only if it hasn't
@@ -112,4 +114,29 @@ func luaRestart(L *lua.LState) int {
 func luaQuit(L *lua.LState) int {
 	core.Quit()
 	return 0
+}
+
+// luaEnv gets or sets an environment variable.
+//
+// Lua signature:
+//
+//	srwm.env("KEY", "VALUE")  — set an environment variable
+//	srwm.env("KEY")           — get an environment variable (returns value or nil)
+func luaEnv(L *lua.LState) int {
+	key := L.CheckString(1)
+	if L.GetTop() >= 2 {
+		value := L.CheckString(2)
+		if err := os.Setenv(key, value); err != nil {
+			L.RaiseError("srwm.env: failed to set %s: %v", key, err)
+		}
+		return 0
+	}
+	// Getter: return current value or nil
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		L.Push(lua.LNil)
+	} else {
+		L.Push(lua.LString(value))
+	}
+	return 1
 }
