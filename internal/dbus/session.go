@@ -49,7 +49,9 @@ func Start() (*Session, error) {
 
 	select {
 	case addr := <-addrCh:
-		os.Setenv("DBUS_SESSION_BUS_ADDRESS", addr)
+		if err := os.Setenv("DBUS_SESSION_BUS_ADDRESS", addr); err != nil {
+			log.Printf("dbus: failed to set DBUS_SESSION_BUS_ADDRESS: %v", err)
+		}
 		log.Printf("D-Bus session bus started: %s", addr)
 		return &Session{cmd: cmd, address: addr}, nil
 	case <-time.After(5 * time.Second):
