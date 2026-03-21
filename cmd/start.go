@@ -10,6 +10,7 @@ import (
 	"github.com/infraflakes/srwm/internal/config"
 	"github.com/infraflakes/srwm/internal/control"
 	"github.com/infraflakes/srwm/internal/core"
+	"github.com/infraflakes/srwm/internal/dbus"
 	"github.com/infraflakes/srwm/internal/ipc"
 	"github.com/infraflakes/srwm/internal/xserver"
 	"github.com/spf13/cobra"
@@ -40,6 +41,14 @@ start an Xorg server. Otherwise, it connects to the existing X display.`,
 				os.Exit(0)
 			}()
 		}
+		// Start D-Bus session bus if not already running
+		dbusSession, err := dbus.Start()
+		if err != nil {
+			log.Printf("warning: %v", err)
+		}
+		if dbusSession != nil {
+			defer dbusSession.Stop()
+		}
 
 		runWM(socketPath)
 	},
@@ -61,6 +70,17 @@ func runWM(socketPath string) {
 			log.Printf("IPC server error: %v", err)
 		}
 	}()
+
+	// Set XDG session environment so apps can detect the WM
+	if os.Getenv("XDG_CURRENT_DESKTOP") == "" {
+		os.Setenv("XDG_CURRENT_DESKTOP", "srwm")
+	}
+	if os.Getenv("XDG_SESSION_TYPE") == "" {
+		os.Setenv("XDG_SESSION_TYPE", "x11")
+	}
+	if os.Getenv("XDG_SESSION_DESKTOP") == "" {
+		os.Setenv("XDG_SESSION_DESKTOP", "srwm")
+	}
 
 	for {
 		if err := core.InitDisplay(); err != nil {
