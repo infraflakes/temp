@@ -38,6 +38,9 @@ var defaultBarScript []byte
 //go:embed lua/startup.lua
 var defaultStartupScript []byte
 
+//go:embed lua/env.lua
+var defaultEnvScript []byte
+
 // defaultLuaModules maps filenames to their embedded contents.
 var defaultLuaModules = map[string][]byte{
 	"general.lua":     defaultGeneralScript,
@@ -46,6 +49,7 @@ var defaultLuaModules = map[string][]byte{
 	"theming.lua":     defaultThemingScript,
 	"bar.lua":         defaultBarScript,
 	"startup.lua":     defaultStartupScript,
+	"env.lua":         defaultEnvScript,
 }
 
 //go:embed widgets/battery.sh

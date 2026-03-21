@@ -73,13 +73,13 @@ func runWM(socketPath string) {
 
 	// Set XDG session environment so apps can detect the WM
 	if os.Getenv("XDG_CURRENT_DESKTOP") == "" {
-		os.Setenv("XDG_CURRENT_DESKTOP", "srwm")
+		_ = os.Setenv("XDG_CURRENT_DESKTOP", "srwm")
 	}
 	if os.Getenv("XDG_SESSION_TYPE") == "" {
-		os.Setenv("XDG_SESSION_TYPE", "x11")
+		_ = os.Setenv("XDG_SESSION_TYPE", "x11")
 	}
 	if os.Getenv("XDG_SESSION_DESKTOP") == "" {
-		os.Setenv("XDG_SESSION_DESKTOP", "srwm")
+		_ = os.Setenv("XDG_SESSION_DESKTOP", "srwm")
 	}
 
 	for {
