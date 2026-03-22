@@ -13,7 +13,9 @@ int compositor_running(void) {
 }
 
 void publish_canvas_state(Monitor *m) {
-    int32_t zoom_fp = (int32_t)(m->canvas_zoom * 10000.0f);
+    int tagidx = getcurrenttag(m);
+    
+    int32_t zoom_fp = (int32_t)(m->canvas[tagidx].zoom * 10000.0f);
     XChangeProperty(dpy, root, netatom[SrwmCanvasZoom],
         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&zoom_fp, 1);
     
