@@ -12,7 +12,7 @@ int compositor_running(void) {
     return (owner != None);
 }
 
-static void publish_canvas_state(Monitor *m) {
+void publish_canvas_state(Monitor *m) {
     int tagidx = getcurrenttag(m);
     
     int32_t zoom_fp = (int32_t)(m->canvas[tagidx].zoom * 10000.0f);
