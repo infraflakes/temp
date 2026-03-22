@@ -4,7 +4,7 @@
 #define CANVAS_ZOOM_MIN  0.2f  
 #define CANVAS_ZOOM_MAX  5.0f  
 
-static int compositor_running(void) {
+int compositor_running(void) {
     char atom_name[32];
     snprintf(atom_name, sizeof(atom_name), "_NET_WM_CM_S%d", DefaultScreen(dpy));
     Atom cm_atom = XInternAtom(dpy, atom_name, False);
