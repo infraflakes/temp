@@ -201,6 +201,7 @@ void setup(void) {
   XSelectInput(dpy, root, wa.event_mask);
   grabkeys();
   focus(NULL);
+  publish_canvas_state(selmon);
 }
 
 void run(void) {
