@@ -38,6 +38,8 @@ If you use the default bar's widgets config, the bar's widgets depend on some de
 - xset
 - bc
 
+srwm by default only shrinks or expand windows to mimick zoom because it requires a compositor, for true zooming visuals you can install [srcom](https://github.com/infraflakes/srcom/releases/) and use as compositor.
+
 ### Building from scratch
 
 Current the project only supports building with flakes (fully statically linked).
