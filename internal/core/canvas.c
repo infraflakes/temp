@@ -91,8 +91,20 @@ void homecanvas(const Arg *arg) {
     float old_zoom = selmon->canvas[tagidx].zoom;  
     if (old_zoom != 1.0f) {  
         if (compositor_running()) {
-            selmon->canvas[tagidx].zoom = 1.0f;  
-            publish_canvas_state(selmon);  
+            float scale = 1.0f / old_zoom;
+            int scx = selmon->wx + selmon->ww / 2;
+            int scy = selmon->wy + selmon->wh / 2;
+            for (c = selmon->clients; c; c = c->next) {
+                if (ISVISIBLE(c)) {
+                    int new_x = scx + (int)((c->x - scx) * scale);
+                    int new_y = scy + (int)((c->y - scy) * scale);
+                    c->x = new_x;
+                    c->y = new_y;
+                    XMoveWindow(dpy, c->win, c->x, c->y);
+                }
+            }
+            selmon->canvas[tagidx].zoom = 1.0f;
+            publish_canvas_state(selmon);
         } else {
             float scale = 1.0f / old_zoom;  
             int scx = selmon->wx + selmon->ww / 2;  
@@ -221,8 +233,25 @@ void zoomcanvas(const Arg *arg) {
         return;  
    
     if (compositor_running()) {
-        selmon->canvas[tagidx].zoom = new_zoom;  
-        publish_canvas_state(selmon);  
+        float scale = new_zoom / old_zoom;
+        int cx = selmon->wx + selmon->ww / 2;
+        int cy = selmon->wy + selmon->wh / 2;
+
+        Client *c;
+        for (c = selmon->clients; c; c = c->next) {
+            if (ISVISIBLE(c)) {
+                int new_x = cx + (int)((c->x - cx) * scale);
+                int new_y = cy + (int)((c->y - cy) * scale);
+                c->x = new_x;
+                c->y = new_y;
+                XMoveWindow(dpy, c->win, c->x, c->y);
+            }
+        }
+
+        selmon->canvas[tagidx].cx = (int)(selmon->canvas[tagidx].cx * scale);
+        selmon->canvas[tagidx].cy = (int)(selmon->canvas[tagidx].cy * scale);
+        selmon->canvas[tagidx].zoom = new_zoom;
+        publish_canvas_state(selmon);
     } else {
         float scale = new_zoom / old_zoom;  
         int cx = selmon->wx + selmon->ww / 2;  
