@@ -329,17 +329,18 @@ void maprequest(XEvent* e) {
 }
 
 void motionnotify(XEvent* e) {
-  static Monitor* mon = NULL;
-  Monitor* m;
-  XMotionEvent* ev = &e->xmotion;
-
-  if (ev->window != root) return;
-  if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
-    unfocus(selmon->sel, 1);
-    selmon = m;
-    focus(NULL);
-  }
-  mon = m;
+    static Monitor* mon = NULL;
+    Monitor* m;
+    XMotionEvent* ev = &e->xmotion;
+    if (ev->window != root) return;
+    if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
+        unfocus(selmon->sel, 1);
+        selmon = m;
+        focus(NULL);
+    }
+    mon = m;
+    // Edge auto-pan when zoomed out (general cursor movement)
+    canvas_edge_autopan(ev->x_root, ev->y_root, NULL, NULL, NULL);
 }
 
 void propertynotify(XEvent* e) {

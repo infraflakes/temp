@@ -259,3 +259,54 @@ void zoomcanvas(const Arg *arg) {
    
     drawbar(selmon);  
 }
+
+// Returns 1 if panning occurred, 0 otherwise.  
+// `exclude` is an optional client to skip when moving windows (e.g., the window being dragged).  
+// `pan_dx_out` and `pan_dy_out` return the pan delta applied (for callers that need to adjust drag references).  
+int canvas_edge_autopan(int cursor_x, int cursor_y, Client *exclude, int *pan_dx_out, int *pan_dy_out) {  
+    if (!selmon->canvas_mode)  
+        return 0;  
+      
+    int tagidx = getcurrenttag(selmon);  
+    float zoom = selmon->canvas[tagidx].zoom;  
+    if (zoom >= 1.0f)  
+        return 0;  
+      
+    int edge_margin = 2;   // pixels from edge to trigger pan  
+    int base_pan_speed = 15; // base pixels per frame  
+    // Scale pan speed inversely with zoom so it feels consistent  
+    int pan_speed = (int)(base_pan_speed / zoom);  
+      
+    int pan_dx = 0, pan_dy = 0;  
+      
+    if (cursor_x <= selmon->mx + edge_margin)  
+        pan_dx = -pan_speed;  
+    else if (cursor_x >= selmon->mx + selmon->mw - edge_margin - 1)  
+        pan_dx = pan_speed;  
+    if (cursor_y <= selmon->my + edge_margin)  
+        pan_dy = -pan_speed;  
+    else if (cursor_y >= selmon->my + selmon->mh - edge_margin - 1)  
+        pan_dy = pan_speed;  
+      
+    if (!pan_dx && !pan_dy)  
+        return 0;  
+      
+    // Move all visible clients except the excluded one  
+    Client *c;  
+    for (c = selmon->clients; c; c = c->next) {  
+        if (ISVISIBLE(c) && c != exclude) {  
+            c->x -= pan_dx;  
+            c->y -= pan_dy;  
+            XMoveWindow(dpy, c->win, c->x, c->y);  
+        }  
+    }  
+      
+    // Update canvas offset  
+    selmon->canvas[tagidx].cx -= pan_dx;  
+    selmon->canvas[tagidx].cy -= pan_dy;  
+      
+    if (pan_dx_out) *pan_dx_out = pan_dx;  
+    if (pan_dy_out) *pan_dy_out = pan_dy;  
+      
+    return 1;  
+}
