@@ -1,4 +1,5 @@
 #include "wm.h"
+#include <sys/select.h>
 
 int screen;  
 int sw, sh;  
@@ -206,10 +207,39 @@ void setup(void) {
 
 void run(void) {
   XEvent ev;
-  /* main event loop */
+  int x11_fd = ConnectionNumber(dpy);
   XSync(dpy, False);
-  while (running && !XNextEvent(dpy, &ev))
-    if (handler[ev.type]) handler[ev.type](&ev); /* call handler */
+  while (running) {
+    // Check if we need continuous auto-pan
+    int need_autopan = selmon && selmon->canvas_mode &&
+                       selmon->canvas[getcurrenttag(selmon)].zoom < 1.0f;
+
+    if (need_autopan && !XPending(dpy)) {
+      fd_set fds;
+      FD_ZERO(&fds);
+      FD_SET(x11_fd, &fds);
+      struct timeval tv = { .tv_sec = 0, .tv_usec = 16000 }; // 16ms = ~60fps
+      int ret = select(x11_fd + 1, &fds, NULL, NULL, &tv);
+
+      if (ret == 0) {
+        // Timeout — check if cursor is at edge and auto-pan
+        int cx, cy;
+        Window dummy_w;
+        int di;
+        unsigned int dui;
+        if (XQueryPointer(dpy, root, &dummy_w, &dummy_w, &cx, &cy, &di, &di, &dui)) {
+          canvas_edge_autopan(cx, cy, NULL, NULL, NULL);
+        }
+        continue;
+      }
+      // If ret > 0, fall through to process the X event
+    }
+
+    if (XNextEvent(dpy, &ev))
+      break;
+    if (handler[ev.type])
+      handler[ev.type](&ev);
+  }
 }
 
 void scan(void) {
