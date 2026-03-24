@@ -36,8 +36,19 @@ void movemouse(const Arg* arg) {
         if ((ev.xmotion.time - lasttime) <= (1000 / 120)) continue;
         lasttime = ev.xmotion.time;
 
+        // --- Edge auto-pan when zoomed out in canvas mode ---  
+        {
+            int pan_dx = 0, pan_dy = 0;
+            if (canvas_edge_autopan(ev.xmotion.x_root, ev.xmotion.y_root, c, &pan_dx, &pan_dy)) {
+            // Shift drag reference so the dragged window moves with canvas
+                ocx -= pan_dx;
+                ocy -= pan_dy;
+            }
+        }
+
         nx = ocx + (ev.xmotion.x - x);
         ny = ocy + (ev.xmotion.y - y);
+
         if (abs(selmon->wx - nx) < px_till_snapping_to_screen_edge)
           nx = selmon->wx;
         else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < px_till_snapping_to_screen_edge)
@@ -216,8 +227,18 @@ void resizemouse(const Arg* arg) {
         if ((ev.xmotion.time - lasttime) <= (1000 / 60)) continue;
         lasttime = ev.xmotion.time;
 
+        // --- Edge auto-pan when zoomed out ---
+        {
+            int pan_dx = 0, pan_dy = 0;
+            if (canvas_edge_autopan(ev.xmotion.x_root, ev.xmotion.y_root, c, &pan_dx, &pan_dy)) {
+                ocx -= pan_dx;
+                ocy -= pan_dy;
+            }
+        }
+
         nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
         nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
+
         if (c->mon->wx + nw >= selmon->wx &&
             c->mon->wx + nw <= selmon->wx + selmon->ww &&
             c->mon->wy + nh >= selmon->wy &&
