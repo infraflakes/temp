@@ -154,7 +154,6 @@ typedef struct Monitor Monitor;
 typedef struct {
   int cx, cy;             /* current canvas offset */
   int saved_cx, saved_cy; /* saved offset for layout transitions */
-  float zoom;             /* current zoom level, 1.0 = default */
 } CanvasOffset;
 typedef struct Client Client;
 struct Client {
@@ -239,6 +238,7 @@ struct Monitor {
   unsigned int occ, urg;
   int canvas_mode;      /* 1 = infinite canvas active, 0 = normal tiling */
   CanvasOffset *canvas; /* per-tag canvas offsets, allocated in createmon() */
+  float canvas_zoom;      /* global zoom level, shared across all tags */
   int showbar;
   int topbar, toptab;
   Client *clients;

@@ -98,8 +98,9 @@ Monitor* createmon(void) {
   m->showbar_mask = showbar ? ~0u : 0u;
   m->canvas_mode = layout_mode;
   m->canvas = ecalloc(9, sizeof(CanvasOffset)); /* one per tag, max 9 */
+  m->canvas_zoom = 1.0f;
   for (int i = 0; i < 9; i++) {
-    m->canvas[i].zoom = 1.0f;
+    m->canvas_zoom = 1.0f;
   }
 
   return m;
@@ -214,7 +215,7 @@ void run(void) {
   while (running) {
     // Check if we need continuous auto-pan
     int need_autopan = selmon && selmon->canvas_mode &&
-                       selmon->canvas[getcurrenttag(selmon)].zoom < 1.0f;
+                       selmon->canvas_zoom < 1.0f;
 
     if (need_autopan && !XPending(dpy)) {
       fd_set fds;

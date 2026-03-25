@@ -29,7 +29,7 @@ void movemouse(const Arg* arg) {
   int got_release = 0;
   while (!got_release) {
     int need_autopan = selmon->canvas_mode &&
-                       selmon->canvas[getcurrenttag(selmon)].zoom < 1.0f;
+                       selmon->canvas_zoom < 1.0f;
 
     if (need_autopan) {
         // Non-blocking check for matching events
@@ -240,7 +240,7 @@ void resizemouse(const Arg* arg) {
   int got_release = 0;
   while (!got_release) {
     int need_autopan = selmon->canvas_mode &&
-                       selmon->canvas[getcurrenttag(selmon)].zoom < 1.0f;
+                       selmon->canvas_zoom < 1.0f;
 
     if (need_autopan) {
         if (!XCheckMaskEvent(dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev)) {

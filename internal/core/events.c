@@ -352,7 +352,7 @@ void motionnotify(XEvent *e) {
 
   // Edge auto-pan should work regardless of which window the cursor is over
   if (selmon && selmon->canvas_mode &&
-      selmon->canvas[getcurrenttag(selmon)].zoom < 1.0f) {
+      selmon->canvas_zoom < 1.0f) {
     canvas_edge_autopan(ev->x_root, ev->y_root, NULL, NULL, NULL);
   }
 

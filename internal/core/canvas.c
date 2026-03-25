@@ -13,9 +13,7 @@ int compositor_running(void) {
 }
 
 void publish_canvas_state(Monitor *m) {
-    int tagidx = getcurrenttag(m);
-    
-    int32_t zoom_fp = (int32_t)(m->canvas[tagidx].zoom * 10000.0f);
+    int32_t zoom_fp = (int32_t)(m->canvas_zoom * 10000.0f);
     XChangeProperty(dpy, root, netatom[SrwmCanvasZoom],
         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&zoom_fp, 1);
     
@@ -88,7 +86,7 @@ void homecanvas(const Arg *arg) {
     selmon->canvas[tagidx].cx = 0;  
     selmon->canvas[tagidx].cy = 0;  
     /* Reset zoom to 1.0 */  
-    float old_zoom = selmon->canvas[tagidx].zoom;  
+    float old_zoom = selmon->canvas_zoom;  
     if (old_zoom != 1.0f) {  
         if (compositor_running()) {
             float scale = 1.0f / old_zoom;
@@ -103,7 +101,7 @@ void homecanvas(const Arg *arg) {
                     XMoveWindow(dpy, c->win, c->x, c->y);
                 }
             }
-            selmon->canvas[tagidx].zoom = 1.0f;
+            selmon->canvas_zoom = 1.0f;
             publish_canvas_state(selmon);
         } else {
             float scale = 1.0f / old_zoom;  
@@ -118,7 +116,7 @@ void homecanvas(const Arg *arg) {
                     resizeclient(c, new_x, new_y, new_w, new_h);  
                 }  
             }  
-            selmon->canvas[tagidx].zoom = 1.0f;  
+            selmon->canvas_zoom = 1.0f;  
         }
     }
     drawbar(selmon);  
@@ -187,7 +185,7 @@ void manuallymovecanvas(const Arg *arg) {
                 continue;  
             lasttime = ev.xmotion.time;  
   
-            float zoom = selmon->canvas[tagidx].zoom;
+            float zoom = selmon->canvas_zoom;
             float speed = 3.0f;  // base multiplier
             int nx = (int)((ev.xmotion.x - start_x) * speed / zoom);
             int ny = (int)((ev.xmotion.y - start_y) * speed / zoom);
@@ -218,7 +216,7 @@ void zoomcanvas(const Arg *arg) {
         return;  
    
     int tagidx = getcurrenttag(selmon);  
-    float old_zoom = selmon->canvas[tagidx].zoom;  
+    float old_zoom = selmon->canvas_zoom;  
     float new_zoom;  
    
     if (arg->i > 0)  
@@ -233,7 +231,7 @@ void zoomcanvas(const Arg *arg) {
         return;  
    
     if (compositor_running()) {
-        selmon->canvas[tagidx].zoom = new_zoom;
+        selmon->canvas_zoom = new_zoom;
         publish_canvas_state(selmon);
     } else {
         float scale = new_zoom / old_zoom;  
@@ -254,7 +252,7 @@ void zoomcanvas(const Arg *arg) {
    
         selmon->canvas[tagidx].cx = (int)(selmon->canvas[tagidx].cx * scale);  
         selmon->canvas[tagidx].cy = (int)(selmon->canvas[tagidx].cy * scale);  
-        selmon->canvas[tagidx].zoom = new_zoom;  
+        selmon->canvas_zoom = new_zoom;  
     }
    
     drawbar(selmon);  
@@ -268,7 +266,7 @@ int canvas_edge_autopan(int cursor_x, int cursor_y, Client *exclude, int *pan_dx
         return 0;  
       
     int tagidx = getcurrenttag(selmon);  
-    float zoom = selmon->canvas[tagidx].zoom;  
+    float zoom = selmon->canvas_zoom;  
     if (zoom >= 1.0f)  
         return 0;  
       

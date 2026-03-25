@@ -26,6 +26,7 @@ void view(const Arg* arg) {
     togglebar(NULL);
   focus(NULL);
   arrange(selmon);
+  publish_canvas_state(selmon);  // sync zoom/active state with compositor
   updatecurrentdesktop();
 }
 
@@ -51,6 +52,7 @@ void toggleview(const Arg* arg) {
 
     focus(NULL);
     arrange(selmon);
+    publish_canvas_state(selmon);
   }
   updatecurrentdesktop();
 }
