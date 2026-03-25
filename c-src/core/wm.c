@@ -91,16 +91,16 @@ void detach(Client* c) {
 
 
 void focus(Client* c) {
-  if (!c || !ISVISIBLE(c) || !c->ismapped)
-    for (c = selmon->clients; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
+  if (!c || !ISVISIBLE(c) || HIDDEN(c))
+    for (c = selmon->clients; c && (!ISVISIBLE(c) || HIDDEN(c)); c = c->next);
   if (selmon->sel && selmon->sel != c) unfocus(selmon->sel, 0);
-   if (c) {
-     if (c->mon != selmon) selmon = c->mon;
-     if (c->isurgent) seturgent(c, 0);
-     grabbuttons(c, 1);
-     XSetWindowBorder(dpy, c->win, border_active.pixel);
-     setfocus(c);
-   } else {
+  if (c) {
+    if (c->mon != selmon) selmon = c->mon;
+    if (c->isurgent) seturgent(c, 0);
+    grabbuttons(c, 1);
+    XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
+    setfocus(c);
+  } else {
     XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
     XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
   }
@@ -324,8 +324,6 @@ void manage(Window w, XWindowAttributes* wa) {
   }
   XRaiseWindow(dpy, c->win);
   attach(c);
-  if (ISVISIBLE(c) && c->mon->ntabs < MAXTABS)
-    c->mon->tab_order[c->mon->ntabs++] = c;
   XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32,
                   PropModeAppend, (unsigned char*)&(c->win), 1);
   XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w,
@@ -418,10 +416,7 @@ void sendmon(Client* c, Monitor* m) {
   c->mon = m;
   c->ws = m->current_ws;
   attach(c);
-  /* Add to dest tab_order */
-  if (ISVISIBLE(c) && m->ntabs < MAXTABS)
-    m->tab_order[m->ntabs++] = c;
-  setclientwsprop(c);
+  setclienttagprop(c);
   focus(NULL);
   arrange(NULL);
 }
@@ -503,7 +498,8 @@ void window_map(Client *c, int deiconify) {
   if (deiconify)  
     window_set_state(c->win, NormalState);
   XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);  
-  XMapWindow(dpy, c->win);
+  XSetInputFocus(dpy, win, RevertToPointerRoot, CurrentTime);
+  XMapWindow(dpy, win);
 }  
   
 void window_unmap(Window win, int iconify) {  
@@ -524,19 +520,10 @@ void unmanage(Client* c, int destroyed) {
   Monitor* m = c->mon;
   XWindowChanges wc;
 
-  /* Remove from tab_order */
-  for (int i = 0; i < m->ntabs; i++) {
-    if (m->tab_order[i] == c) {
-      memmove(&m->tab_order[i], &m->tab_order[i+1], (m->ntabs - i - 1) * sizeof(Client*));
-      m->ntabs--;
-      break;
-    }
-  }
-
   /* If this was the selected client, find next visible one */
   if (c == m->sel) {
     Client *t;
-    for (t = m->clients; t && (!ISVISIBLE(t) || !t->ismapped || t == c); t = t->next);
+    for (t = m->clients; t && (!ISVISIBLE(t) || HIDDEN(t) || t == c); t = t->next);
     m->sel = t;
   }
 
