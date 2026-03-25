@@ -451,8 +451,7 @@ void manage(Window w, XWindowAttributes* wa) {
     c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;  
 
     /* Scale new window to match current zoom level */
-    int tagidx = getcurrenttag(c->mon);
-    float zoom = c->mon->canvas[tagidx].zoom;
+    float zoom = c->mon->canvas_zoom;
     if (zoom != 1.0f && !compositor_running()) {
         int cx = c->mon->wx + c->mon->ww / 2;
         int cy = c->mon->wy + c->mon->wh / 2;
