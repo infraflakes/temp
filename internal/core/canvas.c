@@ -24,7 +24,7 @@ void publish_canvas_state(Monitor *m) {
     XChangeProperty(dpy, root, netatom[SrwmCanvasCenterY],
         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&cy, 1);
     
-    int32_t active = m->canvas_mode ? 1 : 0;
+    int32_t active = 1;
     XChangeProperty(dpy, root, netatom[SrwmCanvasActive],
         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&active, 1);
     
@@ -38,9 +38,6 @@ int getcurrenttag(Monitor *m) {
 }  
   
 void movecanvas(const Arg *arg) {  
-    if (!selmon->canvas_mode)  
-        return;  
-  
     int tagidx = getcurrenttag(selmon);  
     int dx = 0, dy = 0;  
     int step = 120; /* MOVE_CANVAS_STEP */  
@@ -65,12 +62,9 @@ void movecanvas(const Arg *arg) {
     }  
     drawbar(selmon);  
 }  
-  
+ 
 void homecanvas(const Arg *arg) {  
-    if (!selmon->canvas_mode)  
-        return;  
-   
-    int tagidx = getcurrenttag(selmon);  
+   int tagidx = getcurrenttag(selmon);
     int cx = selmon->canvas[tagidx].cx;  
     int cy = selmon->canvas[tagidx].cy;  
    
@@ -125,7 +119,7 @@ void homecanvas(const Arg *arg) {
   
 void centerwindowoncanvas(const Arg *arg) {  
     Client *c = selmon->sel;  
-    if (!c || !selmon->canvas_mode)  
+    if (!c)  
         return;  
   
     Monitor *m = c->mon;  
@@ -155,12 +149,9 @@ void centerwindowoncanvas(const Arg *arg) {
     m->canvas[tagidx].cy += dy;  
     drawbar(m);  
 }  
-  
+ 
 void manuallymovecanvas(const Arg *arg) {  
-    if (!selmon->canvas_mode)  
-        return;  
-  
-    int start_x, start_y;  
+    int start_x, start_y;
     Window dummy;  
     int di;  
     unsigned int dui;  
@@ -209,13 +200,10 @@ void manuallymovecanvas(const Arg *arg) {
     } while (ev.type != ButtonRelease);
 
     XUngrabPointer(dpy, CurrentTime);
-}
+}  
  
 void zoomcanvas(const Arg *arg) {  
-    if (!selmon->canvas_mode)  
-        return;  
-   
-    int tagidx = getcurrenttag(selmon);  
+   int tagidx = getcurrenttag(selmon);
     float old_zoom = selmon->canvas_zoom;  
     float new_zoom;  
    
@@ -262,9 +250,6 @@ void zoomcanvas(const Arg *arg) {
 // `exclude` is an optional client to skip when moving windows (e.g., the window being dragged).  
 // `pan_dx_out` and `pan_dy_out` return the pan delta applied (for callers that need to adjust drag references).  
 int canvas_edge_autopan(int cursor_x, int cursor_y, Client *exclude, int *pan_dx_out, int *pan_dy_out) {  
-    if (!selmon->canvas_mode)  
-        return 0;  
-      
     int tagidx = getcurrenttag(selmon);  
     float zoom = selmon->canvas_zoom;  
     if (zoom >= 1.0f)  

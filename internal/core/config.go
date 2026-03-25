@@ -6,14 +6,6 @@ package core
 */
 import "C"
 
-func GetLayoutMode() int {
-	return int(C.srwm_get_layout_mode())
-}
-
-func SetLayoutMode(v int) {
-	C.srwm_set_layout_mode(C.int(v))
-}
-
 func GetBorderPx() uint {
 	return uint(C.srwm_get_borderpx())
 }

@@ -110,13 +110,8 @@ void toggletag(const Arg* arg) {
 }
 
 void togglefloating(const Arg* arg) {
-  if (!selmon->sel) return;
-  if (selmon->sel->isfullscreen) return;
-  if (selmon->canvas_mode) return;  /* all windows are floating in canvas mode */
-  selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
-  if (selmon->sel->isfloating)
-    resize(selmon->sel, selmon->sel->x, selmon->sel->y, selmon->sel->w, selmon->sel->h, 0);
-  arrange(selmon);
+  /* No-op in canvas mode — all windows are always floating */
+  return;
 }
 
 void togglefullscr(const Arg* arg) {
