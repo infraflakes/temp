@@ -44,8 +44,6 @@ void srwm_clear_mousebindings(void);
 extern void srwm_handle_mouse(int id);
 
 /* Config getters and setters */
-int srwm_get_layout_mode(void);  
-void srwm_set_layout_mode(int);
 unsigned int srwm_get_borderpx(void);
 void srwm_set_borderpx(unsigned int);
 unsigned int srwm_get_gaps(void);

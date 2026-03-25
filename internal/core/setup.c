@@ -96,7 +96,7 @@ Monitor* createmon(void) {
   m->prev = NULL;
   m->curtag = m->prevtag = 1;
   m->showbar_mask = showbar ? ~0u : 0u;
-  m->canvas_mode = layout_mode;
+  m->canvas_mode = 1;
   m->canvas = ecalloc(9, sizeof(CanvasOffset)); /* one per tag, max 9 */
   m->canvas_zoom = 1.0f;
   for (int i = 0; i < 9; i++) {
@@ -526,7 +526,6 @@ int toptab = 1;
 int topbar = 1;
 int colorfultag = 1;
 int tag_colorful_occupied_only = 1;
-int layout_mode = 0;  /* 0 = monocle (default), 1 = canvas */
 const char* fonts[] = {"JetBrainsMonoNerdFont:size=13"};
 const char* colors[][3] = {
     [SchemeNorm] = {gray3, black, gray2},
@@ -554,16 +553,10 @@ int tagschemes[9] = {SchemeTag1, SchemeTag2, SchemeTag3,
                      SchemeTag4, SchemeTag5, SchemeTag6,
                      SchemeTag7, SchemeTag8, SchemeTag9};
 
-const Rule rules[] = {
-    { "Toolkit",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
-    { "firefox",  NULL,       "Picture-in-Picture",   0,         1,          -1 },
-    { "Chromium", NULL,       "Picture-in-Picture",   0,         1,          -1 },
-};
-
 /* button definitions */
 const Button buttons[] = {
     {ClkRootWin, MODKEY, Button1, manuallymovecanvas, {0}},  // drag canvas on blank desktop
-    {ClkClientWin, MODKEY, Button1, moveorplace, {.i = 0}},
+    {ClkClientWin, MODKEY, Button1, movemouse, {.i = 0}},
     {ClkClientWin, MODKEY, Button2, togglefloating, {0}},
     {ClkClientWin, MODKEY, Button3, resizemouse, {0}},
     {ClkTagBar, 0, Button1, view, {0}},

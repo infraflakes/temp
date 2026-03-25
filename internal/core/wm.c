@@ -3,39 +3,6 @@
 const char broken[] = "broken";
 
 /* function implementations */
-void applyrules(Client* c) {
-  const char* class, *instance;
-  unsigned int i;
-  const Rule* r;
-  Monitor* m;
-  XClassHint ch = {NULL, NULL};
-
-  /* rule matching */
-  c->iscentered = 0;
-  c->isfloating = 0;
-  c->tags = 0;
-  XGetClassHint(dpy, c->win, &ch);
-  class = ch.res_class ? ch.res_class : broken;
-  instance = ch.res_name ? ch.res_name : broken;
-
-  for (i = 0; i < LENGTH(rules); i++) {
-    r = &rules[i];
-    if ((!r->title || strstr(c->name, r->title)) &&
-        (!r->class || strstr(class, r->class)) &&
-        (!r->instance || strstr(instance, r->instance))) {
-      c->iscentered = r->iscentered;
-      c->isfloating = r->isfloating;
-      c->tags |= r->tags;
-      for (m = mons; m && m->num != r->monitor; m = m->next);
-      if (m) c->mon = m;
-    }
-  }
-  if (ch.res_class) XFree(ch.res_class);
-  if (ch.res_name) XFree(ch.res_name);
-  c->tags =
-      c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
-}
-
 int applysizehints(Client* c, int* x, int* y, int* w, int* h, int interact) {
   int baseismin;
   Monitor* m = c->mon;
@@ -100,9 +67,6 @@ void arrange(Monitor* m) {
 }
 
 void arrangemon(Monitor* m) {  
-  Client* c;
-  int newx, newy, neww, newh;
-
   updatebarpos(m);
   updatesystray();
 
@@ -120,21 +84,6 @@ void arrangemon(Monitor* m) {
   }
   XMoveResizeWindow(dpy, m->tabwin, m->wx + m->gap, m->ty,
                     m->ww - 2 * m->gap, th);
-  }
-
-  /* Skip tiling in canvas mode — all windows are floating */  
-  if (m->canvas_mode) return;
-
-  /* Arrange all tiled windows in fullscreen style */
-  for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
-    newx = m->wx + m->gap - c->bw;
-    newy = m->wy + m->gap - c->bw;
-    neww = m->ww - 2 * (m->gap + c->bw);
-    newh = m->wh - 2 * (m->gap + c->bw);
-    applysizehints(c, &newx, &newy, &neww, &newh, 0);
-    if (neww < m->ww) newx = m->wx + (m->ww - (neww + 2 * c->bw)) / 2;
-    if (newh < m->wh) newy = m->wy + (m->wh - (newh + 2 * c->bw)) / 2;
-    resize(c, newx, newy, neww, newh, 0);
   }
 }
 
@@ -392,7 +341,7 @@ void manage(Window w, XWindowAttributes* wa) {
     c->tags = t->tags;
   } else {
     c->mon = selmon;
-    applyrules(c);
+    c->tags = c->mon->tagset[c->mon->seltags];
   }
 
   if (c->x + WIDTH(c) > c->mon->wx + c->mon->ww)
@@ -431,36 +380,27 @@ void manage(Window w, XWindowAttributes* wa) {
   }
   setclienttagprop(c);
 
-  if (c->iscentered) {
-    c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
-    c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
-  }
   XSelectInput(dpy, w,
                EnterWindowMask | FocusChangeMask | PropertyChangeMask |
                    StructureNotifyMask);
   grabbuttons(c, 0);
-  if (!c->isfloating) c->isfloating = c->oldstate = trans != None || c->isfixed;
-  /* In canvas mode, all new windows are floating */  
-  if (c->mon->canvas_mode && !c->isfloating) {  
-     c->isfloating = 1;  
-  }
-  if (c->mon->canvas_mode) {  
-    /* Center new window on current viewport so it appears where the user is looking,  
-       not at the absolute origin which may be far off-screen after panning */  
-    c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;  
-    c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;  
+  c->isfloating = 1;
 
-    /* Scale new window to match current zoom level */
-    float zoom = c->mon->canvas_zoom;
-    if (zoom != 1.0f && !compositor_running()) {
-        int cx = c->mon->wx + c->mon->ww / 2;
-        int cy = c->mon->wy + c->mon->wh / 2;
-        c->w = MAX(1, (int)(c->w * zoom));
-        c->h = MAX(1, (int)(c->h * zoom));
-        /* Re-center with new size */
-        c->x = cx - (c->w + 2 * c->bw) / 2;
-        c->y = cy - (c->h + 2 * c->bw) / 2;
-    }
+  /* Center new window on current viewport so it appears where the user is looking,
+     not at the absolute origin which may be far off-screen after panning */
+  c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;
+  c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
+
+  /* Scale new window to match current zoom level */
+  float zoom = c->mon->canvas_zoom;
+  if (zoom != 1.0f && !compositor_running()) {
+      int cx = c->mon->wx + c->mon->ww / 2;
+      int cy = c->mon->wy + c->mon->wh / 2;
+      c->w = MAX(1, (int)(c->w * zoom));
+      c->h = MAX(1, (int)(c->h * zoom));
+      /* Re-center with new size */
+      c->x = cx - (c->w + 2 * c->bw) / 2;
+      c->y = cy - (c->h + 2 * c->bw) / 2;
   }
   if (c->isfloating) XRaiseWindow(dpy, c->win);
   attach(c);
@@ -480,23 +420,22 @@ void manage(Window w, XWindowAttributes* wa) {
 
 void movestack(const Arg *arg) {
 	Client *c = NULL, *p = NULL, *pc = NULL, *i;
-	int skip_float = !selmon->canvas_mode;
 
 	if(arg->i > 0) {
 		/* find the client after selmon->sel */
-		for(c = selmon->sel->next; c && (!ISVISIBLE(c) || (skip_float && c->isfloating)); c = c->next);
+		for(c = selmon->sel->next; c && (!ISVISIBLE(c)); c = c->next);
 		if(!c)
-			for(c = selmon->clients; c && (!ISVISIBLE(c) || (skip_float && c->isfloating)); c = c->next);
+			for(c = selmon->clients; c && (!ISVISIBLE(c)); c = c->next);
 
 	}
 	else {
 		/* find the client before selmon->sel */
 		for(i = selmon->clients; i != selmon->sel; i = i->next)
-			if(ISVISIBLE(i) && !(skip_float && i->isfloating))
+			if(ISVISIBLE(i))
 				c = i;
 		if(!c)
 			for(; i; i = i->next)
-				if(ISVISIBLE(i) && !(skip_float && i->isfloating))
+				if(ISVISIBLE(i))
 					c = i;
 	}
 	/* find the client before selmon->sel and c */
@@ -525,24 +464,6 @@ void movestack(const Arg *arg) {
 
 		arrange(selmon);
 	}
-}
-
-Client* nexttiled(Client* c) {
-  for (; c && (c->isfloating || (!ISVISIBLE(c) || HIDDEN(c))); c = c->next);
-  return c;
-}
-
-Client* recttoclient(int x, int y, int w, int h) {
-  Client *c, *r = NULL;
-  int a, area = 0;
-
-  for (c = nexttiled(selmon->clients); c; c = nexttiled(c->next)) {
-    if ((a = INTERSECTC(x, y, w, h, c)) > area) {
-      area = a;
-      r = c;
-    }
-  }
-  return r;
 }
 
 Monitor* recttomon(int x, int y, int w, int h) {
@@ -583,7 +504,6 @@ void resizeclient(Client* c, int x, int y, int w, int h) {
 }
 
 void restack(Monitor* m) {
-  Client* c;
   XEvent ev;
   XWindowChanges wc;
 
@@ -591,20 +511,12 @@ void restack(Monitor* m) {
   drawtab(m);
   if (!m->sel) return;
   if (m->sel->isfloating) XRaiseWindow(dpy, m->sel->win);
-  wc.stack_mode = Below;
-  wc.sibling = m->barwin;
-  for (c = m->stack; c; c = c->snext)
-    if (!c->isfloating && ISVISIBLE(c)) {
-      XConfigureWindow(dpy, c->win, CWSibling | CWStackMode, &wc);
-      wc.sibling = c->win;
-    }
-  /* In canvas mode all windows are floating and can overlap the bar.  
-   Raise bar and tab windows so they stay visible on top. */  
-  if (m->canvas_mode) {  
-      XRaiseWindow(dpy, m->barwin);  
-      if (m->tabwin)  
-          XRaiseWindow(dpy, m->tabwin);  
-  }
+
+  /* Always raise bar and tab windows so they stay visible on top */
+  XRaiseWindow(dpy, m->barwin);
+  if (m->tabwin)
+      XRaiseWindow(dpy, m->tabwin);
+
   XSync(dpy, False);
   while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
@@ -840,7 +752,6 @@ void updatewindowtype(Client* c) {
 
   if (state == netatom[NetWMFullscreen]) setfullscreen(c, 1);
   if (wtype == netatom[NetWMWindowTypeDialog]) {
-    c->iscentered = 1;
     c->isfloating = 1;
   }
 }

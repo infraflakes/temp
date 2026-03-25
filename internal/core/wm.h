@@ -168,7 +168,7 @@ struct Client {
   int bw, oldbw;
   int ishidden;
   unsigned int tags;
-  int isfixed, iscentered, isfloating, isurgent, neverfocus, oldstate,
+  int isfixed, isfloating, isurgent, neverfocus, oldstate,
       isfullscreen;
   unsigned int icw, ich;
   Picture icon;
@@ -208,16 +208,6 @@ typedef struct {
 extern DynamicButton dbuttons[MAX_DYNAMIC_BUTTONS];
 extern int dbuttons_len;
 
-typedef struct {
-  const char *class;
-  const char *instance;
-  const char *title;
-  unsigned int tags;
-  int iscentered;
-  int isfloating;
-  int monitor;
-} Rule;
-
 typedef struct Systray Systray;
 struct Systray {
   Window win;
@@ -256,7 +246,6 @@ struct Monitor {
   unsigned int showbar_mask; // bit i set = showbar enabled for tag i
 };
 
-void applyrules(Client *c);
 int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 void arrange(Monitor *m);
 void arrangemon(Monitor *m);
@@ -304,11 +293,7 @@ void mappingnotify(XEvent *e);
 void maprequest(XEvent *e);
 void motionnotify(XEvent *e);
 void movemouse(const Arg *arg);
-void moveorplace(const Arg *arg);
-Client *nexttiled(Client *c);
-void placemouse(const Arg *arg);
 void propertynotify(XEvent *e);
-Client *recttoclient(int x, int y, int w, int h);
 Monitor *recttomon(int x, int y, int w, int h);
 void removesystrayicon(Client *i);
 void resize(Client *c, int x, int y, int w, int h, int interact);
@@ -444,12 +429,10 @@ extern int toptab;
 extern int topbar;
 extern int colorfultag;
 extern int tag_colorful_occupied_only;
-extern int layout_mode;
 extern char *tags[];
 extern int tagschemes[];
 extern const char *colors[18][3]; // 18 = SchemeBtnClose + 1
 extern const char *fonts[1];
-extern const Rule rules[3];
 extern const Button buttons[];
 extern const int buttons_len;
 

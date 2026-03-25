@@ -228,8 +228,6 @@ void srwm_action_toggleview(unsigned int mask) { toggleview(&(Arg){.ui = mask});
 void srwm_action_tag(unsigned int mask) { tag(&(Arg){.ui = mask}); }
 void srwm_action_toggletag(unsigned int mask) { toggletag(&(Arg){.ui = mask}); }
 void srwm_set_tag_colorful_occupied_only(int val) {tag_colorful_occupied_only = val;}
-int srwm_get_layout_mode(void) { return layout_mode; }  
-void srwm_set_layout_mode(int val) { layout_mode = val; }
 
 void srwm_action_movecanvas(int dir) { movecanvas(&(Arg){.i = dir}); }  
 void srwm_action_homecanvas(void) { homecanvas(&(Arg){0}); }  
