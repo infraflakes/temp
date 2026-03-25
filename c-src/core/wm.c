@@ -12,8 +12,8 @@ int applysizehints(Client* c, int* x, int* y, int* w, int* h, int interact) {
     if (*x + *w + 2 * c->bw < 0) *x = 0;
     if (*y + *h + 2 * c->bw < 0) *y = 0;
   }
-  if (*h < 20) *h = 20;
-  if (*w < 20) *w = 20;
+  if (*h < bh) *h = bh;
+  if (*w < bh) *w = bh;
   return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
 }
 
@@ -91,8 +91,8 @@ void detach(Client* c) {
 
 
 void focus(Client* c) {
-  if (!c || !ISVISIBLE(c) || HIDDEN(c))
-    for (c = selmon->clients; c && (!ISVISIBLE(c) || HIDDEN(c)); c = c->next);
+  if (!c || !ISVISIBLE(c) || !c->ismapped)
+    for (c = selmon->clients; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
   if (selmon->sel && selmon->sel != c) unfocus(selmon->sel, 0);
   if (c) {
     if (c->mon != selmon) selmon = c->mon;
@@ -131,9 +131,17 @@ void setfocus(Client* c) {
 void focusstack(const Arg* arg) {
   if (!selmon->sel || selmon->ntabs < 2) return;
 
-  int idx = -1;
-  for (int i = 0; i < selmon->ntabs; i++) {
-    if (selmon->tab_order[i] == selmon->sel) { idx = i; break; }
+  if (!selmon->sel) return;
+  if (arg->i > 0) {
+    for (c = selmon->sel->next; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
+    if (!c)
+      for (c = selmon->clients; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
+  } else {
+    for (i = selmon->clients; i != selmon->sel; i = i->next)
+      if (ISVISIBLE(i) && i->ismapped) c = i;
+    if (!c)
+      for (; i; i = i->next)
+        if (ISVISIBLE(i) && i->ismapped) c = i;
   }
   if (idx < 0) return;
 
@@ -324,6 +332,8 @@ void manage(Window w, XWindowAttributes* wa) {
   }
   XRaiseWindow(dpy, c->win);
   attach(c);
+  if (ISVISIBLE(c) && c->mon->ntabs < MAXTABS)
+    c->mon->tab_order[c->mon->ntabs++] = c;
   XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32,
                   PropModeAppend, (unsigned char*)&(c->win), 1);
   XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w,
@@ -334,7 +344,7 @@ void manage(Window w, XWindowAttributes* wa) {
   arrange(c->mon);
   XMapWindow(dpy, c->win);
   c->ismapped = 1;
-  focus(c);
+  focus(NULL);
 }
 
 void movestack(const Arg *arg) {
@@ -416,6 +426,9 @@ void sendmon(Client* c, Monitor* m) {
   c->mon = m;
   c->ws = m->current_ws;
   attach(c);
+  /* Add to dest tab_order */
+  if (ISVISIBLE(c) && m->ntabs < MAXTABS)
+    m->tab_order[m->ntabs++] = c;
   setclienttagprop(c);
   focus(NULL);
   arrange(NULL);
@@ -498,8 +511,7 @@ void window_map(Client *c, int deiconify) {
   if (deiconify)  
     window_set_state(c->win, NormalState);
   XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);  
-  XSetInputFocus(dpy, win, RevertToPointerRoot, CurrentTime);
-  XMapWindow(dpy, win);
+  XMapWindow(dpy, c->win);
 }  
   
 void window_unmap(Window win, int iconify) {  
@@ -520,10 +532,19 @@ void unmanage(Client* c, int destroyed) {
   Monitor* m = c->mon;
   XWindowChanges wc;
 
+  /* Remove from tab_order */
+  for (int i = 0; i < m->ntabs; i++) {
+    if (m->tab_order[i] == c) {
+      memmove(&m->tab_order[i], &m->tab_order[i+1], (m->ntabs - i - 1) * sizeof(Client*));
+      m->ntabs--;
+      break;
+    }
+  }
+
   /* If this was the selected client, find next visible one */
   if (c == m->sel) {
     Client *t;
-    for (t = m->clients; t && (!ISVISIBLE(t) || HIDDEN(t) || t == c); t = t->next);
+    for (t = m->clients; t && (!ISVISIBLE(t) || !t->ismapped || t == c); t = t->next);
     m->sel = t;
   }
 
