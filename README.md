@@ -100,7 +100,11 @@ Since `srwm` is built as a zero-dependency static binary, you can run it on almo
 > [!CAUTION]
 > You should modify the font config at ~/.config/srwm/bar.lua
 > And keybindings at ~/.config/srwm/keybindings.lua before starting
+<<<<<<< HEAD
 >>>>>>> 9836c1a (Update installation)
+=======
+> The default tab bar uses nerd glyph to display control buttons, you may want to install it
+>>>>>>> 9142e8c (Fix tab bar button glyphs not rendered)
 
 You can generate the default config with `srwm kickstart`:
 
@@ -108,11 +112,12 @@ You can generate the default config with `srwm kickstart`:
 srwm kickstart
 ```
 
-Then start the window manager with `srwm start` (srwm already has X Server process handler built in):
+Then start the window manager with `srwm start` (make sure you have xorg-xauth utility installed):
 ```bash
 srwm start
 ```
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 6fd8943 (Update README)
@@ -125,6 +130,10 @@ If you use the default bar's widgets config, the bar's widgets depend on some de
 - bc
 
 >>>>>>> 5a70b2a (Update README)
+=======
+srwm by default only shrinks or expand windows to mimick zoom because it requires a compositor, for true zooming visuals you can use [srcom](https://github.com/infraflakes/srcom/releases/).
+
+>>>>>>> 9142e8c (Fix tab bar button glyphs not rendered)
 ### Building from scratch
 
 Current the project only supports building with flakes (fully statically linked).
