@@ -99,6 +99,15 @@ fn handle_connection(stream: &mut impl Read) {
                 crate::ffi::srwm_request_restart();
             }
         }
+<<<<<<< HEAD
+=======
+        "refresh" => {
+            eprintln!("srwm: IPC received refresh");
+            unsafe {
+                crate::ffi::srwm_grabkeys();
+            }
+        }
+>>>>>>> fe32d26 (DBus and XServer helper)
         _ => {
             eprintln!("srwm: unknown IPC command: {}", cmd);
         }

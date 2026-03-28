@@ -1,5 +1,8 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fe32d26 (DBus and XServer helper)
 pub mod cli;
 pub mod config;
 pub mod dbus;
@@ -10,7 +13,11 @@ pub mod xserver;
 
 use crate::cli::Cli;
 use clap::Parser;
+<<<<<<< HEAD
 use std::sync::atomic::AtomicBool;
+=======
+use std::sync::atomic::{AtomicBool, Ordering};
+>>>>>>> fe32d26 (DBus and XServer helper)
 
 static SHOULD_QUIT: AtomicBool = AtomicBool::new(false);
 
@@ -25,12 +32,19 @@ fn main() {
         Some(crate::cli::Command::Version) => {
             println!("srwm {}", env!("CARGO_PKG_VERSION"));
         }
+<<<<<<< HEAD
         Some(crate::cli::Command::Shutdown) => {
             if let Err(e) = ipc::send_command("shutdown\n") {
+=======
+        Some(crate::cli::Command::Ipc { command }) => {
+            let full_cmd = format!("{}\n", command);
+            if let Err(e) = ipc::send_command(&full_cmd) {
+>>>>>>> fe32d26 (DBus and XServer helper)
                 eprintln!("srwm: {}", e);
                 std::process::exit(1);
             }
         }
+<<<<<<< HEAD
         Some(crate::cli::Command::Restart) => {
             if let Err(e) = ipc::send_command("restart\n") {
                 eprintln!("srwm: {}", e);
@@ -48,6 +62,8 @@ fn main() {
                 }
             }
         }
+=======
+>>>>>>> fe32d26 (DBus and XServer helper)
     }
 }
 
@@ -75,7 +91,11 @@ fn setup_signal_handlers() {
 pub fn main_run() {
     let _dbus = dbus::Session::start();
 
+<<<<<<< HEAD
     let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
+=======
+    let xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
+>>>>>>> fe32d26 (DBus and XServer helper)
         match xserver::start() {
             Ok(srv) => Some(srv),
             Err(e) => {

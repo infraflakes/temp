@@ -3,7 +3,11 @@ use std::process::{Command, Stdio};
 
 pub struct Session {
     child: Option<std::process::Child>,
+<<<<<<< HEAD
     _address: String,
+=======
+    address: String,
+>>>>>>> fe32d26 (DBus and XServer helper)
 }
 
 impl Session {
@@ -51,7 +55,11 @@ impl Session {
 
         Some(Session {
             child: Some(child),
+<<<<<<< HEAD
             _address: address,
+=======
+            address,
+>>>>>>> fe32d26 (DBus and XServer helper)
         })
     }
 }

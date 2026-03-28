@@ -13,17 +13,23 @@ which = "7"
 signal-hook = "0.3"
 libc = "0.2.183"
 getrandom = "0.2"
+<<<<<<< HEAD
 =======
 >>>>>>> 9436516 (Scaffold)
 =======
 dirs = "6"
 >>>>>>> d027391 (Config parsing reimplementation)
+=======
+>>>>>>> fe32d26 (DBus and XServer helper)
 
 [build-dependencies]
 bindgen = "0.72.1"
 cc = "1.2.58"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 clap = "4.6.0"
 >>>>>>> 9436516 (Scaffold)
+=======
+>>>>>>> fe32d26 (DBus and XServer helper)
 pkg-config = "0.3.32"

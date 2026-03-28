@@ -15,6 +15,7 @@ pub enum Command {
     Start,
     /// Print version information
     Version,
+<<<<<<< HEAD
     /// Shut down the running instance
     Shutdown,
     /// Restart the running instance
@@ -24,5 +25,11 @@ pub enum Command {
         /// Overwrite existing config files
         #[arg(short, long)]
         force: bool,
+=======
+    /// Send a command to a running instance via IPC
+    Ipc {
+        /// Command to send: shutdown, restart, or refresh
+        command: String,
+>>>>>>> fe32d26 (DBus and XServer helper)
     },
 }

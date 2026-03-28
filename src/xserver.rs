@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 use std::process::{Child, Command};
 use std::sync::atomic::{AtomicBool, Ordering};
+=======
+use std::io;
+use std::os::unix::process::CommandExt;
+use std::process::{Child, Command};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+>>>>>>> fe32d26 (DBus and XServer helper)
 use std::time::Duration;
 
 static SIGUSR1_RECEIVED: AtomicBool = AtomicBool::new(false);
@@ -72,10 +80,14 @@ pub fn start() -> Result<Server, String> {
     // 4. Set up SIGUSR1 handler for Xorg readiness
     SIGUSR1_RECEIVED.store(false, Ordering::SeqCst);
     unsafe {
+<<<<<<< HEAD
         libc::signal(
             libc::SIGUSR1,
             sigusr1_handler as *const () as libc::sighandler_t,
         );
+=======
+        libc::signal(libc::SIGUSR1, sigusr1_handler as libc::sighandler_t);
+>>>>>>> fe32d26 (DBus and XServer helper)
     }
 
     // 5. Start Xorg
