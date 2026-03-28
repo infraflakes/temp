@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 use std::io::Write;
 
+=======
+>>>>>>> d027391 (Config parsing reimplementation)
 const DEFAULT_SRWMRC: &str = include_str!("../config/srwmrc.lua");
 const DEFAULT_GENERAL: &str = include_str!("../config/general.lua");
 const DEFAULT_CANVAS: &str = include_str!("../config/canvas.lua");
@@ -9,6 +12,7 @@ const DEFAULT_BAR: &str = include_str!("../config/bar.lua");
 const DEFAULT_STARTUP: &str = include_str!("../config/startup.lua");
 const DEFAULT_ENV: &str = include_str!("../config/env.lua");
 
+<<<<<<< HEAD
 pub fn deploy_defaults() -> bool {
     let dir = crate::config::config_dir();
 
@@ -102,4 +106,20 @@ fn confirm_yes() -> bool {
     } else {
         false
     }
+=======
+pub fn deploy_defaults() {
+    let dir = crate::config::config_dir();
+    if dir.exists() {
+        return;
+    }
+    std::fs::create_dir_all(&dir).ok();
+    std::fs::write(dir.join("srwmrc.lua"), DEFAULT_SRWMRC).ok();
+    std::fs::write(dir.join("general.lua"), DEFAULT_GENERAL).ok();
+    std::fs::write(dir.join("canvas.lua"), DEFAULT_CANVAS).ok();
+    std::fs::write(dir.join("keybindings.lua"), DEFAULT_KEYBINDINGS).ok();
+    std::fs::write(dir.join("theming.lua"), DEFAULT_THEMING).ok();
+    std::fs::write(dir.join("bar.lua"), DEFAULT_BAR).ok();
+    std::fs::write(dir.join("startup.lua"), DEFAULT_STARTUP).ok();
+    std::fs::write(dir.join("env.lua"), DEFAULT_ENV).ok();
+>>>>>>> d027391 (Config parsing reimplementation)
 }
