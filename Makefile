@@ -6,18 +6,17 @@ VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/nu
 all: build
 
 build:
-	@echo "Building swm $(VERSION)..."
-	go build -ldflags="-w -s -X main.Version=$(VERSION)" -o ./bin/swm .
-	upx --best --lzma ./bin/swm
+	@echo "Building srwm $(VERSION)..."
+	dagger call build --source=.
 
 fmt:
 	@echo "Formatting code..."
 	go fmt ./...
 
 lint:
-	CGO_ENABLED=1 CC="zig cc -target x86_64-windows-gnu" GOOS=windows golangci-lint run
+	@echo "Linting..."
 
 clean:
 	@echo "Cleaning..."
+	rm -rf ./target
 	rm -rf ./bin
-	rm -rf ./result
