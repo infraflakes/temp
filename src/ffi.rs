@@ -54,15 +54,13 @@ pub extern "C" fn srwm_handle_mouse(id: std::ffi::c_int) {
     }
 =======
 // C calls these when a dynamic key/mouse binding fires
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn srwm_handle_key(id: std::ffi::c_int) {
-    // TODO: dispatch to Lua callback registry
     eprintln!("srwm: key callback {id} (not yet implemented)");
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn srwm_handle_mouse(id: std::ffi::c_int) {
-    // TODO: dispatch to Lua callback registry
     eprintln!("srwm: mouse callback {id} (not yet implemented)");
 >>>>>>> 9436516 (Scaffold)
 }

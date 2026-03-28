@@ -38,9 +38,10 @@ CONFIG_DEF = internal/core/config.def.h
 
 all: build
 
-build:
+build: clean
 	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=.
+	@mkdir -p bin
+	dagger call build --source=. export --path=./target/release/srwm
 
 fmt:
 	@echo "Formatting code..."
@@ -51,6 +52,7 @@ lint:
 
 clean:
 	@echo "Cleaning..."
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -74,3 +76,6 @@ clean:
 	rm -rf ./target
 	rm -rf ./bin
 >>>>>>> 1a2036c (Dagger)
+=======
+	rm -rf ./target/release
+>>>>>>> 6d9990a (Fix compiling error)
