@@ -40,7 +40,7 @@ all: build
 
 build:
 	@echo "Building srwm $(VERSION)..."
-	go build -ldflags="-w -s -X github.com/infraflakes/srwm/cmd.Version=$(VERSION)" -o ./bin/srwm .
+	dagger call build --source=.
 
 fmt:
 	@echo "Formatting code..."
@@ -48,11 +48,10 @@ fmt:
 
 lint:
 	@echo "Linting..."
-	go vet ./...
-	golangci-lint run
 
 clean:
 	@echo "Cleaning..."
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 	rm -rf ./bin/swm
@@ -71,3 +70,7 @@ clean:
 	rm -rf ./bin
 	rm -rf ./result
 >>>>>>> 9891618 (Add locale fallback)
+=======
+	rm -rf ./target
+	rm -rf ./bin
+>>>>>>> 1a2036c (Dagger)
