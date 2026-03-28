@@ -1,22 +1,8 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-use std::process::{Child, Command};
-use std::sync::atomic::{AtomicBool, Ordering};
-=======
 use std::io;
 use std::os::unix::process::CommandExt;
-=======
->>>>>>> 2dd0a21 (Static major libraries)
 use std::process::{Child, Command};
-<<<<<<< HEAD
-use std::sync::Arc;
-<<<<<<< HEAD
->>>>>>> fe32d26 (DBus and XServer helper)
-=======
-=======
->>>>>>> 349a5c6 (Restart, shutdown command)
 use std::sync::atomic::{AtomicBool, Ordering};
->>>>>>> 3711089 (Remove old codes)
+use std::sync::Arc;
 use std::time::Duration;
 
 static SIGUSR1_RECEIVED: AtomicBool = AtomicBool::new(false);
@@ -89,20 +75,7 @@ pub fn start() -> Result<Server, String> {
     // 4. Set up SIGUSR1 handler for Xorg readiness
     SIGUSR1_RECEIVED.store(false, Ordering::SeqCst);
     unsafe {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 2dd0a21 (Static major libraries)
-        libc::signal(
-            libc::SIGUSR1,
-            sigusr1_handler as *const () as libc::sighandler_t,
-        );
-<<<<<<< HEAD
-=======
         libc::signal(libc::SIGUSR1, sigusr1_handler as libc::sighandler_t);
->>>>>>> fe32d26 (DBus and XServer helper)
-=======
->>>>>>> 2dd0a21 (Static major libraries)
     }
 
     // 5. Start Xorg

@@ -15,34 +15,9 @@ pub enum Command {
     Start,
     /// Print version information
     Version,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 349a5c6 (Restart, shutdown command)
-    /// Shut down the running instance
-    Shutdown,
-    /// Restart the running instance
-    Restart,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ebe0956 (Add srwm kickstart)
-    /// Deploy config files to ~/.config/srwm/ without starting the WM
-    Kickstart {
-        /// Overwrite existing config files
-        #[arg(short, long)]
-        force: bool,
-<<<<<<< HEAD
-=======
     /// Send a command to a running instance via IPC
     Ipc {
         /// Command to send: shutdown, restart, or refresh
         command: String,
->>>>>>> fe32d26 (DBus and XServer helper)
     },
-=======
->>>>>>> 349a5c6 (Restart, shutdown command)
-=======
-    },
->>>>>>> ebe0956 (Add srwm kickstart)
 }
