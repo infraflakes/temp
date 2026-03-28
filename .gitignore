@@ -5,8 +5,11 @@ build.log
 <<<<<<< HEAD
 result
 target/
+<<<<<<< HEAD
 =======
 >>>>>>> f1a06f2 (Flakes)
 =======
 result
 >>>>>>> ba9c6a5 (Refine CI/CD, add checksum, fix nix build)
+=======
+>>>>>>> 9436516 (Scaffold)

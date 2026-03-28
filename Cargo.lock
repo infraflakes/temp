@@ -62,6 +62,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -73,6 +74,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -157,7 +160,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b193af5b67834b676abd72466a96c1024e6a6ad978a1f484bd90b85c94041351"
 dependencies = [
  "clap_builder",
+<<<<<<< HEAD
  "clap_derive",
+=======
+>>>>>>> 9436516 (Scaffold)
 ]
 
 [[package]]
@@ -173,6 +179,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "clap_derive"
 version = "4.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -185,6 +192,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "clap_lex"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -197,6 +206,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
+<<<<<<< HEAD
 name = "dirs"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -218,12 +228,15 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
+<<<<<<< HEAD
 name = "env_home"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -240,12 +253,15 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "find-msvc-tools"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
+<<<<<<< HEAD
 name = "getrandom"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -257,12 +273,15 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
+<<<<<<< HEAD
 name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,6 +297,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -309,6 +330,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "libredox"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -324,6 +346,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "lock_api"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -354,7 +378,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a86cc925d4053d0526ae7f5bc765dbd0d7a5d1a63d43974f4966cb349ca63295"
 dependencies = [
  "cc",
+<<<<<<< HEAD
  "which 8.0.2",
+=======
+ "which",
+>>>>>>> 9436516 (Scaffold)
 ]
 
 [[package]]
@@ -425,12 +453,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
+<<<<<<< HEAD
 name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "parking_lot"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -497,6 +528,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "redox_users"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -508,6 +540,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "regex"
 version = "1.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -543,6 +577,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94300abf3f1ae2e2b8ffb7b58043de3d399c73fa6f4b73826402a5c457614dbe"
 
 [[package]]
+<<<<<<< HEAD
 name = "rustix"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -556,6 +591,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "rustversion"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -603,6 +640,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+<<<<<<< HEAD
 name = "signal-hook"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -623,6 +661,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -632,6 +672,7 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 name = "srwm"
 version = "0.5.4"
 dependencies = [
+<<<<<<< HEAD
  "atty",
  "bindgen",
  "cc",
@@ -643,6 +684,13 @@ dependencies = [
  "pkg-config",
  "signal-hook",
  "which 7.0.3",
+=======
+ "bindgen",
+ "cc",
+ "clap",
+ "mlua",
+ "pkg-config",
+>>>>>>> 9436516 (Scaffold)
 ]
 
 [[package]]
@@ -663,6 +711,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "thiserror"
 version = "2.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -683,6 +732,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -695,6 +746,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
+<<<<<<< HEAD
 name = "wasi"
 version = "0.11.1+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -713,6 +765,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "which"
 version = "8.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -722,6 +776,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "winapi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -744,6 +799,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
+=======
+>>>>>>> 9436516 (Scaffold)
 name = "windows-link"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -757,9 +814,12 @@ checksum = "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc"
 dependencies = [
  "windows-link",
 ]
+<<<<<<< HEAD
 
 [[package]]
 name = "winsafe"
 version = "0.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
+=======
+>>>>>>> 9436516 (Scaffold)

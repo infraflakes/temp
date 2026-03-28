@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 pub mod cli;
 pub mod config;
 pub mod dbus;
@@ -122,4 +123,9 @@ pub fn main_run() {
     }
 
     ipc::set_running(false);
+=======
+mod ffi;
+fn main() {
+    println!("srwm built successfully");
+>>>>>>> 9436516 (Scaffold)
 }
