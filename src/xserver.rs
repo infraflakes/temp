@@ -5,9 +5,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::process::{Child, Command};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+<<<<<<< HEAD
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+use std::sync::atomic::{AtomicBool, Ordering};
+>>>>>>> 3711089 (Remove old codes)
 use std::time::Duration;
 
 static SIGUSR1_RECEIVED: AtomicBool = AtomicBool::new(false);
