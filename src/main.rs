@@ -35,6 +35,17 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        Some(crate::cli::Command::Kickstart { force }) => {
+            if force {
+                if deploy::force_deploy() {
+                    println!("srwm: config deployed (forced) to ~/.config/srwm/");
+                }
+            } else {
+                if deploy::deploy_defaults() {
+                    println!("srwm: config deployed to ~/.config/srwm/");
+                }
+            }
+        }
     }
 }
 

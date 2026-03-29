@@ -1,12 +1,12 @@
 # Serein Window Manager
-A fully statically linked X11 floating, zooming window manager. Built with Go, C and Lua.
+A fully statically linked X11 floating, zooming window manager. Built with Rust, C and Lua.
 
 ![Preview](./assets/screenshot_default.png)
 
 ## Installation
 
 ### Download Binary (Recommended)
-Since `srwm` is built as a zero-dependency static binary, you can run it on almost any Linux distribution.
+Since `srwm` is built with most dependencies statically linked, you can run it on almost any Linux distribution.
 
 1. Download the latest release from the [Releases](https://github.com/infraflakes/srwm/releases) page.
 2. Make it executable and move it to your path:
@@ -37,14 +37,7 @@ srwm by default only shrinks or expand windows to mimick zoom because it require
 
 ### Building from scratch
 
-Current the project only supports building with flakes (fully statically linked).
-After having all the dependencies you can easily build the window manager:
-
-```bash
-nix build .#default
-```
-
-Or
+Current the project only supports building with [dagger](https://dagger.io/).
 
 ```bash
 make build

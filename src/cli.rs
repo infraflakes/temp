@@ -19,4 +19,10 @@ pub enum Command {
     Shutdown,
     /// Restart the running instance
     Restart,
+    /// Deploy config files to ~/.config/srwm/ without starting the WM
+    Kickstart {
+        /// Overwrite existing config files
+        #[arg(short, long)]
+        force: bool,
+    },
 }
