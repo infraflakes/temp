@@ -13,9 +13,7 @@ int compositor_running(void) {
 }
 
 void publish_canvas_state(Monitor *m) {
-    int tagidx = getcurrenttag(m);
-    
-    int32_t zoom_fp = (int32_t)(m->canvas[tagidx].zoom * 10000.0f);
+    int32_t zoom_fp = (int32_t)(m->canvas_zoom * 10000.0f);
     XChangeProperty(dpy, root, netatom[SrwmCanvasZoom],
         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&zoom_fp, 1);
     
@@ -91,7 +89,7 @@ void homecanvas(const Arg *arg) {
                     XMoveWindow(dpy, c->win, c->x, c->y);
                 }
             }
-            selmon->canvas[tagidx].zoom = 1.0f;
+            selmon->canvas_zoom = 1.0f;
             publish_canvas_state(selmon);
         } else {
             float scale = 1.0f / old_zoom;  
@@ -215,7 +213,7 @@ void zoomcanvas(const Arg *arg) {
         return;  
    
     if (compositor_running()) {
-        selmon->canvas[tagidx].zoom = new_zoom;
+        selmon->canvas_zoom = new_zoom;
         publish_canvas_state(selmon);
     } else {
         float scale = new_zoom / old_zoom;  

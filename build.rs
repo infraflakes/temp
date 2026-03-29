@@ -16,18 +16,16 @@ fn main() {
     let mut build = cc::Build::new();
     build
         .files(&[
-            "c-src/wm.c",
-            "c-src/bar.c",
-            "c-src/bridge.c",
-            "c-src/canvas.c",
-            "c-src/drw.c",
-            "c-src/events.c",
-            "c-src/mouse.c",
-            "c-src/setup.c",
-            "c-src/util.c",
-            "c-src/workspace.c",
-=======
->>>>>>> 7870993 (Modularize codebase)
+            "c-src/core/wm.c",
+            "c-src/core/events.c",
+            "c-src/core/setup.c",
+            "c-src/ui/bar.c",
+            "c-src/ui/canvas.c",
+            "c-src/ui/drw.c",
+            "c-src/input/mouse.c",
+            "c-src/input/workspace.c",
+            "c-src/bridge/bridge.c",
+            "c-src/util/util.c",
         ])
         .include("c-src/include")
         .include("c-src/bridge")
@@ -46,7 +44,7 @@ fn main() {
     let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
     let mut bindgen_builder = bindgen::Builder::default()
-        .header("c-src/bridge.h")
+        .header("c-src/bridge/bridge.h")
         .allowlist_function("srwm_.*")
         .allowlist_var("running");
 

@@ -177,11 +177,9 @@ struct Monitor {
   int mx, my, mw, mh; /* screen size */
   int wx, wy, ww, wh; /* window area  */
   unsigned int borderpx;
-  unsigned int colorfultag;
-  CanvasOffset *canvas; /* per-tag canvas offsets, allocated in createmon() */
-  float canvas_zoom;      /* global zoom level, shared across all tags */
-  int showbar;
-  int topbar, toptab;
+  CanvasOffset *canvas; /* per-ws canvas offsets, allocated in createmon() */
+  float canvas_zoom;      /* global zoom level, shared across all workspaces */
+  int toptab;
   Client *clients;
   Client *tail; // last client in list, for O(1) append
   Client *sel;
@@ -260,10 +258,7 @@ void setup(void);
 void setviewport(void);
 void seturgent(Client *c, int urg);
 void showhide(Monitor *m);
-Monitor *systraytomon(Monitor *m);
-void tag(const Arg *arg);
-void togglebar(const Arg *arg);
-void togglefullscr(const Arg *arg);
+void move_to_ws(const Arg *arg);
 void freeicon(Client *c);
 void unfocus(Client *c, int setfocus);
 void unmanage(Client *c, int destroyed);
@@ -273,10 +268,6 @@ void updateclientlist(void);
 int updategeom(void);
 void updatenumlockmask(void);
 void rebuild_tab_order(Monitor *m);
-void updatestatus(void);
-void updatesystray(void);
-void updatesystrayicongeom(Client *i, int w, int h);
-void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 void updatetitle(Client *c);
 void updateicon(Client *c);
 void updatewindowtype(Client *c);

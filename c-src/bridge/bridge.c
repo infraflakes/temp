@@ -167,26 +167,26 @@ extern const char* fonts[];
 void srwm_set_font(const char* font) { fonts[0] = font; }
 
 extern const char* colors[][3];
-static int colors_owned[18][3] = {0}; /* tracks which slots were strdup'd */  
-  
-void srwm_set_color(int scheme, int slot, const char* hex) {  
-  if (slot < 0 || slot >= 3) return;  
-  if (colors_owned[scheme][slot])  
-    free((void*)colors[scheme][slot]);  
-  colors[scheme][slot] = strdup(hex);  
-  colors_owned[scheme][slot] = 1;  
+static int colors_owned[5][3] = {0}; /* tracks which slots were strdup'd */
+
+void srwm_set_color(int scheme, int slot, const char* hex) {
+   if (slot < 0 || slot >= 3) return;
+   if (colors_owned[scheme][slot])
+     free((void*)colors[scheme][slot]);
+   colors[scheme][slot] = strdup(hex);
+   colors_owned[scheme][slot] = 1;
 }
 
-extern char* tags[];
-extern int tags_len;
-static int tags_owned[9] = {0};  
-  
-void srwm_set_tag(int idx, const char* name) {  
-  if (idx < 0 || idx >= 9) return;  
-  if (tags_owned[idx])  
-    free(tags[idx]);  
-  tags[idx] = strdup(name);  
-  tags_owned[idx] = 1;  
+extern char* ws_labels[];
+extern int ws_count;
+static int ws_labels_owned[9] = {0};
+
+void srwm_set_ws_label(int idx, const char* name) {
+  if (idx < 0 || idx >= 9) return;
+  if (ws_labels_owned[idx])
+    free(ws_labels[idx]);
+  ws_labels[idx] = strdup(name);
+  ws_labels_owned[idx] = 1;
 }
 
 void srwm_set_ws_count(int len) {

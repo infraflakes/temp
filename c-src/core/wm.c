@@ -12,8 +12,8 @@ int applysizehints(Client* c, int* x, int* y, int* w, int* h, int interact) {
     if (*x + *w + 2 * c->bw < 0) *x = 0;
     if (*y + *h + 2 * c->bw < 0) *y = 0;
   }
-  if (*h < bh) *h = bh;
-  if (*w < bh) *w = bh;
+  if (*h < 20) *h = 20;
+  if (*w < 20) *w = 20;
   return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
 }
 
@@ -94,13 +94,13 @@ void focus(Client* c) {
   if (!c || !ISVISIBLE(c) || !c->ismapped)
     for (c = selmon->clients; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
   if (selmon->sel && selmon->sel != c) unfocus(selmon->sel, 0);
-  if (c) {
-    if (c->mon != selmon) selmon = c->mon;
-    if (c->isurgent) seturgent(c, 0);
-    grabbuttons(c, 1);
-    XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
-    setfocus(c);
-  } else {
+   if (c) {
+     if (c->mon != selmon) selmon = c->mon;
+     if (c->isurgent) seturgent(c, 0);
+     grabbuttons(c, 1);
+     XSetWindowBorder(dpy, c->win, border_active.pixel);
+     setfocus(c);
+   } else {
     XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
     XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
   }
@@ -131,17 +131,9 @@ void setfocus(Client* c) {
 void focusstack(const Arg* arg) {
   if (!selmon->sel || selmon->ntabs < 2) return;
 
-  if (!selmon->sel) return;
-  if (arg->i > 0) {
-    for (c = selmon->sel->next; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
-    if (!c)
-      for (c = selmon->clients; c && (!ISVISIBLE(c) || !c->ismapped); c = c->next);
-  } else {
-    for (i = selmon->clients; i != selmon->sel; i = i->next)
-      if (ISVISIBLE(i) && i->ismapped) c = i;
-    if (!c)
-      for (; i; i = i->next)
-        if (ISVISIBLE(i) && i->ismapped) c = i;
+  int idx = -1;
+  for (int i = 0; i < selmon->ntabs; i++) {
+    if (selmon->tab_order[i] == selmon->sel) { idx = i; break; }
   }
   if (idx < 0) return;
 
@@ -429,7 +421,7 @@ void sendmon(Client* c, Monitor* m) {
   /* Add to dest tab_order */
   if (ISVISIBLE(c) && m->ntabs < MAXTABS)
     m->tab_order[m->ntabs++] = c;
-  setclienttagprop(c);
+  setclientwsprop(c);
   focus(NULL);
   arrange(NULL);
 }

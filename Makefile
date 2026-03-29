@@ -15,7 +15,7 @@ build-verbose: clean
 
 fmt:
 	@echo "Formatting code..."
-	go fmt ./...
+	cargo fmt
 
 lint:
 	@echo "Linting..."

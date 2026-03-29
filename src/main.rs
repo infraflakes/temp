@@ -90,26 +90,34 @@ pub fn main_run() {
     loop {
         deploy::deploy_defaults();
 
-    loop {
         unsafe {
             if ffi::srwm_init_display() != 0 {
                 eprintln!("srwm: cannot open display");
                 std::process::exit(1);
             }
 
-            // TODO: Phase 2B — load Lua config here
-            // config::deploy_defaults();
-            // config::load();
+            let lua = mlua::Lua::new();
+            ffi::set_lua_vm(&lua);
+
+            if let Err(e) = config::load_config(&lua) {
+                eprintln!("srwm: lua config error: {}", e);
+            }
 
             ffi::srwm_init_setup();
-            ffi::srwm_run(); // blocks until running == 0  
+            ffi::srwm_run();
 
+            ffi::clear_lua_vm();
             ffi::srwm_cleanup();
+
+            config::get_key_callbacks().clear();
+            config::get_mouse_callbacks().clear();
 
             if ffi::srwm_should_restart() == 0 {
                 break;
             }
-            // TODO: Phase 2C — clear keybindings here
+
+            ffi::srwm_clear_keybindings();
+            ffi::srwm_clear_mousebindings();
         }
     }
 

@@ -1,6 +1,5 @@
 use std::process::{Child, Command};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::time::Duration;
 
 static SIGUSR1_RECEIVED: AtomicBool = AtomicBool::new(false);

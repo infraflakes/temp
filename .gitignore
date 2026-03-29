@@ -1,3 +1,5 @@
 .direnv/
 bin/
 build.log
+result
+target/
