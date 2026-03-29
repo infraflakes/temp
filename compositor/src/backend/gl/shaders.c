@@ -1,0 +1,399 @@
+#include "gl_common.h"
+// Don't macro expand bool!
+#undef bool
+// clang-format off
+const char copy_area_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex;
+	in vec2 texcoord;
+	void main() {
+		vec2 texsize = textureSize(tex, 0);
+		gl_FragColor = texture2D(tex, texcoord / texsize, 0);
+	}
+);
+
+const char copy_area_with_dither_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex;
+	in vec2 texcoord;
+	vec4 dither(vec4, vec2);
+	void main() {
+		vec2 texsize = textureSize(tex, 0);
+		gl_FragColor = dither(texture2D(tex, texcoord / texsize, 0), gl_FragCoord.xy);
+	}
+);
+
+const char blend_with_mask_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex;
+	layout(location = UNIFORM_OPACITY_LOC)
+	uniform float opacity;
+	in vec2 texcoord;
+	float mask_factor();
+	void main() {
+		gl_FragColor = texelFetch(tex, ivec2(texcoord.xy), 0) * opacity * mask_factor();
+	}
+);
+
+const char fill_frag[] = GLSL(330,
+	layout(location = UNIFORM_COLOR_LOC)
+	uniform vec4 color;
+	void main() {
+		gl_FragColor = color;
+	}
+);
+
+const char fill_vert[] = GLSL(330,
+	layout(location = 0) in vec2 in_coord;
+	layout(location = UNIFORM_PROJECTION_LOC)
+	uniform mat4 projection;
+	void main() {
+		gl_Position = projection * vec4(in_coord, 0, 1);
+	}
+);
+
+const char interpolating_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex;
+	in vec2 texcoord;
+	void main() {
+		gl_FragColor = vec4(texture2D(tex, vec2(texcoord.xy), 0).rgb, 1);
+	}
+);
+
+const char interpolating_vert[] = GLSL(330,
+	layout(location = UNIFORM_PROJECTION_LOC)
+	uniform mat4 projection;
+	layout(location = UNIFORM_TEXSIZE_LOC)
+	uniform vec2 texsize;
+	layout(location = 0) in vec2 in_coord;
+	layout(location = 1) in vec2 in_texcoord;
+	out vec2 texcoord;
+	void main() {
+		gl_Position = projection * vec4(in_coord, 0, 1);
+		texcoord = in_texcoord / texsize;
+	}
+);
+
+#define MASKING_SHADER_TEMPLATE GLSL(330,                                                    \
+	layout(location = UNIFORM_MASK_TEX_LOC)                                              \
+	uniform sampler2D mask_tex;                                                          \
+	layout(location = UNIFORM_MASK_OFFSET_LOC)                                           \
+	uniform vec2 mask_offset;                                                            \
+	layout(location = UNIFORM_MASK_CORNER_RADIUS_LOC)                                    \
+	uniform float mask_corner_radius;                                                    \
+	layout(location = UNIFORM_MASK_INVERTED_LOC)                                         \
+	uniform bool mask_inverted;                                                          \
+	X(layout(location = UNIFORM_MASK_SCALE_LOC)                                          \
+	uniform vec2 mask_scale;)                                                            \
+	in vec2 texcoord;                                                                    \
+	vec2 mask_rectangle_sdf(vec2 point, vec2 half_size) {                                \
+		vec2 d = max(abs(point) - half_size, 0.0);                                   \
+		float l = length(d);                                                         \
+		/* Add a small number to avoid 0/0. */                                       \
+		return vec2(l, l / (max(d.x, d.y) + 1e-8));                                  \
+	}                                                                                    \
+	float mask_factor() {                                                                \
+		vec2 mask_size = textureSize(mask_tex, 0);                                   \
+		vec2 maskcoord = texcoord - mask_offset;                                     \
+		X(maskcoord = maskcoord / mask_scale;)                                       \
+		vec4 mask = texture2D(mask_tex, maskcoord / mask_size);                      \
+		if (mask_corner_radius != 0) {                                               \
+			vec2 inner_size = mask_size - vec2(mask_corner_radius) * 2.0f;       \
+			vec2 sdf = mask_rectangle_sdf(maskcoord - mask_size / 2.0f,          \
+			    inner_size / 2.0f);                                              \
+			float dist = sdf.x - mask_corner_radius + sdf.y / 2.0f;              \
+			if (dist > 0.0f) {                                                   \
+				mask.r *= (1.0f - clamp(dist, 0.0f, sdf.y) / (sdf.y + 1e-8));\
+			}                                                                    \
+		}                                                                            \
+		if (mask_inverted) {                                                         \
+			mask.rgb = 1.0 - mask.rgb;                                           \
+		}                                                                            \
+		return mask.r;                                                               \
+	}                                                                                    \
+)
+#define X(...)
+const char masking_glsl[] = MASKING_SHADER_TEMPLATE;
+#undef X
+#define X(...) __VA_ARGS__
+const char scaled_masking_glsl[] = MASKING_SHADER_TEMPLATE;
+#undef X
+const char blit_shader_glsl[] = GLSL(330,
+	// Opacity and dim is unused by the default shader. They are here for
+	// backwards compatibility with existing shaders.
+	//
+	// Opacity is set to tint.a, dim is set to (tint.r + tint.g + tint.b) / 3.0
+	layout(location = UNIFORM_OPACITY_LOC)
+	uniform float opacity;
+	layout(location = UNIFORM_DIM_LOC)
+	uniform float dim;
+	layout(location = UNIFORM_TINT_LOC)
+	uniform vec4 tint;
+	layout(location = UNIFORM_CORNER_RADIUS_LOC)
+	uniform float corner_radius;
+	layout(location = UNIFORM_BORDER_WIDTH_LOC)
+	uniform float border_width;
+	layout(location = UNIFORM_INVERT_COLOR_LOC)
+	uniform bool invert_color;
+	in vec2 texcoord;
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex;
+	layout(location = UNIFORM_EFFECTIVE_SIZE_LOC)
+	uniform vec2 effective_size;
+	layout(location = UNIFORM_BRIGHTNESS_LOC)
+	uniform sampler2D brightness;
+	layout(location = UNIFORM_MAX_BRIGHTNESS_LOC)
+	uniform float max_brightness;
+	layout(location = UNIFORM_TIME_LOC)
+	uniform float time;
+	// Signed distance field for rectangle center at (0, 0), with size of
+	// half_size * 2
+	// Returns 2 number: the distance, and the approximate chord length inside
+	// the pixel around `point`.
+	vec2 rectangle_sdf(vec2 point, vec2 half_size) {
+		vec2 d = max(abs(point) - half_size, 0.0);
+		float l = length(d);
+		// Add a small number to avoid 0/0.
+		return vec2(l, l / (max(d.x, d.y) + 1e-8));
+	}
+
+	vec4 default_post_processing(vec4 c) {
+		vec4 border_color = texture(tex, vec2(0.0, 0.5));
+		if (invert_color) {
+			c = vec4(c.aaa - c.rgb, c.a);
+			border_color = vec4(border_color.aaa - border_color.rgb, border_color.a);
+		}
+		c = c * tint;
+		border_color = border_color * tint;
+
+		vec3 rgb_brightness = texelFetch(brightness, ivec2(0, 0), 0).rgb;
+		// Ref: https://en.wikipedia.org/wiki/Relative_luminance
+		float brightness = rgb_brightness.r * 0.21 +
+		                   rgb_brightness.g * 0.72 +
+		                   rgb_brightness.b * 0.07;
+		if (brightness > max_brightness) {
+			c.rgb = c.rgb * (max_brightness / brightness);
+			border_color.rgb = border_color.rgb * (max_brightness / brightness);
+		}
+
+		if (corner_radius != 0) {
+			// Rim color is the color of the outer rim of the window, if there is no
+			// border, it's the color of the window itself, otherwise it's the border.
+			// Using mix() to avoid a branch here.
+			vec4 rim_color = mix(c, border_color, clamp(border_width, 0.0f, 1.0f));
+
+			vec2 outer_size = effective_size;
+			vec2 inner_size = outer_size - vec2(corner_radius) * 2.0f;
+			vec2 sdf = rectangle_sdf(texcoord - outer_size / 2.0f,
+			    inner_size / 2.0f);
+			// For anti-aliasing, we estimate how much of the pixel is covered by the rounded
+			// rectangle. This differs depends on at what angle the circle sweeps through the
+			// pixel. e.g. if it goes from corner to corner, then the coverage goes from 0 to
+			// 1 when the distance goes from -sqrt(2)/2 to +sqrt(2)/2; if it goes from edge to
+			// edge, then the coverage goes from 0 to 1 when the distance goes from -0.5 to 0.5.
+			// The chord length returned by `rectangle_sdf` is an approximation of this.
+			float rect_distance = sdf.x - corner_radius + sdf.y / 2.0f;
+			// Add a small number to sdf.y to avoid 0/0
+			if (rect_distance > 0.0f) {
+				c = (1.0f - clamp(rect_distance, 0.0f, sdf.y) / (sdf.y + 1e-8)) * rim_color;
+			} else {
+				float factor = clamp(rect_distance + border_width, 0.0f, sdf.y) / (sdf.y + 1e-8);
+				c = (1.0f - factor) * c + factor * border_color;
+			}
+		}
+
+		return c;
+	}
+
+	vec4 window_shader();
+	float mask_factor();
+
+	void main() {
+		gl_FragColor = window_shader() * mask_factor();
+	}
+);
+
+const char blit_shader_default[] = GLSL(330,
+	in vec2 texcoord;
+	uniform sampler2D tex;
+	vec4 default_post_processing(vec4 c);
+	vec4 window_shader() {
+		vec2 texsize = textureSize(tex, 0);
+		vec4 c = texture2D(tex, texcoord / texsize, 0);
+		return default_post_processing(c);
+	}
+);
+
+const char vertex_shader[] = GLSL(330,
+	layout(location = UNIFORM_PROJECTION_LOC)
+	uniform mat4 projection;
+	layout(location = UNIFORM_SCALE_LOC)
+	uniform float scale = 1.0f;
+	layout(location = 0) in vec2 coord;
+	layout(location = 1) in vec2 in_texcoord;
+	out vec2 texcoord;
+	void main() {
+		gl_Position = projection * vec4(coord, 0, scale);
+		texcoord = in_texcoord;
+	}
+);
+/// Add dithering for downsampling from 16-bit color to 8-bit color.
+const char dither_glsl[] = GLSL(330,
+	// Stolen from: https://www.shadertoy.com/view/7sfXDn
+	float bayer2(vec2 a) {
+		a = floor(a);
+		return fract(a.x / 2. + a.y * a.y * .75);
+	}
+	// 16 * 16 is 2^8, so in total we have equivalent of 16-bit
+	// color depth, should be enough?
+	float bayer(vec2 a16) {
+		vec2  a8 = a16 * .5;
+		vec2  a4 =  a8 * .5;
+		vec2  a2 =  a4 * .5;
+		float bayer32 = ((bayer2(a2) * .25 + bayer2( a4))
+		                             * .25 + bayer2( a8))
+		                             * .25 + bayer2(a16);
+		return bayer32;
+	}
+	vec4 dither(vec4 c, vec2 coord) {
+		vec4 residual = mod(c, 1.0 / 255.0);
+		residual = min(residual, vec4(1.0 / 255.0) - residual);
+		vec4 dithered = vec4(greaterThan(residual, vec4(1.0 / 65535.0)));
+		return vec4(c + dithered * bayer(coord) / 255.0);
+	}
+);
+
+const char cursor_vert[] = GLSL(330,
+	layout(location = 0) in vec2 in_coord;
+	layout(location = 1) in vec2 in_texcoord;
+	layout(location = UNIFORM_PROJECTION_LOC)
+	uniform mat4 projection;
+	out vec2 texcoord;
+	void main() {
+		gl_Position = projection * vec4(in_coord, 0.0, 1.0);
+		texcoord = in_texcoord;
+	}
+);
+
+const char cursor_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D cursor_tex;
+	in vec2 texcoord;
+	out vec4 out_color;
+	void main() {
+		out_color = texture(cursor_tex, texcoord);
+	}
+);
+
+const char border_blur_vert[] = GLSL(330,
+	layout(location = 0) in vec2 in_coord;
+	layout(location = 1) in vec2 in_texcoord;
+	layout(location = UNIFORM_PROJECTION_LOC)
+	uniform mat4 projection;
+	out vec2 texcoord;
+	out vec2 screen_pos;
+	void main() {
+		gl_Position = projection * vec4(in_coord, 0.0, 1.0);
+		texcoord = in_texcoord;
+		screen_pos = in_coord;
+	}
+);
+
+const char border_blur_frag[] = GLSL(330,
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D blur_tex;
+	layout(location = UNIFORM_OPACITY_LOC)
+	uniform float darkness;
+	uniform vec4 viewport_rect;
+	uniform float corner_radius;
+	uniform vec2 screen_size;
+	in vec2 texcoord;
+	in vec2 screen_pos;
+	out vec4 out_color;
+
+	float rounded_rect_sdf(vec2 p, vec2 half_size, float radius) {
+		vec2 d = abs(p) - half_size + vec2(radius);
+		return length(max(d, 0.0)) - radius;
+	}
+
+	void main() {
+		vec2 pos_ydown = vec2(screen_pos.x, screen_size.y - screen_pos.y);
+		
+		vec2 vp_center = (viewport_rect.xy + viewport_rect.zw) * 0.5;
+		vec2 vp_half_size = (viewport_rect.zw - viewport_rect.xy) * 0.5;
+		
+		float dist = rounded_rect_sdf(pos_ydown - vp_center, vp_half_size, corner_radius);
+		
+		if (dist < -1.0) {
+			discard;
+		}
+		
+		float alpha = smoothstep(-1.0, 1.0, dist);
+		
+		vec4 c = texture(blur_tex, texcoord);
+		out_color = vec4(c.rgb * (1.0 - darkness * 0.4), c.a) * alpha;
+	}
+);
+
+const char kawase_down_vert[] = GLSL(330,
+	layout(location = 0) in vec2 in_coord;
+	layout(location = 1) in vec2 in_texcoord;
+	out vec2 texcoord;
+	void main() {
+		gl_Position = vec4(in_coord, 0.0, 1.0);
+		texcoord = in_texcoord;
+	}
+);
+
+const char kawase_down_frag[] = GLSL(330,
+	layout(location = UNIFORM_PIXEL_NORM_LOC)
+	uniform vec2 pixel_norm;
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex_src;
+	in vec2 texcoord;
+	out vec4 out_color;
+	void main() {
+		vec2 uv = texcoord;
+		vec2 offset = pixel_norm;
+		vec4 sum = texture(tex_src, uv) * 4.0;
+		sum += texture(tex_src, uv + vec2(-0.5, -0.5) * offset);
+		sum += texture(tex_src, uv + vec2( 0.5, -0.5) * offset);
+		sum += texture(tex_src, uv + vec2(-0.5,  0.5) * offset);
+		sum += texture(tex_src, uv + vec2( 0.5,  0.5) * offset);
+		out_color = sum / 8.0;
+	}
+);
+
+const char kawase_up_vert[] = GLSL(330,
+	layout(location = 0) in vec2 in_coord;
+	layout(location = 1) in vec2 in_texcoord;
+	out vec2 texcoord;
+	void main() {
+		gl_Position = vec4(in_coord, 0.0, 1.0);
+		texcoord = in_texcoord;
+	}
+);
+
+const char kawase_up_frag[] = GLSL(330,
+	layout(location = UNIFORM_PIXEL_NORM_LOC)
+	uniform vec2 pixel_norm;
+	layout(location = UNIFORM_TEX_LOC)
+	uniform sampler2D tex_src;
+	in vec2 texcoord;
+	out vec4 out_color;
+	void main() {
+		vec2 uv = texcoord;
+		vec2 offset = pixel_norm;
+		vec4 sum = texture(tex_src, uv + vec2(-1.0,  0.0) * offset);
+		sum += texture(tex_src, uv + vec2(-0.5,  0.5) * offset) * 2.0;
+		sum += texture(tex_src, uv + vec2( 0.0,  1.0) * offset);
+		sum += texture(tex_src, uv + vec2( 0.5,  0.5) * offset) * 2.0;
+		sum += texture(tex_src, uv + vec2( 1.0,  0.0) * offset);
+		sum += texture(tex_src, uv + vec2( 0.5, -0.5) * offset) * 2.0;
+		sum += texture(tex_src, uv + vec2( 0.0, -1.0) * offset);
+		sum += texture(tex_src, uv + vec2(-0.5, -0.5) * offset) * 2.0;
+		out_color = sum / 12.0;
+	}
+);
+// clang-format on

@@ -89,6 +89,40 @@ fn main() {
     ] {
         println!("cargo:rustc-link-lib=static={}", name);
     }
+    // Build srcom compositor if source exists
+    let compositor_dir =
+        std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("compositor");
 
+    if compositor_dir.join("meson.build").exists() {
+        let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+        let build_dir = out.join("srcom-build");
+        std::fs::create_dir_all(&build_dir).ok();
+
+        let meson = std::process::Command::new("meson")
+            .args([
+                "setup",
+                build_dir.to_str().unwrap(),
+                compositor_dir.to_str().unwrap(),
+                "--buildtype=release",
+                "-Dregex=true",
+                "-Dunittest=false",
+            ])
+            .status()
+            .expect("meson failed");
+        assert!(meson.success(), "meson setup failed");
+
+        let ninja = std::process::Command::new("ninja")
+            .args(["-C", build_dir.to_str().unwrap()])
+            .status()
+            .expect("ninja failed");
+        assert!(ninja.success(), "ninja build failed");
+
+        // Copy the built binary to OUT_DIR so include_bytes! can find it
+        std::fs::copy(build_dir.join("src/srcom"), out.join("srcom"))
+            .expect("failed to copy srcom binary");
+
+        println!("cargo:rustc-cfg=feature=\"embedded-compositor\"");
+        println!("cargo:rerun-if-changed=compositor/");
+    }
     println!("cargo:rerun-if-changed=c-src/");
 }

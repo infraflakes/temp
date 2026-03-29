@@ -8,6 +8,7 @@ const DEFAULT_THEMING: &str = include_str!("../config/theming.lua");
 const DEFAULT_BAR: &str = include_str!("../config/bar.lua");
 const DEFAULT_STARTUP: &str = include_str!("../config/startup.lua");
 const DEFAULT_ENV: &str = include_str!("../config/env.lua");
+const DEFAULT_COMP: &str = include_str!("../compositor/data/animations.conf");
 
 pub fn deploy_defaults() -> bool {
     let dir = crate::config::config_dir();
@@ -83,6 +84,7 @@ fn write_files(dir: &std::path::Path) {
         ("bar.lua", DEFAULT_BAR),
         ("startup.lua", DEFAULT_STARTUP),
         ("env.lua", DEFAULT_ENV),
+        ("compositor.conf", DEFAULT_COMP),
     ];
 
     for (name, content) in files {

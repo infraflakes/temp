@@ -13,18 +13,25 @@ func (m *Srwm) Build(ctx context.Context, source *dagger.Directory) *dagger.File
 		WithEnvVariable("DEBIAN_FRONTEND", "noninteractive").
 		WithExec([]string{"apt-get", "update"}).
 		WithExec([]string{"apt-get", "install", "-y",
-			"gcc", "pkg-config", "upx-ucl",
-			"libx11-dev", "libxinerama-dev", "libxft-dev", "libxrender-dev",
-			"libxcb1-dev", "libx11-xcb-dev", "libxext-dev",
-			"libxau-dev", "libxdmcp-dev",
-			"libfontconfig-dev", "libfreetype-dev",
-			"libexpat1-dev", "zlib1g-dev", "libbz2-dev",
-			"libpng-dev", "libbrotli-dev",
+			// srwm deps
+			"gcc", "pkg-config",
+			"libx11-dev", "libxinerama-dev", "libxft-dev", "libxrender-dev", "libx11-xcb-dev",
+			"libfontconfig1-dev", "libfreetype6-dev",
 			"libclang-dev",
+			// srcom deps
+			"meson", "ninja-build", "cmake", "git",
+			"libxcb1-dev", "libxcb-composite0-dev", "libxcb-damage0-dev",
+			"libxcb-dpms0-dev", "libxcb-image0-dev", "libxcb-present-dev",
+			"libxcb-randr0-dev", "libxcb-render0-dev", "libxcb-render-util0-dev",
+			"libxcb-shape0-dev", "libxcb-xfixes0-dev", "libxcb-xinerama0-dev",
+			"libxcb-ewmh-dev", "libxcb-icccm4-dev", "libxcb-sync-dev",
+			"libxcb-shm0-dev", "libxcb-util-dev",
+			"libgl-dev", "libegl-dev", "libepoxy-dev",
+			"libev-dev", "libpcre2-dev", "libpixman-1-dev",
+			"libconfig-dev", "uthash-dev",
 		}).
 		WithDirectory("/src", source.WithoutDirectory("target")).
 		WithWorkdir("/src").
 		WithExec([]string{"cargo", "build", "--release"}).
-		WithExec([]string{"upx", "--best", "--lzma", "target/release/srwm"}).
 		File("target/release/srwm")
 }

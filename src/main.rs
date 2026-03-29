@@ -1,4 +1,5 @@
 pub mod cli;
+pub mod compositor;
 pub mod config;
 pub mod dbus;
 pub mod deploy;
@@ -104,9 +105,17 @@ pub fn main_run() {
             }
 
             ffi::srwm_init_setup();
+            let config_dir = dirs::config_dir()
+                .unwrap_or_else(|| std::path::PathBuf::from("~/.config"))
+                .join("srwm");
+            let comp_conf = config_dir.join("compositor.conf");
+            if comp_conf.exists() {
+                compositor::start(comp_conf.to_str().unwrap());
+            }
             ffi::srwm_run();
 
             ffi::clear_lua_vm();
+            compositor::stop();
             ffi::srwm_cleanup();
 
             config::get_key_callbacks().clear();

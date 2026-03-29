@@ -3,6 +3,10 @@ name = "srwm"
 version = "0.5.4"
 edition = "2024"
 
+[features]  
+default = ["embedded-compositor"]  
+embedded-compositor = []  
+  
 [dependencies]
 mlua = { version = "0.11.6", features = ["lua54", "vendored"] }
 dirs = "6"
