@@ -1,8 +1,8 @@
 use std::io::Write;
 
 const DEFAULT_SRWMRC: &str = include_str!("../config/srwmrc.lua");
-const DEFAULT_GENERAL: &str = include_str!("../config/general.lua");
 const DEFAULT_CANVAS: &str = include_str!("../config/canvas.lua");
+const DEFAULT_COMPOSITOR: &str = include_str!("../config/compositor.lua");
 const DEFAULT_KEYBINDINGS: &str = include_str!("../config/keybindings.lua");
 const DEFAULT_THEMING: &str = include_str!("../config/theming.lua");
 const DEFAULT_BAR: &str = include_str!("../config/bar.lua");
@@ -23,8 +23,8 @@ pub fn deploy_defaults() -> bool {
     let mut has_existing = false;
     let files = [
         "srwmrc.lua",
-        "general.lua",
         "canvas.lua",
+        "compositor.lua",
         "keybindings.lua",
         "theming.lua",
         "bar.lua",
@@ -77,8 +77,8 @@ pub fn force_deploy() -> bool {
 fn write_files(dir: &std::path::Path) {
     let files = [
         ("srwmrc.lua", DEFAULT_SRWMRC),
-        ("general.lua", DEFAULT_GENERAL),
         ("canvas.lua", DEFAULT_CANVAS),
+        ("compositor.lua", DEFAULT_COMPOSITOR),
         ("keybindings.lua", DEFAULT_KEYBINDINGS),
         ("theming.lua", DEFAULT_THEMING),
         ("bar.lua", DEFAULT_BAR),

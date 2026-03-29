@@ -35,26 +35,20 @@ fn ensure_extracted() -> Option<PathBuf> {
     let path = dir.join("srcom");
     eprintln!("srwm: cache path = {}", path.display());
 
-    // Write if missing or different size
-    let needs_write = match std::fs::metadata(&path) {
-        Ok(m) => m.len() != SRCOM_BIN.len() as u64,
-        Err(_) => true,
-    };
-
-    if needs_write {
-        eprintln!(
-            "srwm: extracting compositor ({} bytes) to {}",
-            SRCOM_BIN.len(),
-            path.display()
-        );
-        let mut f = std::fs::File::create(&path).expect("failed to create srcom file");
-        f.write_all(SRCOM_BIN)
-            .expect("failed to write srcom binary");
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).ok()?;
-        }
+    // Always remove old binary to prevent stale versions
+    let _ = std::fs::remove_file(&path);
+    eprintln!(
+        "srwm: extracting compositor ({} bytes) to {}",
+        SRCOM_BIN.len(),
+        path.display()
+    );
+    let mut f = std::fs::File::create(&path).expect("failed to create srcom file");
+    f.write_all(SRCOM_BIN)
+        .expect("failed to write srcom binary");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).ok()?;
     }
 
     Some(path)

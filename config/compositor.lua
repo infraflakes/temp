@@ -1,0 +1,1 @@
+srwm.compositor.enable(true)

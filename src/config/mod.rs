@@ -1,5 +1,6 @@
 pub mod bar;
 pub mod canvas;
+pub mod compositor;
 pub mod keys;
 pub mod lifecycle;
 pub mod mouse;
@@ -28,6 +29,7 @@ pub fn load_config(lua: &Lua) -> LuaResult<()> {
     bar::register(lua, &srwm)?;
     spawn::register(lua, &srwm)?;
     lifecycle::register(lua, &srwm)?;
+    compositor::register(lua, &srwm)?;
 
     lua.globals().set("srwm", srwm)?;
 

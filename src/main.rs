@@ -106,12 +106,15 @@ pub fn main_run() {
 
             ffi::srwm_init_setup();
 
-            compositor::start(
-                config::config_dir()
-                    .join("compositor.conf")
-                    .to_str()
-                    .unwrap_or(""),
-            );
+            // Start compositor if enabled in config
+            if config::compositor::is_enabled() {
+                compositor::start(
+                    config::config_dir()
+                        .join("compositor.conf")
+                        .to_str()
+                        .unwrap_or(""),
+                );
+            }
 
             ffi::srwm_run();
 
@@ -125,11 +128,14 @@ pub fn main_run() {
                 break;
             }
 
+            // On restart: stop compositor, it'll restart after config reload
             compositor::stop();
+            config::compositor::reset();
+
             ffi::srwm_clear_keybindings();
             ffi::srwm_clear_mousebindings();
         }
     }
-
+    crate::compositor::stop();
     ipc::set_running(false);
 }
