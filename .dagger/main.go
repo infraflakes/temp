@@ -1,4 +1,3 @@
-// .dagger/main.go
 package main
 
 import (
@@ -14,19 +13,19 @@ func (m *Srwm) Build(ctx context.Context, source *dagger.Directory) *dagger.File
 		WithEnvVariable("DEBIAN_FRONTEND", "noninteractive").
 		WithExec([]string{"apt-get", "update"}).
 		WithExec([]string{"apt-get", "install", "-y",
-			// C compiler + pkg-config
-			"gcc", "pkg-config",
-			// X11 stack (needed by c-src/wm.h)
-			"libx11-dev", "libxinerama-dev", "libxft-dev", "libx11-xcb-dev",
-			// Fontconfig + Freetype (font rendering)
-			"libfontconfig1-dev", "libfreetype6-dev",
-			// libclang (needed by bindgen to parse bridge.h)
+			"gcc", "pkg-config", "upx-ucl",
+			"libx11-dev", "libxinerama-dev", "libxft-dev", "libxrender-dev",
+			"libxcb1-dev", "libx11-xcb-dev", "libxext-dev",
+			"libxau-dev", "libxdmcp-dev",
+			"libfontconfig-dev", "libfreetype-dev",
+			"libexpat1-dev", "zlib1g-dev", "libbz2-dev",
+			"libpng-dev", "libbrotli-dev",
 			"libclang-dev",
 		}).
-		WithDirectory("/src", source.
-			WithoutDirectory("target"),
-		).
+		WithDirectory("/src", source.WithoutDirectory("target")).
 		WithWorkdir("/src").
+		WithEnvVariable("SRWM_STATIC", "1").
 		WithExec([]string{"cargo", "build", "--release"}).
+		WithExec([]string{"upx", "--best", "--lzma", "target/release/srwm"}).
 		File("target/release/srwm")
 }

@@ -8,7 +8,7 @@ pub mod xserver;
 
 use crate::cli::Cli;
 use clap::Parser;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 
 static SHOULD_QUIT: AtomicBool = AtomicBool::new(false);
 
@@ -62,7 +62,7 @@ fn setup_signal_handlers() {
 pub fn main_run() {
     let _dbus = dbus::Session::start();
 
-    let xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
+    let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
         match xserver::start() {
             Ok(srv) => Some(srv),
             Err(e) => {

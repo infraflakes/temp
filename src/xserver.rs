@@ -1,5 +1,3 @@
-use std::io;
-use std::os::unix::process::CommandExt;
 use std::process::{Child, Command};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -75,7 +73,10 @@ pub fn start() -> Result<Server, String> {
     // 4. Set up SIGUSR1 handler for Xorg readiness
     SIGUSR1_RECEIVED.store(false, Ordering::SeqCst);
     unsafe {
-        libc::signal(libc::SIGUSR1, sigusr1_handler as libc::sighandler_t);
+        libc::signal(
+            libc::SIGUSR1,
+            sigusr1_handler as *const () as libc::sighandler_t,
+        );
     }
 
     // 5. Start Xorg

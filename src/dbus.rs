@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 
 pub struct Session {
     child: Option<std::process::Child>,
-    address: String,
+    _address: String,
 }
 
 impl Session {
@@ -51,7 +51,7 @@ impl Session {
 
         Some(Session {
             child: Some(child),
-            address,
+            _address: address,
         })
     }
 }
