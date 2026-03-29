@@ -52,7 +52,6 @@ func (m *Srwm) Build(ctx context.Context, source *dagger.Directory) *dagger.File
 		}).
 		WithDirectory("/src", source.WithoutDirectory("target")).
 		WithWorkdir("/src").
-		WithEnvVariable("SRWM_STATIC", "1").
 		WithExec([]string{"cargo", "build", "--release"}).
 <<<<<<< HEAD
 >>>>>>> 1a2036c (Dagger)

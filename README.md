@@ -2,10 +2,14 @@
 <<<<<<< HEAD
 # Serein Window Manager
 <<<<<<< HEAD
+<<<<<<< HEAD
 A floating, zooming X11 window manager. Built with Rust, C and Lua.
 =======
 A fully statically linked X11 floating, zooming window manager. Built with Rust, C and Lua.
 >>>>>>> ebe0956 (Add srwm kickstart)
+=======
+A floating, zooming X11 window manager. Built with Rust, C and Lua.
+>>>>>>> 2939a1b (Verbose build)
 
 ![Preview](./assets/screenshot_default.png)
 
