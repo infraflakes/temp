@@ -43,6 +43,37 @@ fn main() {
 
     let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
+    // Build srcom as a standalone EXECUTABLE
+    if std::env::var("CARGO_FEATURE_EMBEDDED_COMPOSITOR").is_ok() {
+        let srcom_build = out_path.join("srcom-build");
+        std::fs::create_dir_all(&srcom_build).ok();
+
+        let srcom_path = std::path::PathBuf::from("compositor");
+        let meson_status = std::process::Command::new("meson")
+            .args([
+                "setup",
+                srcom_build.to_str().unwrap(),
+                srcom_path.to_str().unwrap(),
+                "--buildtype=release",
+                "-Dregex=true",
+                "-Dunittest=false",
+            ])
+            .status()
+            .expect("meson setup failed");
+        assert!(meson_status.success());
+
+        let ninja_status = std::process::Command::new("ninja")
+            .args(["-C", srcom_build.to_str().unwrap(), "src/srcom"])
+            .status()
+            .expect("ninja failed");
+        assert!(ninja_status.success());
+
+        // Copy the srcom binary to OUT_DIR so include_bytes!() can find it
+        std::fs::copy(srcom_build.join("src/srcom"), out_path.join("srcom"))
+            .expect("failed to copy srcom binary to OUT_DIR");
+    }
+
+    // Bindgen for srwm C code only — no srcom FFI needed
     let mut bindgen_builder = bindgen::Builder::default()
         .header("c-src/bridge/bridge.h")
         .allowlist_function("srwm_.*")
@@ -77,6 +108,7 @@ fn main() {
     }
     for name in [
         "xcb",
+        "X11-xcb",
         "Xext",
         "Xau",
         "Xdmcp",
@@ -89,40 +121,7 @@ fn main() {
     ] {
         println!("cargo:rustc-link-lib=static={}", name);
     }
-    // Build srcom compositor if source exists
-    let compositor_dir =
-        std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("compositor");
 
-    if compositor_dir.join("meson.build").exists() {
-        let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
-        let build_dir = out.join("srcom-build");
-        std::fs::create_dir_all(&build_dir).ok();
-
-        let meson = std::process::Command::new("meson")
-            .args([
-                "setup",
-                build_dir.to_str().unwrap(),
-                compositor_dir.to_str().unwrap(),
-                "--buildtype=release",
-                "-Dregex=true",
-                "-Dunittest=false",
-            ])
-            .status()
-            .expect("meson failed");
-        assert!(meson.success(), "meson setup failed");
-
-        let ninja = std::process::Command::new("ninja")
-            .args(["-C", build_dir.to_str().unwrap()])
-            .status()
-            .expect("ninja failed");
-        assert!(ninja.success(), "ninja build failed");
-
-        // Copy the built binary to OUT_DIR so include_bytes! can find it
-        std::fs::copy(build_dir.join("src/srcom"), out.join("srcom"))
-            .expect("failed to copy srcom binary");
-
-        println!("cargo:rustc-cfg=feature=\"embedded-compositor\"");
-        println!("cargo:rerun-if-changed=compositor/");
-    }
     println!("cargo:rerun-if-changed=c-src/");
+    println!("cargo:rerun-if-changed=srcom/");
 }
