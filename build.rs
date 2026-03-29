@@ -32,6 +32,7 @@ fn main() {
             "c-src/input/workspace.c",
             "c-src/bridge/bridge.c",
             "c-src/util/util.c",
+<<<<<<< HEAD
         ])
         .include("c-src/include")
         .include("c-src/bridge")
@@ -124,8 +125,11 @@ fn main() {
             "c-src/setup.c",
             "c-src/util.c",
             "c-src/workspace.c",
+=======
+>>>>>>> 7870993 (Modularize codebase)
         ])
-        .include("c-src")
+        .include("c-src/include")
+        .include("c-src/bridge")
         .define("XINERAMA", None)
         .flag_if_supported("-Wno-unused-parameter")
         .flag_if_supported("-Wno-sign-compare");
@@ -141,7 +145,7 @@ fn main() {
     let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
     let mut bindgen_builder = bindgen::Builder::default()
-        .header("c-src/bridge.h")
+        .header("c-src/bridge/bridge.h")
         .allowlist_function("srwm_.*")
         .allowlist_var("running");
 
