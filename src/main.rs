@@ -33,6 +33,7 @@ fn main() {
             println!("srwm {}", env!("CARGO_PKG_VERSION"));
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         Some(crate::cli::Command::Shutdown) => {
             if let Err(e) = ipc::send_command("shutdown\n") {
 =======
@@ -40,6 +41,16 @@ fn main() {
             let full_cmd = format!("{}\n", command);
             if let Err(e) = ipc::send_command(&full_cmd) {
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+        Some(crate::cli::Command::Shutdown) => {
+            if let Err(e) = ipc::send_command("shutdown\n") {
+                eprintln!("srwm: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some(crate::cli::Command::Restart) => {
+            if let Err(e) = ipc::send_command("restart\n") {
+>>>>>>> 349a5c6 (Restart, shutdown command)
                 eprintln!("srwm: {}", e);
                 std::process::exit(1);
             }
@@ -144,6 +155,7 @@ pub fn main_run() {
     }
 
     ipc::set_running(false);
+<<<<<<< HEAD
 =======
 mod ffi;
 
@@ -200,4 +212,6 @@ fn main() {
         }
     }
 >>>>>>> 4d838fa (Minimal life cycle)
+=======
+>>>>>>> 349a5c6 (Restart, shutdown command)
 }

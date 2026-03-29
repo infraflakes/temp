@@ -162,7 +162,7 @@ typedef struct {
   unsigned int click;   // ClkRootWin, ClkClientWin, etc.
   unsigned int mod;     // modifier mask
   unsigned int button;  // Button1-Button5
-  int id;               // callback ID for Go
+  int id;               // callback ID for Rust
 } DynamicButton;
 
 #define MAX_DYNAMIC_BUTTONS 64
@@ -310,7 +310,7 @@ int prev_ws(void);
 int isuniquegeom(XineramaScreenInfo *unique, size_t n,
                  XineramaScreenInfo *info);
 
-/* From Go (CGo export) — called in events.c keypress() */
+/* From Rust — called in events.c keypress() */
 extern void srwm_handle_key(int id);
 
 /* From setup.c / wm.c */

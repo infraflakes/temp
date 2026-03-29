@@ -100,6 +100,7 @@ fn handle_connection(stream: &mut impl Read) {
             }
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         "refresh" => {
             eprintln!("srwm: IPC received refresh");
@@ -108,6 +109,8 @@ fn handle_connection(stream: &mut impl Read) {
             }
         }
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+>>>>>>> 349a5c6 (Restart, shutdown command)
         _ => {
             eprintln!("srwm: unknown IPC command: {}", cmd);
         }

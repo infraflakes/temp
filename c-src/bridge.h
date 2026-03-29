@@ -18,7 +18,7 @@ extern void scan(void);
 extern void run(void);
 extern void cleanup(void);
 
-/* Bridge lifecycle — called by Go */
+/* Bridge lifecycle — called by Rust */
 int  srwm_init_display(void);
 void srwm_init_setup(void);
 void srwm_run(void);
@@ -26,21 +26,21 @@ void srwm_cleanup(void);
 void srwm_quit(void);
 int  srwm_should_restart(void);
 
-/* Status bar — Go sets the root window name */
+/* Status bar — Rust sets the root window name */
 void srwm_set_status(const char *text);
 
 /* Called from srwm.c restart() to distinguish restart from quit */
 void srwm_request_restart(void);
 
-/* Dynamic keybindings (Go -> C) */
+/* Dynamic keybindings (Rust -> C) */
 void srwm_add_keybinding(unsigned int mod, KeySym keysym, int id);
 void srwm_clear_keybindings(void);
 void srwm_grabkeys(void);
-/* Dynamic mouse bindings (Go -> C) */
+/* Dynamic mouse bindings (Rust -> C) */
 void srwm_add_mousebinding(unsigned int click, unsigned int mod, unsigned int button, int id);
 void srwm_clear_mousebindings(void);
 
-/* Called from C -> Go when a dynamic mouse button is pressed */
+/* Called from C -> Rust when a dynamic mouse button is pressed */
 extern void srwm_handle_mouse(int id);
 
 /* Config getters and setters */
@@ -67,7 +67,7 @@ extern char pending_border_inactive[8];
 void srwm_set_ws_label(int idx, const char* name);
 void srwm_set_ws_count(int len);
 
-/* Actions (Go -> C wrappers for internal static functions) */
+/* Actions (Rust -> C wrappers for internal static functions) */
 void srwm_action_killclient(void);
 void srwm_action_togglefullscr(void);
 void srwm_action_focusstack(int dir);
@@ -84,7 +84,7 @@ void srwm_action_homecanvas(void);
 void srwm_action_centerwindowoncanvas(void);  
 void srwm_action_zoomcanvas(int dir);
 
-/* Called from C -> Go when a dynamic key is pressed */
+/* Called from C -> Rust when a dynamic key is pressed */
 extern void srwm_handle_key(int id);
 
 #endif /* SRWM_BRIDGE_H */

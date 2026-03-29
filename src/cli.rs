@@ -16,10 +16,14 @@ pub enum Command {
     /// Print version information
     Version,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 349a5c6 (Restart, shutdown command)
     /// Shut down the running instance
     Shutdown,
     /// Restart the running instance
     Restart,
+<<<<<<< HEAD
     /// Deploy config files to ~/.config/srwm/ without starting the WM
     Kickstart {
         /// Overwrite existing config files
@@ -32,4 +36,6 @@ pub enum Command {
         command: String,
 >>>>>>> fe32d26 (DBus and XServer helper)
     },
+=======
+>>>>>>> 349a5c6 (Restart, shutdown command)
 }
