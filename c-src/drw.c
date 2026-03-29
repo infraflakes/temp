@@ -233,10 +233,14 @@ drw_setscheme(Drw *drw, Clr *scm)
 Picture
 drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8369e7a (Remove redundant icon logic, depedencies)
 	// Icons are loaded but never rendered (status bar removed)
 	// Return None to avoid Imlib2 dependency
 	(void)drw; (void)src; (void)srcw; (void)srch; (void)dstw; (void)dsth;
 	return None;
+<<<<<<< HEAD
 =======
 	Pixmap pm;
 	Picture pic;
@@ -298,6 +302,8 @@ drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int 
 
 	return pic;
 >>>>>>> 1a2036c (Dagger)
+=======
+>>>>>>> 8369e7a (Remove redundant icon logic, depedencies)
 }
 
 void
