@@ -23,9 +23,14 @@ fn main() {
         Some(crate::cli::Command::Version) => {
             println!("srwm {}", env!("CARGO_PKG_VERSION"));
         }
-        Some(crate::cli::Command::Ipc { command }) => {
-            let full_cmd = format!("{}\n", command);
-            if let Err(e) = ipc::send_command(&full_cmd) {
+        Some(crate::cli::Command::Shutdown) => {
+            if let Err(e) = ipc::send_command("shutdown\n") {
+                eprintln!("srwm: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some(crate::cli::Command::Restart) => {
+            if let Err(e) = ipc::send_command("restart\n") {
                 eprintln!("srwm: {}", e);
                 std::process::exit(1);
             }
@@ -96,4 +101,6 @@ pub fn main_run() {
             // TODO: Phase 2C — clear keybindings here
         }
     }
+
+    ipc::set_running(false);
 }

@@ -15,9 +15,8 @@ pub enum Command {
     Start,
     /// Print version information
     Version,
-    /// Send a command to a running instance via IPC
-    Ipc {
-        /// Command to send: shutdown, restart, or refresh
-        command: String,
-    },
+    /// Shut down the running instance
+    Shutdown,
+    /// Restart the running instance
+    Restart,
 }

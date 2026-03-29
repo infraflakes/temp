@@ -99,12 +99,6 @@ fn handle_connection(stream: &mut impl Read) {
                 crate::ffi::srwm_request_restart();
             }
         }
-        "refresh" => {
-            eprintln!("srwm: IPC received refresh");
-            unsafe {
-                crate::ffi::srwm_grabkeys();
-            }
-        }
         _ => {
             eprintln!("srwm: unknown IPC command: {}", cmd);
         }
