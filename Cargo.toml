@@ -15,6 +15,9 @@ which = "7"
 signal-hook = "0.3"
 libc = "0.2.183"
 getrandom = "0.2"
+pkg-config = "0.3.32"
+cc = "1.2.58"
+bindgen = "0.72.1"
 
 [build-dependencies]
 bindgen = "0.72.1"

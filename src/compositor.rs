@@ -11,8 +11,9 @@ const SRCOM_BIN: &[u8] = &[];
 static mut COMPOSITOR_PROCESS: Option<Child> = None;
 
 fn cache_dir() -> PathBuf {
-    dirs::cache_dir()
-        .unwrap_or_else(|| PathBuf::from("/tmp"))
+    dirs::data_local_dir()
+        .or_else(|| dirs::home_dir().map(|h| h.join(".local/share")))
+        .expect("cannot determine data directory")
         .join("srwm")
 }
 
