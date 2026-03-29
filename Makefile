@@ -3,10 +3,14 @@
 VERSION ?= $(shell git describe --tags --always --dirty --first-parent 2>/dev/null || echo "dev")
 .PHONY: all build config clean fmt lint
 
-all: build build-static
+all: build
 
 build: clean
-	@echo "Building srwm static $(VERSION)..."
+	@echo "Building srwm $(VERSION)..."
+	dagger call build --source=. export --path=./target/release/srwm
+
+build-verbose: clean
+	@echo "Building srwm $(VERSION)..."
 	dagger call build --source=. --progress=plain export --path=./target/release/srwm
 
 fmt:

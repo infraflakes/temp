@@ -1,5 +1,5 @@
 # Serein Window Manager
-A fully statically linked X11 floating, zooming window manager. Built with Rust, C and Lua.
+A floating, zooming X11 window manager. Built with Rust, C and Lua.
 
 ![Preview](./assets/screenshot_default.png)
 

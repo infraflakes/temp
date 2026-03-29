@@ -24,7 +24,6 @@ func (m *Srwm) Build(ctx context.Context, source *dagger.Directory) *dagger.File
 		}).
 		WithDirectory("/src", source.WithoutDirectory("target")).
 		WithWorkdir("/src").
-		WithEnvVariable("SRWM_STATIC", "1").
 		WithExec([]string{"cargo", "build", "--release"}).
 		WithExec([]string{"upx", "--best", "--lzma", "target/release/srwm"}).
 		File("target/release/srwm")
