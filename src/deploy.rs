@@ -4,10 +4,6 @@ const DEFAULT_SRWMRC: &str = include_str!("../config/srwmrc.lua");
 const DEFAULT_CANVAS: &str = include_str!("../config/canvas.lua");
 const DEFAULT_COMPOSITOR: &str = include_str!("../config/compositor.lua");
 const DEFAULT_KEYBINDINGS: &str = include_str!("../config/keybindings.lua");
-const DEFAULT_THEMING: &str = include_str!("../config/theming.lua");
-const DEFAULT_BAR: &str = include_str!("../config/bar.lua");
-const DEFAULT_STARTUP: &str = include_str!("../config/startup.lua");
-const DEFAULT_ENV: &str = include_str!("../config/env.lua");
 const DEFAULT_COMP: &str = include_str!("../compositor/data/animations.conf");
 
 pub fn deploy_defaults() -> bool {
@@ -26,10 +22,6 @@ pub fn deploy_defaults() -> bool {
         "canvas.lua",
         "compositor.lua",
         "keybindings.lua",
-        "theming.lua",
-        "bar.lua",
-        "startup.lua",
-        "env.lua",
     ];
 
     for name in files {
@@ -80,10 +72,6 @@ fn write_files(dir: &std::path::Path) {
         ("canvas.lua", DEFAULT_CANVAS),
         ("compositor.lua", DEFAULT_COMPOSITOR),
         ("keybindings.lua", DEFAULT_KEYBINDINGS),
-        ("theming.lua", DEFAULT_THEMING),
-        ("bar.lua", DEFAULT_BAR),
-        ("startup.lua", DEFAULT_STARTUP),
-        ("env.lua", DEFAULT_ENV),
         ("compositor.conf", DEFAULT_COMP),
     ];
 
