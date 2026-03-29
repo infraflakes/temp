@@ -1,6 +1,9 @@
 fn main() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
     let pc = |name: &str| -> pkg_config::Library {
         let mut cfg = pkg_config::Config::new();
         cfg.cargo_metadata(false);
@@ -14,6 +17,7 @@ fn main() {
     let xrender = pc("xrender");
     let fontconfig = pc("fontconfig");
     let freetype = pc("freetype2");
+<<<<<<< HEAD
 
     let mut build = cc::Build::new();
     build
@@ -103,8 +107,9 @@ fn main() {
     let xrender = pkg_config::probe_library("xrender").unwrap();
     let fontconfig = pkg_config::probe_library("fontconfig").unwrap();
     let freetype = pkg_config::probe_library("freetype2").unwrap();
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
 
-    // Collect all include paths
     let mut build = cc::Build::new();
     build
 >>>>>>> 1a2036c (Dagger)
@@ -125,7 +130,6 @@ fn main() {
         .flag_if_supported("-Wno-unused-parameter")
         .flag_if_supported("-Wno-sign-compare");
 
-    // Add all pkg-config include paths to the C compiler
     for lib in [&x11, &xft, &xinerama, &xrender, &fontconfig, &freetype] {
         for path in &lib.include_paths {
             build.include(path);
@@ -134,46 +138,56 @@ fn main() {
 
     build.compile("srwm");
 
-    // Phase 2: Generate Rust FFI bindings from bridge.h
+    let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+
     let mut bindgen_builder = bindgen::Builder::default()
         .header("c-src/bridge.h")
         .allowlist_function("srwm_.*")
         .allowlist_var("running");
 
-    // Add include paths for bindgen/clang too
     for lib in [&x11, &xft, &xinerama, &xrender, &fontconfig, &freetype] {
         for path in &lib.include_paths {
             bindgen_builder = bindgen_builder.clang_arg(format!("-I{}", path.display()));
         }
     }
 
-    let bindings = bindgen_builder
+    bindgen_builder
         .blocklist_function("srwm_handle_key")
         .blocklist_function("srwm_handle_mouse")
         .generate()
-        .expect("Unable to generate bindings");
-
-    let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
-    bindings
+        .expect("Unable to generate bindings")
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
-    // pkg_config::probe_library already emits cargo:rustc-link-lib directives,
-    // but we need to ensure they're all linked. Add any that pkg-config might miss:
-    // Core X11 libs
-    println!("cargo:rustc-link-lib=static=X11");
-    println!("cargo:rustc-link-lib=static=Xinerama");
-    println!("cargo:rustc-link-lib=static=Xft");
-    println!("cargo:rustc-link-lib=static=Xrender");
-    println!("cargo:rustc-link-lib=static=fontconfig");
-    println!("cargo:rustc-link-lib=static=freetype");
+    println!("cargo:rustc-link-search=native=/usr/lib");
+    println!("cargo:rustc-link-search=native=/usr/lib/x86_64-linux-gnu");
 
-    // Transitive deps (X11 pulls these in)
-    println!("cargo:rustc-link-lib=static=xcb");
-    println!("cargo:rustc-link-lib=static=Xext");
-    println!("cargo:rustc-link-lib=static=Xau");
-    println!("cargo:rustc-link-lib=static=Xdmcp");
+    for name in [
+        "X11",
+        "Xinerama",
+        "Xft",
+        "Xrender",
+        "fontconfig",
+        "freetype",
+    ] {
+        println!("cargo:rustc-link-lib=static={}", name);
+    }
+    for name in [
+        "xcb",
+        "Xext",
+        "Xau",
+        "Xdmcp",
+        "expat",
+        "z",
+        "bz2",
+        "png16",
+        "brotlidec",
+        "brotlicommon",
+    ] {
+        println!("cargo:rustc-link-lib=static={}", name);
+    }
 
+<<<<<<< HEAD
     // Transitive deps (fontconfig/freetype pull these in)
     println!("cargo:rustc-link-lib=static=expat");
     println!("cargo:rustc-link-lib=static=z");
@@ -184,5 +198,7 @@ fn main() {
 
     // Rebuild if C sources change
 >>>>>>> 9436516 (Scaffold)
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
     println!("cargo:rerun-if-changed=c-src/");
 }

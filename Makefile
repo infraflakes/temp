@@ -36,11 +36,11 @@ CONFIG_DEF = internal/core/config.def.h
 >>>>>>> 46f7a59 (Add UPX)
 .PHONY: all build config clean fmt lint
 
-all: build
+all: build build-static
 
 build: clean
-	@echo "Building srwm $(VERSION)..."
-	dagger call build --source=. export --path=./target/release/srwm
+	@echo "Building srwm static $(VERSION)..."
+	dagger call build --source=. --progress=plain export --path=./target/release/srwm
 
 fmt:
 	@echo "Formatting code..."

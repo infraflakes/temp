@@ -14,10 +14,14 @@ pub mod xserver;
 use crate::cli::Cli;
 use clap::Parser;
 <<<<<<< HEAD
+<<<<<<< HEAD
 use std::sync::atomic::AtomicBool;
 =======
 use std::sync::atomic::{AtomicBool, Ordering};
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+use std::sync::atomic::AtomicBool;
+>>>>>>> 2dd0a21 (Static major libraries)
 
 static SHOULD_QUIT: AtomicBool = AtomicBool::new(false);
 
@@ -103,10 +107,14 @@ pub fn main_run() {
     let _dbus = dbus::Session::start();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
 =======
     let xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+    let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
+>>>>>>> 2dd0a21 (Static major libraries)
         match xserver::start() {
             Ok(srv) => Some(srv),
             Err(e) => {

@@ -1,9 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 use std::process::{Child, Command};
 use std::sync::atomic::{AtomicBool, Ordering};
 =======
 use std::io;
 use std::os::unix::process::CommandExt;
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
 use std::process::{Child, Command};
 <<<<<<< HEAD
 use std::sync::Arc;
@@ -87,13 +90,19 @@ pub fn start() -> Result<Server, String> {
     SIGUSR1_RECEIVED.store(false, Ordering::SeqCst);
     unsafe {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
         libc::signal(
             libc::SIGUSR1,
             sigusr1_handler as *const () as libc::sighandler_t,
         );
+<<<<<<< HEAD
 =======
         libc::signal(libc::SIGUSR1, sigusr1_handler as libc::sighandler_t);
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+>>>>>>> 2dd0a21 (Static major libraries)
     }
 
     // 5. Start Xorg
