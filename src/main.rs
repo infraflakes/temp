@@ -1,4 +1,5 @@
 pub mod cli;
+pub mod compositor;
 pub mod config;
 pub mod dbus;
 pub mod deploy;
@@ -87,9 +88,9 @@ pub fn main_run() {
 
     ipc::start_ipc_server();
 
-    loop {
-        deploy::deploy_defaults();
+    deploy::deploy_defaults();
 
+    loop {
         unsafe {
             if ffi::srwm_init_display() != 0 {
                 eprintln!("srwm: cannot open display");
@@ -104,6 +105,14 @@ pub fn main_run() {
             }
 
             ffi::srwm_init_setup();
+
+            compositor::start(
+                config::config_dir()
+                    .join("compositor.conf")
+                    .to_str()
+                    .unwrap_or(""),
+            );
+
             ffi::srwm_run();
 
             ffi::clear_lua_vm();
@@ -116,6 +125,7 @@ pub fn main_run() {
                 break;
             }
 
+            compositor::stop();
             ffi::srwm_clear_keybindings();
             ffi::srwm_clear_mousebindings();
         }
