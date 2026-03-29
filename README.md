@@ -1,7 +1,11 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 # Serein Window Manager
+<<<<<<< HEAD
 A floating, zooming X11 window manager. Built with Rust, C and Lua.
+=======
+A fully statically linked X11 floating, zooming window manager. Built with Rust, C and Lua.
+>>>>>>> ebe0956 (Add srwm kickstart)
 
 ![Preview](./assets/screenshot_default.png)
 
@@ -40,6 +44,7 @@ srwm by default only shrinks or expand windows to mimick zoom because it require
 ### Building from scratch
 
 Current the project only supports building with [dagger](https://dagger.io/).
+<<<<<<< HEAD
 
 =======
 > This project is still unconventionally usable for now
@@ -144,6 +149,8 @@ nix build .#default
 ```
 
 Or
+=======
+>>>>>>> ebe0956 (Add srwm kickstart)
 
 ```bash
 make build

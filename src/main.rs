@@ -60,12 +60,15 @@ fn main() {
             }
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         Some(crate::cli::Command::Restart) => {
             if let Err(e) = ipc::send_command("restart\n") {
                 eprintln!("srwm: {}", e);
                 std::process::exit(1);
             }
         }
+=======
+>>>>>>> ebe0956 (Add srwm kickstart)
         Some(crate::cli::Command::Kickstart { force }) => {
             if force {
                 if deploy::force_deploy() {
@@ -77,8 +80,11 @@ fn main() {
                 }
             }
         }
+<<<<<<< HEAD
 =======
 >>>>>>> fe32d26 (DBus and XServer helper)
+=======
+>>>>>>> ebe0956 (Add srwm kickstart)
     }
 }
 

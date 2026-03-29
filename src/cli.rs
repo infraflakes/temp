@@ -24,11 +24,15 @@ pub enum Command {
     /// Restart the running instance
     Restart,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ebe0956 (Add srwm kickstart)
     /// Deploy config files to ~/.config/srwm/ without starting the WM
     Kickstart {
         /// Overwrite existing config files
         #[arg(short, long)]
         force: bool,
+<<<<<<< HEAD
 =======
     /// Send a command to a running instance via IPC
     Ipc {
@@ -38,4 +42,7 @@ pub enum Command {
     },
 =======
 >>>>>>> 349a5c6 (Restart, shutdown command)
+=======
+    },
+>>>>>>> ebe0956 (Add srwm kickstart)
 }
