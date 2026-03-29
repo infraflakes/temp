@@ -54,15 +54,25 @@ fn ensure_extracted() -> Option<PathBuf> {
     Some(path)
 }
 
-pub fn start(config_path: &str) {
-    eprintln!("srwm: compositor::start called with config={}", config_path);
+pub fn start() {
+    eprintln!("srwm: starting compositor from Lua config");
     let Some(bin) = ensure_extracted() else {
         eprintln!("srwm: compositor binary not available");
         return;
     };
 
+    let config_content = crate::config::compositor::generate_config();
+    eprintln!("srwm: generated config:\n{}", config_content);
+
+    let temp_dir = cache_dir();
+    let temp_config = temp_dir.join("compositor.conf");
+    if let Err(e) = std::fs::write(&temp_config, &config_content) {
+        eprintln!("srwm: failed to write temp config: {}", e);
+        return;
+    }
+
     match Command::new(&bin)
-        .args(["--config", config_path])
+        .args(["--config", temp_config.to_str().unwrap()])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()

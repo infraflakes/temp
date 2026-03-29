@@ -108,12 +108,7 @@ pub fn main_run() {
 
             // Start compositor if enabled in config
             if config::compositor::is_enabled() {
-                compositor::start(
-                    config::config_dir()
-                        .join("compositor.conf")
-                        .to_str()
-                        .unwrap_or(""),
-                );
+                compositor::start();
             }
 
             ffi::srwm_run();
