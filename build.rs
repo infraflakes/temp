@@ -33,6 +33,9 @@ fn main() {
             "c-src/bridge/bridge.c",
             "c-src/util/util.c",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 7870993 (Modularize codebase)
         ])
         .include("c-src/include")
         .include("c-src/bridge")
