@@ -18,7 +18,7 @@ Since `srwm` is built with most dependencies statically linked, you can run it o
 ### Getting started
 
 > [!CAUTION]
-> You should modify the font config at ~/.config/srwm/bar.lua
+> You should modify the font config at ~/.config/srwm/srwmrc.lua
 > And keybindings at ~/.config/srwm/keybindings.lua before starting
 > The default tab bar uses nerd glyph to display control buttons, you may want to install it
 
@@ -41,6 +41,12 @@ Current the project only supports building with [dagger](https://dagger.io/).
 
 ```bash
 make build
+```
+
+Or for plain output:
+
+```bash
+make build-verbose
 ```
 
 ## Acknowledgements

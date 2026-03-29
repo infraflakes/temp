@@ -2546,11 +2546,7 @@ static void __attribute__((constructor(201))) init_early_logging(void) {
  * The function that everybody knows.
  */
 int PICOM_MAIN(int argc, char **argv) {
-	// Set locale so window names with special characters are interpreted
-	// correctly
 	setlocale(LC_ALL, "");
-
-	parse_debug_options(&global_debug_options);
 
 	int exit_code;
 	char *config_file = NULL;
@@ -2559,108 +2555,30 @@ int PICOM_MAIN(int argc, char **argv) {
 		return exit_code;
 	}
 
-	int pfds[2];
-	if (need_fork) {
-		if (pipe2(pfds, O_CLOEXEC)) {
-			perror("pipe2");
-			return 1;
-		}
-		auto pid = fork();
-		if (pid < 0) {
-			perror("fork");
-			return 1;
-		}
-		if (pid > 0) {
-			// We are the parent
-			close(pfds[1]);
-			// We wait for the child to tell us it has finished initialization
-			// by sending us something via the pipe.
-			int tmp;
-			if (read(pfds[0], &tmp, sizeof tmp) <= 0) {
-				// Failed to read, the child has most likely died
-				// We can probably waitpid() here.
-				return 1;
-			}
-			// We are done
-			return 0;
-		}
-		// We are the child
-		close(pfds[0]);
+	Display *dpy = XOpenDisplay(NULL);
+	if (!dpy) {
+		log_fatal("Can't open display.");
+		return 1;
+	}
+	XSetEventQueueOwner(dpy, XCBOwnsEventQueue);
+
+	ps_g = session_init(argc, argv, dpy, config_file, all_xerrors, need_fork);
+	if (!ps_g) {
+		log_fatal("Failed to create new session.");
+		XCloseDisplay(dpy);
+		return 1;
 	}
 
-	// Main loop
-	bool quit = false;
-	int ret_code = 0;
-	char *pid_file = NULL;
+	session_run(ps_g);
 
-	do {
-		Display *dpy = XOpenDisplay(NULL);
-		if (!dpy) {
-			log_fatal("Can't open display.");
-			ret_code = 1;
-			break;
-		}
-		XSetEventQueueOwner(dpy, XCBOwnsEventQueue);
-
-		// Reinit logging system so we don't get leftovers from previous sessions
-		// or early logging.
-		log_deinit_tls();
-		log_init_tls();
-
-		ps_g = session_init(argc, argv, dpy, config_file, all_xerrors, need_fork);
-		if (!ps_g) {
-			log_fatal("Failed to create new session.");
-			ret_code = 1;
-			quit = true;
-			goto end;
-		}
-		if (need_fork) {
-			// Finishing up daemonization
-			// Close files
-			if (fclose(stdout) || fclose(stderr) || fclose(stdin)) {
-				log_fatal("Failed to close standard input/output");
-				ret_code = 1;
-				break;
-			}
-			// Make us the session and process group leader so we don't get
-			// killed when our parent die.
-			setsid();
-			// Notify the parent that we are done. This might cause the parent
-			// to quit, so only do this after setsid()
-			int tmp = 1;
-			if (write(pfds[1], &tmp, sizeof tmp) != sizeof tmp) {
-				log_fatal("Failed to notify parent process");
-				ret_code = 1;
-				break;
-			}
-			close(pfds[1]);
-			// We only do this once
-			need_fork = false;
-		}
-		session_run(ps_g);
-		quit = ps_g->quit;
-		if (quit && ps_g->o.write_pid_path) {
-			pid_file = strdup(ps_g->o.write_pid_path);
-		}
-		session_destroy(ps_g);
-		free(ps_g);
-		ps_g = NULL;
-	end:
-		if (dpy) {
-			XCloseDisplay(dpy);
-		}
-	} while (!quit);
+	session_destroy(ps_g);
+	free(ps_g);
+	ps_g = NULL;
 
 	free(config_file);
-	if (pid_file) {
-		log_trace("remove pid file %s", pid_file);
-		unlink(pid_file);
-		free(pid_file);
-	}
-
 	log_deinit_tls();
 
-	return ret_code;
+	return 0;
 }
 
 #ifdef UNIT_TEST
