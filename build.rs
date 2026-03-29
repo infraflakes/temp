@@ -4,7 +4,6 @@ fn main() {
     let xft = pkg_config::probe_library("xft").unwrap();
     let xinerama = pkg_config::probe_library("xinerama").unwrap();
     let xrender = pkg_config::probe_library("xrender").unwrap();
-    let imlib2 = pkg_config::probe_library("imlib2").unwrap();
     let fontconfig = pkg_config::probe_library("fontconfig").unwrap();
     let freetype = pkg_config::probe_library("freetype2").unwrap();
 
@@ -32,15 +31,7 @@ fn main() {
         .flag_if_supported("-Wno-sign-compare");
 
     // Add all pkg-config include paths to the C compiler
-    for lib in [
-        &x11,
-        &xft,
-        &xinerama,
-        &xrender,
-        &imlib2,
-        &fontconfig,
-        &freetype,
-    ] {
+    for lib in [&x11, &xft, &xinerama, &xrender, &fontconfig, &freetype] {
         for path in &lib.include_paths {
             build.include(path);
         }
@@ -55,15 +46,7 @@ fn main() {
         .allowlist_var("running");
 
     // Add include paths for bindgen/clang too
-    for lib in [
-        &x11,
-        &xft,
-        &xinerama,
-        &xrender,
-        &imlib2,
-        &fontconfig,
-        &freetype,
-    ] {
+    for lib in [&x11, &xft, &xinerama, &xrender, &fontconfig, &freetype] {
         for path in &lib.include_paths {
             bindgen_builder = bindgen_builder.clang_arg(format!("-I{}", path.display()));
         }
@@ -98,13 +81,27 @@ fn main() {
 
     // pkg_config::probe_library already emits cargo:rustc-link-lib directives,
     // but we need to ensure they're all linked. Add any that pkg-config might miss:
-    println!("cargo:rustc-link-lib=X11");
-    println!("cargo:rustc-link-lib=Xinerama");
-    println!("cargo:rustc-link-lib=Xft");
-    println!("cargo:rustc-link-lib=Xrender");
-    println!("cargo:rustc-link-lib=Imlib2");
-    println!("cargo:rustc-link-lib=fontconfig");
-    println!("cargo:rustc-link-lib=freetype");
+    // Core X11 libs
+    println!("cargo:rustc-link-lib=static=X11");
+    println!("cargo:rustc-link-lib=static=Xinerama");
+    println!("cargo:rustc-link-lib=static=Xft");
+    println!("cargo:rustc-link-lib=static=Xrender");
+    println!("cargo:rustc-link-lib=static=fontconfig");
+    println!("cargo:rustc-link-lib=static=freetype");
+
+    // Transitive deps (X11 pulls these in)
+    println!("cargo:rustc-link-lib=static=xcb");
+    println!("cargo:rustc-link-lib=static=Xext");
+    println!("cargo:rustc-link-lib=static=Xau");
+    println!("cargo:rustc-link-lib=static=Xdmcp");
+
+    // Transitive deps (fontconfig/freetype pull these in)
+    println!("cargo:rustc-link-lib=static=expat");
+    println!("cargo:rustc-link-lib=static=z");
+    println!("cargo:rustc-link-lib=static=bz2");
+    println!("cargo:rustc-link-lib=static=png16");
+    println!("cargo:rustc-link-lib=static=brotlidec");
+    println!("cargo:rustc-link-lib=static=brotlicommon");
 
     // Rebuild if C sources change
 >>>>>>> 9436516 (Scaffold)
