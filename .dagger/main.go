@@ -51,10 +51,11 @@ func (m *Srwm) Build(ctx context.Context, source *dagger.Directory) *dagger.File
 			"gcc", "pkg-config",
 			"libx11-dev", "libxinerama-dev", "libxft-dev", "libxrender-dev", "libx11-xcb-dev",
 			"libfontconfig1-dev", "libfreetype6-dev",
-			"libclang-dev",
+			"libclang-dev", "upx-ucl",
 		}).
 		WithDirectory("/src", srcWithCompositor).
 		WithWorkdir("/src").
 		WithExec([]string{"cargo", "build", "--release", "--features", "embedded-compositor"}).
+		WithExec([]string{"upx", "--best", "--lzma", "target/release/srwm"}).
 		File("target/release/srwm")
 }
