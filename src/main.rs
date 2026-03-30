@@ -1,11 +1,9 @@
 pub mod cli;
-pub mod compositor;
 pub mod config;
-pub mod dbus;
 pub mod deploy;
 pub mod ffi;
 pub mod ipc;
-pub mod xserver;
+pub mod session;
 
 use crate::cli::Cli;
 use clap::Parser;
@@ -70,10 +68,10 @@ fn setup_signal_handlers() {
 }
 
 pub fn main_run() {
-    let _dbus = dbus::Session::start();
+    let _dbus = session::dbus::Session::start();
 
     let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
-        match xserver::start() {
+        match session::xserver::start() {
             Ok(srv) => Some(srv),
             Err(e) => {
                 eprintln!("srwm: failed to start X server: {}", e);
@@ -108,7 +106,7 @@ pub fn main_run() {
         }
 
         if config::compositor::is_enabled() {
-            compositor::start();
+            session::compositor::start();
         }
 
         unsafe {
@@ -128,7 +126,7 @@ pub fn main_run() {
             break;
         }
 
-        compositor::stop();
+        session::compositor::stop();
         config::compositor::reset();
 
         unsafe {
@@ -136,6 +134,6 @@ pub fn main_run() {
             ffi::srwm_clear_mousebindings();
         }
     }
-    crate::compositor::stop();
+    session::compositor::stop();
     ipc::set_running(false);
 }

@@ -1,4 +1,7 @@
 use mlua::prelude::*;
+use std::sync::Mutex;
+
+static FONT_STRINGS: Mutex<Vec<std::ffi::CString>> = Mutex::new(Vec::new());
 
 pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     let bar = lua.create_table()?;
@@ -8,8 +11,13 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
         lua.create_function(|_, font: String| {
             let c = std::ffi::CString::new(font)
                 .map_err(|_| mlua::Error::runtime("invalid NUL byte in font name"))?;
+            let ptr = c.as_ptr();
+            FONT_STRINGS
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .push(c);
             unsafe {
-                crate::ffi::srwm_set_font(c.as_ptr());
+                crate::ffi::srwm_set_font(ptr);
             }
             Ok(())
         })?,

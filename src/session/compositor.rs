@@ -24,7 +24,6 @@ fn ensure_extracted() -> Option<PathBuf> {
     );
 
     if SRCOM_BIN.is_empty() {
-        // Not embedded — try PATH
         return which::which("srcom").ok();
     }
 
@@ -36,7 +35,6 @@ fn ensure_extracted() -> Option<PathBuf> {
     let path = dir.join("srcom");
     eprintln!("srwm: cache path = {}", path.display());
 
-    // Always remove old binary to prevent stale versions
     let _ = std::fs::remove_file(&path);
     eprintln!(
         "srwm: extracting compositor ({} bytes) to {}",
