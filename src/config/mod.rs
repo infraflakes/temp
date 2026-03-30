@@ -54,11 +54,11 @@ pub fn config_dir() -> PathBuf {
 }
 
 pub(crate) fn get_key_callbacks() -> std::sync::MutexGuard<'static, Vec<LuaRegistryKey>> {
-    KEY_CALLBACKS.lock().unwrap()
+    KEY_CALLBACKS.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 pub(crate) fn get_mouse_callbacks() -> std::sync::MutexGuard<'static, Vec<LuaRegistryKey>> {
-    MOUSE_CALLBACKS.lock().unwrap()
+    MOUSE_CALLBACKS.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 fn register_include(lua: &Lua) -> LuaResult<()> {

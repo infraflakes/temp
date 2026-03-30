@@ -3,27 +3,31 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
+use std::cell::RefCell;
+
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-static mut LUA_VM: Option<*const mlua::Lua> = None;
-
-pub unsafe fn set_lua_vm(lua: &mlua::Lua) {
-    unsafe {
-        LUA_VM = Some(lua as *const mlua::Lua);
-    }
+thread_local! {
+    static LUA_VM: RefCell<Option<*const mlua::Lua>> = RefCell::new(None);
 }
 
-pub unsafe fn clear_lua_vm() {
-    unsafe {
-        LUA_VM = None;
-    }
+pub fn set_lua_vm(lua: &mlua::Lua) {
+    LUA_VM.with(|vm| {
+        *vm.borrow_mut() = Some(lua as *const mlua::Lua);
+    });
+}
+
+pub fn clear_lua_vm() {
+    LUA_VM.with(|vm| {
+        *vm.borrow_mut() = None;
+    });
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn srwm_handle_key(id: std::ffi::c_int) {
-    unsafe {
-        if let Some(lua_ptr) = LUA_VM {
-            let lua = &*lua_ptr;
+    LUA_VM.with(|lua_vm| {
+        if let Some(lua_ptr) = *lua_vm.borrow() {
+            let lua = unsafe { &*lua_ptr };
             let cbs = crate::config::get_key_callbacks();
             if let Some(reg_key) = cbs.get(id as usize) {
                 if let Ok(cb) = lua.registry_value::<mlua::Function>(reg_key) {
@@ -33,14 +37,14 @@ pub extern "C" fn srwm_handle_key(id: std::ffi::c_int) {
                 }
             }
         }
-    }
+    });
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn srwm_handle_mouse(id: std::ffi::c_int) {
-    unsafe {
-        if let Some(lua_ptr) = LUA_VM {
-            let lua = &*lua_ptr;
+    LUA_VM.with(|lua_vm| {
+        if let Some(lua_ptr) = *lua_vm.borrow() {
+            let lua = unsafe { &*lua_ptr };
             let cbs = crate::config::get_mouse_callbacks();
             if let Some(reg_key) = cbs.get(id as usize) {
                 if let Ok(cb) = lua.registry_value::<mlua::Function>(reg_key) {
@@ -50,5 +54,5 @@ pub extern "C" fn srwm_handle_mouse(id: std::ffi::c_int) {
                 }
             }
         }
-    }
+    });
 }

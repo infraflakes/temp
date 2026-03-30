@@ -57,16 +57,14 @@ fn setup_signal_handlers() {
     unsafe {
         let _ = register(SIGTERM, || {
             SHOULD_QUIT.store(true, std::sync::atomic::Ordering::SeqCst);
-            crate::ffi::srwm_quit();
         });
 
         let _ = register(SIGINT, || {
             SHOULD_QUIT.store(true, std::sync::atomic::Ordering::SeqCst);
-            crate::ffi::srwm_quit();
         });
 
         let _ = register(SIGHUP, || {
-            crate::ffi::srwm_request_restart();
+            SHOULD_QUIT.store(true, std::sync::atomic::Ordering::SeqCst);
         });
     }
 }
@@ -96,37 +94,44 @@ pub fn main_run() {
                 eprintln!("srwm: cannot open display");
                 std::process::exit(1);
             }
+        }
 
-            let lua = mlua::Lua::new();
-            ffi::set_lua_vm(&lua);
+        let lua = mlua::Lua::new();
+        ffi::set_lua_vm(&lua);
 
-            if let Err(e) = config::load_config(&lua) {
-                eprintln!("srwm: lua config error: {}", e);
-            }
+        if let Err(e) = config::load_config(&lua) {
+            eprintln!("srwm: lua config error: {}", e);
+        }
 
+        unsafe {
             ffi::srwm_init_setup();
+        }
 
-            // Start compositor if enabled in config
-            if config::compositor::is_enabled() {
-                compositor::start();
-            }
+        if config::compositor::is_enabled() {
+            compositor::start();
+        }
 
+        unsafe {
             ffi::srwm_run();
+        }
 
-            ffi::clear_lua_vm();
+        ffi::clear_lua_vm();
+        unsafe {
             ffi::srwm_cleanup();
+        }
 
-            config::get_key_callbacks().clear();
-            config::get_mouse_callbacks().clear();
+        config::get_key_callbacks().clear();
+        config::get_mouse_callbacks().clear();
 
-            if ffi::srwm_should_restart() == 0 {
-                break;
-            }
+        let should_restart: i32 = unsafe { ffi::srwm_should_restart() };
+        if should_restart == 0 {
+            break;
+        }
 
-            // On restart: stop compositor, it'll restart after config reload
-            compositor::stop();
-            config::compositor::reset();
+        compositor::stop();
+        config::compositor::reset();
 
+        unsafe {
             ffi::srwm_clear_keybindings();
             ffi::srwm_clear_mousebindings();
         }

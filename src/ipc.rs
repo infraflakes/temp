@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::os::fd::AsRawFd;
 use std::os::unix::net::UnixListener;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -21,6 +22,16 @@ pub fn set_running(value: bool) {
     RUNNING.store(value, Ordering::SeqCst);
 }
 
+fn create_self_pipe() -> Result<(i32, i32), std::io::Error> {
+    let mut fds = [0i32, 0i32];
+    unsafe {
+        if libc::pipe(fds.as_mut_ptr()) != 0 {
+            return Err(std::io::Error::last_os_error());
+        }
+    }
+    Ok((fds[0], fds[1]))
+}
+
 pub fn start_ipc_server() {
     let path = socket_path();
 
@@ -37,28 +48,72 @@ pub fn start_ipc_server() {
             }
         };
 
-        if let Err(e) = listener.set_nonblocking(true) {
-            eprintln!("srwm: failed to set socket nonblocking: {}", e);
-            return;
-        }
+        let (wake_read, wake_write) = match create_self_pipe() {
+            Ok(p) => p,
+            Err(e) => {
+                eprintln!("srwm: failed to create self-pipe: {}", e);
+                return;
+            }
+        };
 
-        while is_running() {
-            match listener.accept() {
-                Ok((mut stream, _)) => {
-                    std::thread::spawn(move || {
-                        handle_connection(&mut stream);
-                    });
+        let mut poll_fds = [
+            libc::pollfd {
+                fd: listener.as_raw_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            },
+            libc::pollfd {
+                fd: wake_read,
+                events: libc::POLLIN,
+                revents: 0,
+            },
+        ];
+
+        loop {
+            let timeout_ms = if is_running() { -1 } else { 0 };
+            let ret = unsafe {
+                libc::poll(
+                    poll_fds.as_mut_ptr(),
+                    poll_fds.len() as libc::nfds_t,
+                    timeout_ms,
+                )
+            };
+
+            if ret < 0 {
+                if std::io::Error::last_os_error().kind() == std::io::ErrorKind::Interrupted {
+                    continue;
                 }
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    std::thread::sleep(std::time::Duration::from_millis(10));
+                eprintln!("srwm: poll error");
+                break;
+            }
+
+            if !is_running() {
+                break;
+            }
+
+            if poll_fds[0].revents & libc::POLLIN != 0 {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        std::thread::spawn(move || {
+                            handle_connection(&mut stream);
+                        });
+                    }
+                    Err(e) => {
+                        eprintln!("srwm: socket accept error: {}", e);
+                    }
                 }
-                Err(e) => {
-                    eprintln!("srwm: socket accept error: {}", e);
-                }
+            }
+
+            if poll_fds[1].revents & libc::POLLIN != 0 {
+                break;
             }
         }
 
-        let _ = std::fs::remove_file(&path);
+        unsafe {
+            let _ = std::fs::remove_file(&path);
+            libc::close(wake_read);
+            libc::close(wake_write);
+        }
     });
 }
 
@@ -89,6 +144,7 @@ fn handle_connection(stream: &mut impl Read) {
     match cmd {
         "shutdown" => {
             eprintln!("srwm: IPC received shutdown");
+            SHOULD_QUIT.store(true, Ordering::SeqCst);
             unsafe {
                 crate::ffi::srwm_quit();
             }
@@ -104,6 +160,8 @@ fn handle_connection(stream: &mut impl Read) {
         }
     }
 }
+
+static SHOULD_QUIT: AtomicBool = AtomicBool::new(false);
 
 pub fn send_command(command: &str) -> Result<(), String> {
     let path = socket_path();

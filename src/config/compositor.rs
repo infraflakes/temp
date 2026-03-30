@@ -290,8 +290,8 @@ pub fn generate_config() -> String {
         let mut out = String::new();
 
         out.push_str("backend = \"egl\";\n");
-        out.push_str(&format!("detect-client-opacity = true;\n"));
-        out.push_str(&format!("use-damage = true;\n"));
+        out.push_str("detect-client-opacity = true;\n");
+        out.push_str("use-damage = true;\n");
         out.push_str(&format!("vsync = {};\n", c.vsync));
 
         out.push_str(&format!("shadow = {};\n", c.shadow.enable));

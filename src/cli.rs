@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "srwm")]
-#[command(version = "0.5.4")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "Simple Rust Window Manager")]
 pub struct Cli {
     #[command(subcommand)]

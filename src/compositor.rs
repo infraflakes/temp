@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Child, Command};
+use std::sync::Mutex;
 
 #[cfg(feature = "embedded-compositor")]
 const SRCOM_BIN: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/srcom"));
@@ -8,7 +9,7 @@ const SRCOM_BIN: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/srcom"));
 #[cfg(not(feature = "embedded-compositor"))]
 const SRCOM_BIN: &[u8] = &[];
 
-static mut COMPOSITOR_PROCESS: Option<Child> = None;
+static COMPOSITOR_PROCESS: Mutex<Option<Child>> = Mutex::new(None);
 
 fn cache_dir() -> PathBuf {
     dirs::home_dir()
@@ -77,18 +78,19 @@ pub fn start() {
     {
         Ok(child) => {
             eprintln!("srwm: compositor started (pid={})", child.id());
-            unsafe { COMPOSITOR_PROCESS = Some(child) }
+            let mut guard = COMPOSITOR_PROCESS.lock().unwrap_or_else(|e| e.into_inner());
+            *guard = Some(child);
         }
         Err(e) => eprintln!("srwm: failed to start compositor: {}", e),
     }
 }
 
 pub fn stop() {
-    unsafe {
-        if let Some(ref mut child) = COMPOSITOR_PROCESS {
+    if let Ok(mut guard) = COMPOSITOR_PROCESS.lock() {
+        if let Some(ref mut child) = *guard {
             let _ = child.kill();
             let _ = child.wait();
         }
-        COMPOSITOR_PROCESS = None;
+        *guard = None;
     }
 }
