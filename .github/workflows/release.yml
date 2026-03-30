@@ -1,0 +1,35 @@
+name: srwm Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Build with Dagger
+        uses: dagger/dagger-for-github@v8.4.0
+        with:
+          verb: call
+          args: build --source=. export --path=./bin/srwm
+
+      - name: Package and Checksum
+        run: |
+          cd bin
+          mv srwm srwm-${{ github.ref_name }}-linux-amd64
+          sha256sum srwm-${{ github.ref_name }}-linux-amd64 > srwm-${{ github.ref_name }}-linux-amd64.sha256
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bin/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
