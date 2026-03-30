@@ -30,8 +30,10 @@ void arrange(Monitor* m) {
 }
 
 void arrangemon(Monitor* m) {  
-  m->wy = m->my;
-  m->wh = m->mh;
+  m->wx = m->mx + m->reserve_left;
+  m->wy = m->my + m->reserve_top;
+  m->ww = m->mw - m->reserve_left - m->reserve_right;
+  m->wh = m->mh - m->reserve_top - m->reserve_bottom;
   if (th > 0) {
     if (m->toptab) {
       m->ty = m->wy;
@@ -161,6 +163,20 @@ void freeicon(Client* c) {
     XRenderFreePicture(dpy, c->icon);
     c->icon = None;
   }
+}
+
+Atom getatomprop(Client* c, Atom prop);
+Atom getatomprop_client(Window w, Atom prop) {
+  int di;
+  unsigned long dl;
+  unsigned char* p = NULL;
+  Atom da, atom = None;
+  if (XGetWindowProperty(dpy, w, prop, 0L, sizeof atom, False, XA_ATOM, &da,
+                         &di, &dl, &dl, &p) == Success && p) {
+    atom = *(Atom*)p;
+    XFree(p);
+  }
+  return atom;
 }
 
 Atom getatomprop(Client* c, Atom prop) {
@@ -659,6 +675,131 @@ Client* wintoclient(Window w) {
         h = (h + 1) & (WIN_HT_SIZE - 1);
     }
     return NULL;
+}
+
+void update_struts(void) {
+    Monitor* m;
+    for (m = mons; m; m = m->next) {
+        m->reserve_left = 0;
+        m->reserve_right = 0;
+        m->reserve_top = 0;
+        m->reserve_bottom = 0;
+    }
+
+    Window root_ret;
+    Window parent_ret;
+    Window* children = NULL;
+    unsigned int n_children = 0;
+
+    if (!XQueryTree(dpy, root, &root_ret, &parent_ret, &children, &n_children))
+        return;
+
+    for (unsigned int i = 0; i < n_children; i++) {
+        Window w = children[i];
+
+        Atom actual_type;
+        int actual_format;
+        unsigned long n_items, bytes_after;
+        Atom* types = NULL;
+
+        if (XGetWindowProperty(dpy, w, netatom[NetWMWindowType], 0, 4, False, XA_ATOM,
+            &actual_type, &actual_format, &n_items, &bytes_after,
+            (unsigned char**)&types) != Success || !types)
+            continue;
+
+        int is_dock = 0;
+        for (unsigned long j = 0; j < n_items; j++) {
+            if (types[j] == netatom[NetWMWindowTypeDock]) {
+                is_dock = 1;
+                break;
+            }
+        }
+        XFree(types);
+        if (!is_dock)
+            continue;
+
+        long* str = NULL;
+        Atom actual;
+        int sfmt;
+        unsigned long len;
+        unsigned long rem;
+
+        if (XGetWindowProperty(dpy, w, netatom[NetWMStrutPartial], 0, 12, False, XA_CARDINAL,
+                    &actual, &sfmt, &len, &rem,
+                    (unsigned char**)&str) == Success && str && len >= 12) {
+            long left = str[0];
+            long right = str[1];
+            long top = str[2];
+            long bottom = str[3];
+            long left_start_y = str[4];
+            long left_end_y = str[5];
+            long right_start_y = str[6];
+            long right_end_y = str[7];
+            long top_start_x = str[8];
+            long top_end_x = str[9];
+            long bot_start_x = str[10];
+            long bot_end_x = str[11];
+
+            XFree(str);
+
+            if (!left && !right && !top && !bottom)
+                continue;
+
+            for (m = mons; m; m = m->next) {
+                int mx = m->mx;
+                int my = m->my;
+                int mw = m->mw;
+                int mh = m->mh;
+
+                if (left > 0) {
+                    long span_start = left_start_y;
+                    long span_end = left_end_y;
+                    if (span_end >= my && span_start <= my + mh - 1) {
+                        int reserve = (int)MAX(0, left - mx);
+                        if (reserve > 0)
+                            m->reserve_left = MAX(m->reserve_left, reserve);
+                    }
+                }
+
+                if (right > 0) {
+                    long span_start = right_start_y;
+                    long span_end = right_end_y;
+                    if (span_end >= my && span_start <= my + mh - 1) {
+                        int global_reserved_left = sw - (int)right;
+                        int overlap = (mx + mw) - global_reserved_left;
+                        int reserve = MAX(0, overlap);
+                        if (reserve > 0)
+                            m->reserve_right = MAX(m->reserve_right, reserve);
+                    }
+                }
+
+                if (top > 0) {
+                    long span_start = top_start_x;
+                    long span_end = top_end_x;
+                    if (span_end >= mx && span_start <= mx + mw - 1) {
+                        int reserve = (int)MAX(0, top - my);
+                        if (reserve > 0)
+                            m->reserve_top = MAX(m->reserve_top, reserve);
+                    }
+                }
+
+                if (bottom > 0) {
+                    long span_start = bot_start_x;
+                    long span_end = bot_end_x;
+                    if (span_end >= mx && span_start <= mx + mw - 1) {
+                        int global_reserved_top = sh - (int)bottom;
+                        int overlap = (my + mh) - global_reserved_top;
+                        int reserve = MAX(0, overlap);
+                        if (reserve > 0)
+                            m->reserve_bottom = MAX(m->reserve_bottom, reserve);
+                    }
+                }
+            }
+        }
+    }
+
+    if (children)
+        XFree(children);
 }
 
 Monitor* wintomon(Window w) {

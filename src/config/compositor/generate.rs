@@ -1,4 +1,4 @@
-use super::types::{AnimationConfig, CompositorConfig};
+use super::types::CompositorConfig;
 
 pub fn generate(c: &CompositorConfig) -> String {
     let mut out = String::new();

@@ -175,6 +175,10 @@ void destroynotify(XEvent *e) {
 
   if ((c = wintoclient(ev->window)))
     unmanage(c, 1);
+  else {
+    update_struts();
+    arrange(NULL);
+  }
 }
 
 void enternotify(XEvent *e) {
@@ -239,8 +243,16 @@ void maprequest(XEvent *e) {
   XMapRequestEvent *ev = &e->xmaprequest;
   if (!XGetWindowAttributes(dpy, ev->window, &wa) || wa.override_redirect)
     return;
-  if (!wintoclient(ev->window))
+  if (!wintoclient(ev->window)) {
+    Atom type = getatomprop_client(ev->window, netatom[NetWMWindowType]);
+    if (type == netatom[NetWMWindowTypeDock]) {
+      XMapWindow(dpy, ev->window);
+      update_struts();
+      arrange(NULL);
+      return;
+    }
     manage(ev->window, &wa);
+  }
 }
 
 void motionnotify(XEvent *e) {
@@ -269,6 +281,10 @@ void propertynotify(XEvent *e) {
 
   if (ev->state == PropertyDelete)
     return; /* ignore */
+  else if (ev->window == root && ev->atom == netatom[NetWMStrutPartial]) {
+    update_struts();
+    arrange(NULL);
+  }
   else if ((c = wintoclient(ev->window))) {
     switch (ev->atom) {
     default:
@@ -304,5 +320,8 @@ void unmapnotify(XEvent *e) {
       setclientstate(c, WithdrawnState);
     else if (c->ismapped)
       unmanage(c, 0);
+  } else {
+    update_struts();
+    arrange(NULL);
   }
 }

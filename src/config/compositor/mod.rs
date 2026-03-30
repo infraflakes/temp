@@ -4,7 +4,7 @@ pub mod types;
 use mlua::prelude::*;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use types::{AnimationConfig, CompositorConfig, RuleConfig};
+use types::{AnimationConfig, RuleConfig};
 
 static COMPOSITOR_ENABLED: AtomicBool = AtomicBool::new(false);
 

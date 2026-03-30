@@ -80,6 +80,8 @@ enum {
   SrwmCanvasCenterX,
   SrwmCanvasCenterY,
   SrwmCanvasActive,
+  NetWMStrut,
+  NetWMStrutPartial,
   NetLast
 }; /* EWMH atoms */
 
@@ -177,6 +179,7 @@ struct Monitor {
   int mx, my, mw, mh; /* screen size */
   int wx, wy, ww, wh; /* window area  */
   unsigned int borderpx;
+  int reserve_top, reserve_bottom, reserve_left, reserve_right;
   CanvasOffset *canvas; /* per-ws canvas offsets, allocated in createmon() */
   float canvas_zoom;      /* global zoom level, shared across all workspaces */
   int toptab;
@@ -214,6 +217,7 @@ void move_window_to_monitor(const Arg *arg);
 void drawtab(Monitor *m);
 void drawtabs(void);
 void updatebars(void);
+void update_struts(void);
 void enternotify(XEvent *e);
 void expose(XEvent *e);
 void focus(Client *c);
@@ -223,6 +227,7 @@ void focuswin(const Arg *arg);
 void movestack(const Arg *arg);
 void shiftview(const Arg *arg);
 Atom getatomprop(Client *c, Atom prop);
+Atom getatomprop_client(Window w, Atom prop);
 Picture geticonprop(Window w, unsigned int *icw, unsigned int *ich);
 int getrootptr(int *x, int *y);
 long getstate(Window w);

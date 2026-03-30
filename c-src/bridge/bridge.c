@@ -69,6 +69,7 @@ int srwm_init_display(void) {
 void srwm_init_setup(void) {
   setup();
   scan();
+  update_struts();
 }
 
 void srwm_run(void) {

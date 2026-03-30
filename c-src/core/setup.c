@@ -86,6 +86,10 @@ Monitor* createmon(void) {
   m->previous_ws = 0;
   m->canvas = ecalloc(9, sizeof(CanvasOffset)); /* one per ws, max 9 */
   m->canvas_zoom = 1.0f;
+  m->reserve_top = 0;
+  m->reserve_bottom = 0;
+  m->reserve_left = 0;
+  m->reserve_right = 0;
 
   return m;
 }
@@ -137,6 +141,8 @@ void setup(void) {
   netatom[SrwmCanvasCenterX] = XInternAtom(dpy, "_SRWM_CANVAS_CENTER_X", False);
   netatom[SrwmCanvasCenterY] = XInternAtom(dpy, "_SRWM_CANVAS_CENTER_Y", False);
   netatom[SrwmCanvasActive] = XInternAtom(dpy, "_SRWM_CANVAS_ACTIVE", False);
+  netatom[NetWMStrut] = XInternAtom(dpy, "_NET_WM_STRUT", False);
+  netatom[NetWMStrutPartial] = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", False);
   /* init cursors */
   cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
   cursor[CurResize] = drw_cur_create(drw, XC_sizing);
