@@ -1,11 +1,11 @@
 use mlua::prelude::*;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 static COMPOSITOR_ENABLED: AtomicBool = AtomicBool::new(false);
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 struct ShadowConfig {
     enable: bool,
     radius: i32,
@@ -15,7 +15,20 @@ struct ShadowConfig {
     color: String,
 }
 
-#[derive(Default, Clone)]
+impl Default for ShadowConfig {
+    fn default() -> Self {
+        Self {
+            enable: false,
+            radius: 12,
+            opacity: 0.75,
+            offset_x: -15,
+            offset_y: -15,
+            color: "#000000".to_string(),
+        }
+    }
+}
+
+#[derive(Clone)]
 struct FadeConfig {
     enable: bool,
     step_in: f64,
@@ -23,19 +36,53 @@ struct FadeConfig {
     delta: i32,
 }
 
-#[derive(Default, Clone)]
+impl Default for FadeConfig {
+    fn default() -> Self {
+        Self {
+            enable: false,
+            step_in: 0.03,
+            step_out: 0.03,
+            delta: 10,
+        }
+    }
+}
+
+#[derive(Clone)]
 struct BlurConfig {
     method: String,
     strength: i32,
 }
 
-#[derive(Default, Clone)]
+impl Default for BlurConfig {
+    fn default() -> Self {
+        Self {
+            method: "none".to_string(),
+            strength: 0,
+        }
+    }
+}
+
+#[derive(Clone)]
 struct AnimationConfig {
     preset: String,
     duration: f64,
     scale: f64,
     curve: String,
     direction: String,
+    opacity_curve: String,
+}
+
+impl Default for AnimationConfig {
+    fn default() -> Self {
+        Self {
+            preset: "none".to_string(),
+            duration: 0.0,
+            scale: 1.0,
+            curve: "linear".to_string(),
+            direction: "none".to_string(),
+            opacity_curve: "linear".to_string(),
+        }
+    }
 }
 
 #[derive(Default, Clone)]
@@ -56,7 +103,7 @@ struct CompositorConfig {
     fade: FadeConfig,
     corner_radius: i32,
     blur: BlurConfig,
-    animations: HashMap<String, AnimationConfig>,
+    animations: BTreeMap<String, AnimationConfig>,
     rules: Vec<RuleConfig>,
 }
 
@@ -161,6 +208,9 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
             anim.curve = opts
                 .get::<String>("curve")
                 .unwrap_or_else(|_| "linear".to_string());
+            anim.opacity_curve = opts
+                .get::<String>("opacity_curve")
+                .unwrap_or_else(|_| anim.curve.clone());
             anim.direction = opts
                 .get::<String>("direction")
                 .unwrap_or_else(|_| "none".to_string());
@@ -249,14 +299,14 @@ pub fn generate_config() -> String {
         out.push_str(&format!("shadow-opacity = {};\n", c.shadow.opacity));
         out.push_str(&format!("shadow-offset-x = {};\n", c.shadow.offset_x));
         out.push_str(&format!("shadow-offset-y = {};\n", c.shadow.offset_y));
-        out.push_str(&format!("shadow-color = \"{}\"\n", c.shadow.color));
+        out.push_str(&format!("shadow-color = \"{}\";\n", c.shadow.color));
 
         out.push_str(&format!("fading = {};\n", c.fade.enable));
         out.push_str(&format!("fade-in-step = {};\n", c.fade.step_in));
         out.push_str(&format!("fade-out-step = {};\n", c.fade.step_out));
         out.push_str(&format!("fade-delta = {};\n", c.fade.delta));
 
-        out.push_str(&format!("corner-radius = {}\n", c.corner_radius));
+        out.push_str(&format!("corner-radius = {};\n", c.corner_radius));
 
         if c.blur.method != "none" {
             out.push_str("blur-background = true;\n");
@@ -292,7 +342,7 @@ pub fn generate_config() -> String {
                         };
                         out.push_str(&format!(
                             "      {{\n        triggers = [\"{}\"];\n        opacity = {{\n          curve = \"{}\";\n          duration = {};\n          start = {};\n          end = {};\n        }};\n        blur-opacity = \"opacity\";\n        shadow-opacity = \"opacity\";\n\n        scale-x = {{\n          curve = \"{}\";\n          duration = {};\n          start = {};\n          end = {};\n        }};\n        scale-y = \"scale-x\";\n\n        offset-x = \"(1 - scale-x) / 2 * window-width\";\n        offset-y = \"(1 - scale-y) / 2 * window-height\";\n\n        shadow-scale-x = \"scale-x\";\n        shadow-scale-y = \"scale-y\";\n        shadow-offset-x = \"offset-x\";\n        shadow-offset-y = \"offset-y\";\n      }},\n",
-                            trigger, anim.curve, anim.duration, start_opacity, end_opacity,
+                            trigger, anim.opacity_curve, anim.duration, start_opacity, end_opacity,
                             anim.curve, anim.duration, start_scale, end_scale
                         ));
                     }
@@ -318,13 +368,13 @@ pub fn generate_config() -> String {
                     out.push_str("    animations = (\n");
                     if let Some(ref a) = rule.animate_open {
                         out.push_str(&format!(
-                            "      {{\n        triggers = [\"open\"];\n        preset = \"{}\";\n        direction = \"{}\";\n        duration = {};\n        scale = {};\n      }},\n",
+                            "      {{\n        triggers = [\"open\", \"show\"];\n        preset = \"{}\";\n        direction = \"{}\";\n        duration = {};\n        scale = {};\n      }},\n",
                             a.preset, a.direction, a.duration, a.scale
                         ));
                     }
                     if let Some(ref a) = rule.animate_close {
                         out.push_str(&format!(
-                            "      {{\n        triggers = [\"close\"];\n        preset = \"{}\";\n        direction = \"{}\";\n        duration = {};\n        scale = {};\n      }},\n",
+                            "      {{\n        triggers = [\"close\", \"hide\"];\n        preset = \"{}\";\n        direction = \"{}\";\n        duration = {};\n        scale = {};\n      }},\n",
                             a.preset, a.direction, a.duration, a.scale
                         ));
                     }

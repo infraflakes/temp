@@ -4,7 +4,6 @@ const DEFAULT_SRWMRC: &str = include_str!("../config/srwmrc.lua");
 const DEFAULT_CANVAS: &str = include_str!("../config/canvas.lua");
 const DEFAULT_COMPOSITOR: &str = include_str!("../config/compositor.lua");
 const DEFAULT_KEYBINDINGS: &str = include_str!("../config/keybindings.lua");
-const DEFAULT_COMP: &str = include_str!("../compositor/data/animations.conf");
 
 pub fn deploy_defaults() -> bool {
     let dir = crate::config::config_dir();
@@ -72,7 +71,6 @@ fn write_files(dir: &std::path::Path) {
         ("canvas.lua", DEFAULT_CANVAS),
         ("compositor.lua", DEFAULT_COMPOSITOR),
         ("keybindings.lua", DEFAULT_KEYBINDINGS),
-        ("compositor.conf", DEFAULT_COMP),
     ];
 
     for (name, content) in files {

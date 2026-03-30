@@ -65,7 +65,7 @@ pub fn start() {
     eprintln!("srwm: generated config:\n{}", config_content);
 
     let temp_dir = cache_dir();
-    let temp_config = temp_dir.join("compositor.conf");
+    let temp_config = temp_dir.join("srcom.conf");
     if let Err(e) = std::fs::write(&temp_config, &config_content) {
         eprintln!("srwm: failed to write temp config: {}", e);
         return;
@@ -73,8 +73,6 @@ pub fn start() {
 
     match Command::new(&bin)
         .args(["--config", temp_config.to_str().unwrap()])
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
         .spawn()
     {
         Ok(child) => {

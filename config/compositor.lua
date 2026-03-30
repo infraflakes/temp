@@ -28,22 +28,22 @@ comp.blur({
 })
 
 comp.animate("open", {
-	preset   = "zoom",
+	preset = "zoom",
 	duration = 0.85,
-	scale    = 0.5,
-	curve    = "cubic-bezier(0.22,1.3,0.36,1)",
+	scale = 0.5,
+	curve = "cubic-bezier(0.22,1.3,0.36,1)",
 })
 
 comp.animate("close", {
-	preset   = "zoom",
+	preset = "zoom",
 	duration = 0.4,
-	scale    = 0.9,
-	curve    = "cubic-bezier(0.22,0.9,0.36,1)",
+	scale = 0.9,
+	curve = "cubic-bezier(0.22,0.9,0.36,1)",
 })
 
 comp.animate("geometry", {
 	duration = 0.7,
-	curve    = "cubic-bezier(0.22,1.3,0.36,1)",
+	curve = "cubic-bezier(0.22,1.3,0.36,1)",
 })
 
 comp.rule("fullscreen", {
