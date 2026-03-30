@@ -19,18 +19,15 @@ srwm.workspaces.set_label("1,2,3,4,5,6") -- set workspaces name
 -- Appearance
 srwm.cfg.borderpx(4)
 
--- Tab dimensions
-srwm.bar.enable(true, "polybar")
-srwm.bar.tab_height(35)
-srwm.bar.tab_tile_vertical_padding(15)
-srwm.bar.tab_tile_inner_padding_horizontal(15)
-srwm.bar.tab_tile_outer_padding_horizontal(15)
-
--- Position
-srwm.bar.tab_top(false)
-
--- Font
+-- Bar dimensions
 srwm.bar.fonts("Terminess Nerd Font:size=16")
+srwm.bar.enable(true, "polybar")
+srwm.bar.tab.enable(false)
+srwm.bar.tab.top(false)
+srwm.bar.tab.height(35)
+srwm.bar.tab.tile_vertical_padding(15)
+srwm.bar.tab.tile_inner_padding_horizontal(15)
+srwm.bar.tab.tile_outer_padding_horizontal(15)
 
 -- Window border colors
 srwm.window.border.active("#6e94b2")

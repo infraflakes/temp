@@ -136,6 +136,7 @@ pub fn main_run() {
         session::compositor::stop();
         config::compositor::reset();
         config::bar::reset_external_bar();
+        config::bar::reset_tab_state();
 
         unsafe {
             ffi::srwm_clear_keybindings();
