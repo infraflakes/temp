@@ -37,7 +37,8 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     border.set(
         "active",
         lua.create_function(|_, hex: String| {
-            let c = std::ffi::CString::new(hex).unwrap();
+            let c = std::ffi::CString::new(hex)
+                .map_err(|_| mlua::Error::runtime("invalid NUL byte in color string"))?;
             unsafe {
                 crate::ffi::srwm_set_border_active(c.as_ptr());
             }
@@ -47,7 +48,8 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     border.set(
         "inactive",
         lua.create_function(|_, hex: String| {
-            let c = std::ffi::CString::new(hex).unwrap();
+            let c = std::ffi::CString::new(hex)
+                .map_err(|_| mlua::Error::runtime("invalid NUL byte in color string"))?;
             unsafe {
                 crate::ffi::srwm_set_border_inactive(c.as_ptr());
             }

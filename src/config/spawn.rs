@@ -5,7 +5,10 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
         "spawn",
         lua.create_function(|_, cmd: String| {
             std::thread::spawn(move || {
-                let _ = std::process::Command::new("sh").arg("-c").arg(&cmd).spawn();
+                match std::process::Command::new("sh").arg("-c").arg(&cmd).spawn() {
+                    Ok(_) => {}
+                    Err(e) => eprintln!("srwm: spawn '{}' failed: {}", cmd, e),
+                }
             });
             Ok(())
         })?,
@@ -22,7 +25,10 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
             drop(spawned);
 
             std::thread::spawn(move || {
-                let _ = std::process::Command::new("sh").arg("-c").arg(&cmd).spawn();
+                match std::process::Command::new("sh").arg("-c").arg(&cmd).spawn() {
+                    Ok(_) => {}
+                    Err(e) => eprintln!("srwm: spawn '{}' failed: {}", cmd, e),
+                }
             });
             Ok(())
         })?,

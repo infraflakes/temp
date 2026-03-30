@@ -13,7 +13,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
 
     let bind_fn = lua.create_function(
         |lua, (mods, button, target, cb): (String, String, String, LuaFunction)| {
-            let modmask = parse_modifiers(&mods);
+            let modmask = parse_modifiers(&mods).map_err(|e| mlua::Error::runtime(e))?;
 
             let btn = match button.to_lowercase().as_str() {
                 "button1" | "left" => BUTTON1,

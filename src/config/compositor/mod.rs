@@ -32,10 +32,18 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
                 c.shadow.enable = v;
             }
             if let Ok(v) = opts.get::<i64>("radius") {
-                c.shadow.radius = v as i32;
+                if v < 0 {
+                    eprintln!("srwm: warning: shadow.radius must be >= 0, got {}", v);
+                } else {
+                    c.shadow.radius = v as i32;
+                }
             }
             if let Ok(v) = opts.get::<f64>("opacity") {
-                c.shadow.opacity = v;
+                if v < 0.0 || v > 1.0 {
+                    eprintln!("srwm: warning: shadow.opacity must be 0.0..1.0, got {}", v);
+                } else {
+                    c.shadow.opacity = v;
+                }
             }
             if let Ok(v) = opts.get::<i64>("offset_x") {
                 c.shadow.offset_x = v as i32;
@@ -58,13 +66,25 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
                 c.fade.enable = v;
             }
             if let Ok(v) = opts.get::<f64>("step_in") {
-                c.fade.step_in = v;
+                if v < 0.0 || v > 1.0 {
+                    eprintln!("srwm: warning: fade.step_in must be 0.0..1.0, got {}", v);
+                } else {
+                    c.fade.step_in = v;
+                }
             }
             if let Ok(v) = opts.get::<f64>("step_out") {
-                c.fade.step_out = v;
+                if v < 0.0 || v > 1.0 {
+                    eprintln!("srwm: warning: fade.step_out must be 0.0..1.0, got {}", v);
+                } else {
+                    c.fade.step_out = v;
+                }
             }
             if let Ok(v) = opts.get::<i64>("delta") {
-                c.fade.delta = v as i32;
+                if v <= 0 {
+                    eprintln!("srwm: warning: fade.delta must be > 0, got {}", v);
+                } else {
+                    c.fade.delta = v as i32;
+                }
             }
         });
         Ok(())
@@ -72,6 +92,12 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     compositor.set("fade", fade_fn)?;
 
     let corner_radius_fn = lua.create_function(|_, radius: i64| {
+        if radius < 0 {
+            return Err(mlua::Error::runtime(format!(
+                "corner_radius must be >= 0, got {}",
+                radius
+            )));
+        }
         types::with_config(|cfg| {
             cfg.borrow_mut().corner_radius = radius as i32;
         });
@@ -80,13 +106,25 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     compositor.set("corner_radius", corner_radius_fn)?;
 
     let blur_fn = lua.create_function(|_, opts: LuaTable| {
+        let method = opts
+            .get::<String>("method")
+            .unwrap_or_else(|_| "dual_kawase".to_string());
+        let valid_methods = ["none", "dual_kawase", "gaussian", "box", "kernel"];
+        if !valid_methods.contains(&method.as_str()) {
+            eprintln!(
+                "srwm: warning: unknown blur method '{}', expected one of {:?}",
+                method, valid_methods
+            );
+        }
         types::with_config(|cfg| {
             let mut c = cfg.borrow_mut();
-            c.blur.method = opts
-                .get::<String>("method")
-                .unwrap_or_else(|_| "dual_kawase".to_string());
+            c.blur.method = method;
             if let Ok(v) = opts.get::<i64>("strength") {
-                c.blur.strength = v as i32;
+                if v < 0 {
+                    eprintln!("srwm: warning: blur.strength must be >= 0, got {}", v);
+                } else {
+                    c.blur.strength = v as i32;
+                }
             }
         });
         Ok(())
@@ -94,13 +132,26 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     compositor.set("blur", blur_fn)?;
 
     let animate_fn = lua.create_function(|_, (trigger, opts): (String, LuaTable)| {
+        let valid_triggers = ["open", "close", "geometry"];
+        if !valid_triggers.contains(&trigger.as_str()) {
+            return Err(mlua::Error::runtime(format!(
+                "invalid animation trigger '{}': expected one of {:?}",
+                trigger, valid_triggers
+            )));
+        }
         types::with_config(|cfg| {
             let mut c = cfg.borrow_mut();
             let mut anim = AnimationConfig::default();
             anim.preset = opts
                 .get::<String>("preset")
                 .unwrap_or_else(|_| "none".to_string());
-            anim.duration = opts.get::<f64>("duration").unwrap_or(0.0);
+            if let Ok(v) = opts.get::<f64>("duration") {
+                if v < 0.0 {
+                    eprintln!("srwm: warning: animate duration must be >= 0, got {}", v);
+                } else {
+                    anim.duration = v;
+                }
+            }
             anim.scale = opts.get::<f64>("scale").unwrap_or(1.0);
             anim.curve = opts
                 .get::<String>("curve")

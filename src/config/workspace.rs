@@ -9,7 +9,13 @@ pub fn register_workspaces(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
             let parts: Vec<&str> = input.split(',').collect();
             let count = parts.len().min(9);
             for (i, part) in parts.iter().take(count).enumerate() {
-                let c = std::ffi::CString::new(part.trim()).unwrap();
+                let c = match std::ffi::CString::new(part.trim()) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        eprintln!("srwm: invalid NUL byte in workspace label, skipping");
+                        continue;
+                    }
+                };
                 unsafe {
                     crate::ffi::srwm_set_ws_label(i as i32, c.as_ptr());
                 }

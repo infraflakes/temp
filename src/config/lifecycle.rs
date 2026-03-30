@@ -25,6 +25,12 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     cfg.set(
         "borderpx",
         lua.create_function(|_, v: u32| {
+            if v > 50 {
+                return Err(mlua::Error::runtime(format!(
+                    "borderpx must be 0..50, got {}",
+                    v
+                )));
+            }
             unsafe {
                 crate::ffi::srwm_set_borderpx(v);
             }
@@ -35,15 +41,11 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
 
     srwm.set(
         "env",
-        lua.create_function(|_lua, args: mlua::Variadic<mlua::String>| {
-            if args.len() >= 2 {
-                let key = args[0].to_str().unwrap().to_string();
-                let value = args[1].to_str().unwrap().to_string();
-                unsafe {
-                    std::env::set_var(&key, &value);
-                }
+        lua.create_function(|_lua, (key, value): (String, String)| {
+            unsafe {
+                std::env::set_var(&key, &value);
             }
-            Ok(mlua::Value::Nil)
+            Ok(())
         })?,
     )?;
 

@@ -18,7 +18,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     lua.globals().set("Ctrl", CONTROL_MASK)?;
 
     let bind_fn = lua.create_function(|lua, (mods, key, cb): (String, String, LuaFunction)| {
-        let modmask = parse_modifiers(&mods);
+        let modmask = parse_modifiers(&mods).map_err(|e| mlua::Error::runtime(e))?;
         let keysym = string_to_keysym(&key)
             .map_err(|_| mlua::Error::runtime(format!("unknown key: {}", key)))?;
         if keysym == 0 {
@@ -43,7 +43,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     Ok(())
 }
 
-pub fn parse_modifiers(s: &str) -> u32 {
+pub fn parse_modifiers(s: &str) -> Result<u32, String> {
     let mut mask = 0u32;
     for part in s.split('+') {
         match part.trim() {
@@ -52,10 +52,10 @@ pub fn parse_modifiers(s: &str) -> u32 {
             "Mod1" | "Alt" => mask |= MOD1_MASK,
             "Mod4" | "Super" => mask |= MOD4_MASK,
             "" => {}
-            other => eprintln!("srwm: unknown modifier: {}", other),
+            other => return Err(format!("unknown modifier: {}", other)),
         }
     }
-    mask
+    Ok(mask)
 }
 
 fn string_to_keysym(name: &str) -> Result<u64, std::ffi::NulError> {

@@ -98,7 +98,11 @@ pub fn main_run() {
         ffi::set_lua_vm(&lua);
 
         if let Err(e) = config::load_config(&lua) {
-            eprintln!("srwm: lua config error: {}", e);
+            eprintln!("==================================================");
+            eprintln!("srwm: LUA CONFIG ERROR — WM may be unusable!");
+            eprintln!("srwm: {}", e);
+            eprintln!("srwm: Fix your config and restart!");
+            eprintln!("==================================================");
         }
 
         unsafe {

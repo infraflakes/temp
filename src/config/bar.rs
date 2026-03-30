@@ -50,6 +50,12 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     tab.set(
         "height",
         lua.create_function(|_, v: i32| {
+            if v < 0 || v > 200 {
+                return Err(mlua::Error::runtime(format!(
+                    "tab.height must be 0..200, got {}",
+                    v
+                )));
+            }
             TAB_DESIRED_HEIGHT.store(v, Ordering::SeqCst);
             sync_tab_height();
             Ok(())
@@ -59,6 +65,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     tab.set(
         "tile_vertical_padding",
         lua.create_function(|_, v: i32| {
+            let v = v.clamp(0, 100);
             unsafe {
                 crate::ffi::srwm_set_tab_tile_vertical_padding(v);
             }
@@ -69,6 +76,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     tab.set(
         "tile_inner_padding_horizontal",
         lua.create_function(|_, v: i32| {
+            let v = v.clamp(0, 100);
             unsafe {
                 crate::ffi::srwm_set_tab_tile_inner_padding_horizontal(v);
             }
@@ -79,6 +87,7 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     tab.set(
         "tile_outer_padding_horizontal",
         lua.create_function(|_, v: i32| {
+            let v = v.clamp(0, 100);
             unsafe {
                 crate::ffi::srwm_set_tab_tile_outer_padding_horizontal(v);
             }

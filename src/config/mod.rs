@@ -17,6 +17,17 @@ pub(crate) static KEY_CALLBACKS: Mutex<Vec<LuaRegistryKey>> = Mutex::new(Vec::ne
 pub(crate) static MOUSE_CALLBACKS: Mutex<Vec<LuaRegistryKey>> = Mutex::new(Vec::new());
 pub(crate) static SPAWNED_ONCE: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
 
+pub fn validate_hex_color(s: &str) -> Result<(), String> {
+    let s = s.trim();
+    if !s.starts_with('#') || (s.len() != 7 && s.len() != 4) {
+        return Err(format!("invalid color '{}': expected #RGB or #RRGGBB", s));
+    }
+    if !s[1..].chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err(format!("invalid color '{}': non-hex characters", s));
+    }
+    Ok(())
+}
+
 pub fn load_config(lua: &Lua) -> LuaResult<()> {
     let srwm = lua.create_table()?;
 
@@ -43,6 +54,9 @@ pub fn load_config(lua: &Lua) -> LuaResult<()> {
         lua.load(&code)
             .set_name(entry.to_string_lossy().as_ref())
             .exec()?;
+    } else {
+        eprintln!("srwm: warning: no config file found at {}", entry.display());
+        eprintln!("srwm: run 'srwm kickstart' to generate default config");
     }
     Ok(())
 }
