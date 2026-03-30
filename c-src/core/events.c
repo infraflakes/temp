@@ -81,8 +81,16 @@ void buttonpress(XEvent *e) {
 
 void clientmessage(XEvent *e) {
   XClientMessageEvent *cme = &e->xclient;
-  Client *c = wintoclient(cme->window);
 
+  if (cme->message_type == netatom[NetCurrentDesktop]) {
+    int ws = (int)cme->data.l[0];
+    if (ws >= 0 && ws < WS_COUNT) {
+      view(&(Arg){.i = ws});
+    }
+    return;
+  }
+
+  Client *c = wintoclient(cme->window);
   if (!c)
     return;
   if (cme->message_type == netatom[NetWMState]) {
