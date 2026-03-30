@@ -109,6 +109,12 @@ pub fn main_run() {
             session::compositor::start();
         }
 
+        if config::bar::is_external_bar_enabled() {
+            if let Some(cmd) = config::bar::get_external_bar_command() {
+                session::bar::start(&cmd);
+            }
+        }
+
         unsafe {
             ffi::srwm_run();
         }
@@ -126,14 +132,17 @@ pub fn main_run() {
             break;
         }
 
+        session::bar::stop();
         session::compositor::stop();
         config::compositor::reset();
+        config::bar::reset_external_bar();
 
         unsafe {
             ffi::srwm_clear_keybindings();
             ffi::srwm_clear_mousebindings();
         }
     }
+    session::bar::stop();
     session::compositor::stop();
     ipc::set_running(false);
 }

@@ -1,7 +1,29 @@
 use mlua::prelude::*;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 static FONT_STRINGS: Mutex<Vec<std::ffi::CString>> = Mutex::new(Vec::new());
+
+static EXTERNAL_BAR_ENABLED: AtomicBool = AtomicBool::new(false);
+static EXTERNAL_BAR_COMMAND: Mutex<Option<String>> = Mutex::new(None);
+
+pub fn is_external_bar_enabled() -> bool {
+    EXTERNAL_BAR_ENABLED.load(Ordering::SeqCst)
+}
+
+pub fn get_external_bar_command() -> Option<String> {
+    EXTERNAL_BAR_COMMAND
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+}
+
+pub fn reset_external_bar() {
+    EXTERNAL_BAR_ENABLED.store(false, Ordering::SeqCst);
+    *EXTERNAL_BAR_COMMAND
+        .lock()
+        .unwrap_or_else(|e| e.into_inner()) = None;
+}
 
 pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     let bar = lua.create_table()?;
@@ -106,6 +128,17 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
                     }
                 }
             }
+            Ok(())
+        })?,
+    )?;
+
+    bar.set(
+        "enable",
+        lua.create_function(|_, (enabled, cmd): (bool, String)| {
+            EXTERNAL_BAR_ENABLED.store(enabled, Ordering::SeqCst);
+            *EXTERNAL_BAR_COMMAND
+                .lock()
+                .unwrap_or_else(|e| e.into_inner()) = Some(cmd);
             Ok(())
         })?,
     )?;

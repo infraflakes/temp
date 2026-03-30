@@ -2,6 +2,26 @@
 
 const char broken[] = "broken";
 
+Window dock_wins[MAX_DOCKS];
+int n_docks = 0;
+
+void dock_track(Window w) {
+    for (int i = 0; i < n_docks; i++)
+        if (dock_wins[i] == w) return;
+    if (n_docks < MAX_DOCKS)
+        dock_wins[n_docks++] = w;
+}
+
+void dock_untrack(Window w) {
+    for (int i = 0; i < n_docks; i++) {
+        if (dock_wins[i] == w) {
+            memmove(&dock_wins[i], &dock_wins[i+1], (n_docks - i - 1) * sizeof(Window));
+            n_docks--;
+            return;
+        }
+    }
+}
+
 /* function implementations */
 int applysizehints(Client* c, int* x, int* y, int* w, int* h, int interact) {
   *w = MAX(1, *w);
@@ -413,6 +433,9 @@ void restack(Monitor* m) {
 
   if (m->tabwin)
       XRaiseWindow(dpy, m->tabwin);
+
+  for (int i = 0; i < n_docks; i++)
+      XRaiseWindow(dpy, dock_wins[i]);
 
   XSync(dpy, False);
   while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));

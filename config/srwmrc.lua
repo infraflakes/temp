@@ -20,6 +20,7 @@ srwm.workspaces.set_label("1,2,3,4,5,6") -- set workspaces name
 srwm.cfg.borderpx(4)
 
 -- Tab dimensions
+srwm.bar.external(true, "polybar")
 srwm.bar.tab_height(35)
 srwm.bar.tab_tile_vertical_padding(15)
 srwm.bar.tab_tile_inner_padding_horizontal(15)

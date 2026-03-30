@@ -340,6 +340,13 @@ extern const char *colors[5][3];
 extern Monitor *mons, *selmon;
 extern Window root, wmcheckwin;
 
+#define MAX_DOCKS 16
+extern Window dock_wins[MAX_DOCKS];
+extern int n_docks;
+
+void dock_track(Window w);
+void dock_untrack(Window w);
+
 /* Dedicated color globals */
 extern Clr border_active;    /* active window border color */
 extern Clr border_inactive;  /* inactive window border color */

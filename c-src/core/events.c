@@ -176,6 +176,7 @@ void destroynotify(XEvent *e) {
   if ((c = wintoclient(ev->window)))
     unmanage(c, 1);
   else {
+    dock_untrack(ev->window);
     update_struts();
     arrange(NULL);
   }
@@ -247,6 +248,7 @@ void maprequest(XEvent *e) {
     Atom type = getatomprop_client(ev->window, netatom[NetWMWindowType]);
     if (type == netatom[NetWMWindowTypeDock]) {
       XMapWindow(dpy, ev->window);
+      dock_track(ev->window);
       update_struts();
       arrange(NULL);
       return;
@@ -321,6 +323,7 @@ void unmapnotify(XEvent *e) {
     else if (c->ismapped)
       unmanage(c, 0);
   } else {
+    dock_untrack(ev->window);
     update_struts();
     arrange(NULL);
   }
