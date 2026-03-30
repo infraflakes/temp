@@ -1,4 +1,7 @@
-libev = dependency('libev', required: false)
+libev = dependency('libev', static: true, required: false)
+if not libev.found()
+	libev = cc.find_library('ev', static: true, required: false)
+endif
 if not libev.found()
 	libev = cc.find_library('ev')
 endif
@@ -36,7 +39,6 @@ required_xcb_packages = [
 
 # Some XCB packages are here because their versioning differs (see check below).
 required_packages = [
-	'pixman-1',
 	'x11',
 	'x11-xcb',
 	'xcb-image',
@@ -48,6 +50,13 @@ required_packages = [
 foreach i : required_packages
 	base_deps += [dependency(i, required: true)]
 endforeach
+
+# pixman — prefer static linking
+pixman_dep = dependency('pixman-1', static: true, required: false)
+if not pixman_dep.found()
+	pixman_dep = dependency('pixman-1', required: true)
+endif
+base_deps += [pixman_dep]
 
 foreach i : required_xcb_packages
 	base_deps += [dependency(i, version: '>=1.12.0', required: true)]

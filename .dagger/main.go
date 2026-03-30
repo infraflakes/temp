@@ -28,7 +28,7 @@ func (m *Srwm) BuildCompositor(ctx context.Context, source *dagger.Directory) *d
 		}).
 		WithDirectory("/src", source.Directory("compositor")).
 		WithWorkdir("/src").
-		WithExec([]string{"meson", "setup", "build", "--buildtype=release", "--default-library=static"}).
+		WithExec([]string{"meson", "setup", "build", "--buildtype=release", "--default-library=static", "-Dstrip=true"}).
 		WithExec([]string{"ninja", "-C", "build"}).
 		File("build/src/srcom")
 }
