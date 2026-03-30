@@ -513,12 +513,10 @@ struct conv **must_use parse_blur_kern_lst(const char *, int *count);
 void *parse_window_shader_prefix(const char *src, const char **end, void *user_data);
 /// Same as `parse_window_shader_prefix`, but the path is relative to the current
 /// working directory. `user_data` is ignored.
-void *parse_window_shader_prefix_with_cwd(const char *src, const char **end, void *);
 void *parse_numeric_prefix(const char *src, const char **end, void *user_data);
 char *must_use locate_auxiliary_file(const char *scope, const char *path,
                                      const char *include_dir);
 int must_use parse_blur_method(const char *src);
-void parse_debug_options(struct debug_options *);
 
 const char *xdg_config_home(void);
 char **xdg_config_dirs(void);

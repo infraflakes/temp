@@ -4,7 +4,6 @@
 // Copyright (c) 2018 Yuxuan Shui <yshuiv7@gmail.com>
 
 #include <ctype.h>
-#include <dlfcn.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -628,10 +627,6 @@ void *parse_window_shader_prefix(const char *src, const char **end, void *user_d
 void *parse_window_shader_prefix_with_cwd(const char *src, const char **end, void * /*data*/) {
 	scoped_charp cwd = getcwd(NULL, 0);
 	return parse_window_shader_prefix(src, end, cwd);
-}
-
-bool load_plugin(const char *name, const char *include_dir) {
-	return false;
 }
 
 bool parse_config(options_t *opt, const char *config_file) {
