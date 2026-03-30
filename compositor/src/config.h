@@ -484,7 +484,6 @@ typedef struct options {
 	bool has_both_style_of_rules;
 } options_t;
 
-bool load_plugin(const char *name, const char *include_dir);
 static inline void record_problematic_option(struct options *opt, const char *name) {
 	struct option_name *record = calloc(1, sizeof(*record));
 	record->name = name;

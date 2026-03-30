@@ -631,15 +631,7 @@ void *parse_window_shader_prefix_with_cwd(const char *src, const char **end, voi
 }
 
 bool load_plugin(const char *name, const char *include_dir) {
-	scoped_charp path = locate_auxiliary_file("plugins", optarg, include_dir);
-	void *handle = NULL;
-	if (!path) {
-		handle = dlopen(name, RTLD_LAZY);
-	} else {
-		log_debug("Plugin %s resolved to %s", name, path);
-		handle = dlopen(path, RTLD_LAZY);
-	}
-	return handle != NULL;
+	return false;
 }
 
 bool parse_config(options_t *opt, const char *config_file) {

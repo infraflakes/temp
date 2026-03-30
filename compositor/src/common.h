@@ -12,7 +12,6 @@
 // #define DEBUG_RESTACK    1
 // #define DEBUG_WINMATCH   1
 // #define DEBUG_C2         1
-// #define DEBUG_GLX_DEBUG_CONTEXT        1
 
 #define MAX_ALPHA (255)
 
@@ -47,9 +46,6 @@
 #define NS_PER_SEC 1000000000L
 #define US_PER_SEC 1000000L
 #define MS_PER_SEC 1000
-
-/// @brief Maximum OpenGL buffer age.
-#define CGLX_MAX_BUFFER_AGE 5
 
 // Window flags
 
@@ -96,8 +92,6 @@ typedef struct session {
 	void *backend_blur_context;
 	/// graphic drivers used
 	enum driver drivers;
-	/// file watch handle
-	void *file_watch_handle;
 	/// libev mainloop
 	struct ev_loop *loop;
 	struct shader_info *root_pixmap_shader;

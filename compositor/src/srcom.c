@@ -39,7 +39,6 @@
 #include <srcom/types.h>
 #include <test.h>
 
-#include "api_internal.h"
 #include "atom.h"
 #include "backend/backend.h"
 #include "backend/gl/gl_common.h"
@@ -55,10 +54,8 @@
 #include "renderer/command_builder.h"
 #include "renderer/layout.h"
 #include "renderer/renderer.h"
-#include "utils/file_watch.h"
 #include "utils/list.h"
 #include "utils/misc.h"
-#include "utils/process.h"
 #include "utils/statistics.h"
 #include "utils/str.h"
 #include "utils/ui.h"
@@ -610,7 +607,6 @@ static bool initialize_backend(session_t *ps) {
 	assert(!ps->backend_data);
 	// Reinitialize win_data
 	ps->backend_data = backend_init(ps->o.backend, ps, session_get_target_window(ps));
-	api_backend_plugins_invoke(backend_name(ps->o.backend), ps->backend_data);
 	if (!ps->backend_data) {
 		log_fatal("Failed to initialize backend, aborting...");
 		quit(ps);
@@ -1992,72 +1988,6 @@ static struct window_options win_options_from_config(const struct options *opts)
 	return ret;
 }
 
-static void show_config_warning_message_box(struct options *opt) {
-	if (opt->problematic_options == NULL) {
-		return;
-	}
-
-	struct x_connection c;
-	if (spawn_srcomling(&c) != 0) {
-		return;
-	}
-
-	struct ui *ui = ui_new(&c);
-	if (ui == NULL) {
-		exit(1);
-	}
-
-	auto lines = HASH_COUNT(opt->problematic_options) + 4;
-	struct ui_message_box_line normal_line_template = {
-	    .text = NULL,
-	    .color = UI_COLOR_WHITE,
-	    .style = UI_STYLE_NORMAL,
-	    .justify = UI_JUSTIFY_LEFT,
-	    .pad_bottom = 3,
-	};
-	struct ui_message_box_content *content =
-	    malloc(sizeof(*content) + lines * sizeof(struct ui_message_box_line));
-	content->num_lines = lines;
-	content->margin = 10;
-	content->scale = 0;
-	content->lines[0] = (struct ui_message_box_line){
-	    .text = "srcom Warning!",
-	    .color = UI_COLOR_YELLOW,
-	    .style = UI_STYLE_BOLD,
-	    .justify = UI_JUSTIFY_CENTER,
-	    .pad_bottom = 15,
-	};
-	content->lines[1] = normal_line_template;
-	content->lines[1].text =
-	    "Some of your settings have generated warnings. Check the console";
-	content->lines[2] = normal_line_template;
-	content->lines[2].text =
-	    "output of srcom for more information. Offending options are:";
-	content->lines[2].pad_bottom = 10;
-	struct option_name *o, *no;
-	unsigned pos = 3;
-	HASH_ITER(hh, opt->problematic_options, o, no) {
-		char *buf = NULL;
-		casprintf(&buf, "    * %s", o->name);
-		content->lines[pos] = normal_line_template;
-		content->lines[pos].text = buf;
-		pos++;
-	}
-	content->lines[pos - 1].pad_bottom = 10;
-	content->lines[pos] = normal_line_template;
-	content->lines[pos].text = "(Press ESC to close)";
-	content->lines[pos].pad_bottom = 10;
-	content->lines[pos].justify = UI_JUSTIFY_CENTER;
-	ui_message_box_content_plan(ui, &c, content);
-	ui_message_box_show(ui, &c, content, 15);
-
-	for (unsigned i = 3; i < lines - 1; i++) {
-		free((void *)content->lines[i].text);
-	}
-	free(content);
-	exit(0);
-}
-
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 
 /// Initialize a session.
@@ -2132,8 +2062,6 @@ static const session_t s_def = {
 		          "invalid options.");
 		goto err;
 	}
-
-	show_config_warning_message_box(&ps->o);
 
 	ps->window_options_default = win_options_from_config(&ps->o);
 
@@ -2242,19 +2170,6 @@ static const session_t s_def = {
 
 	ps->drivers = detect_driver(ps->c.c, ps->backend_data, ps->c.screen_info->root);
 	apply_driver_workarounds(ps, ps->drivers);
-
-	if (ps->o.config_file_path) {
-		ps->file_watch_handle = file_watch_init(ps->loop);
-		if (ps->file_watch_handle) {
-			file_watch_add(ps->file_watch_handle, ps->o.config_file_path,
-			               config_file_change_cb, ps);
-			list_foreach(struct included_config_file, i,
-			             &ps->o.included_config_files, siblings) {
-				file_watch_add(ps->file_watch_handle, i->path,
-				               config_file_change_cb, ps);
-			}
-		}
-	}
 
 	// Monitor screen changes if vsync_sw is enabled and we are using
 	// an auto-detected refresh rate, or when X RandR features are enabled
@@ -2414,11 +2329,6 @@ static void session_destroy(session_t *ps) {
 	}
 	command_builder_free(ps->command_builder);
 	ps->command_builder = NULL;
-
-	if (ps->file_watch_handle) {
-		file_watch_destroy(ps->loop, ps->file_watch_handle);
-		ps->file_watch_handle = NULL;
-	}
 
 	// Stop listening to events on root window
 	xcb_change_window_attributes(ps->c.c, ps->c.screen_info->root, XCB_CW_EVENT_MASK,
