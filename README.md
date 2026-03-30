@@ -18,7 +18,7 @@ Since `srwm` is built with most dependencies statically linked, you can run it o
 ### Getting started
 
 > [!CAUTION]
-> You should modify the font config at ~/.config/srwm/srwmrc.lua
+> You should modify your bar config at ~/.config/srwm/srwmrc.lua
 > And keybindings at ~/.config/srwm/keybindings.lua before starting
 > The default tab bar uses nerd glyph to display control buttons, you may want to install it
 
@@ -58,4 +58,6 @@ Special thanks to:
 - [Siduck](https://github.com/siduck) and other contributors for chadwm which `srwm` originally based on.
 
 - [wh1tepearl](https://codeberg.org/wh1tepearl) for the canvas layout `srwm` based on.
+
+- [yshui](https://github.com/yshui) and contributors for making [picom](https://github.com/yshui/picom).
 ---
