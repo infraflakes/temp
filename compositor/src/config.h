@@ -445,6 +445,10 @@ typedef struct options {
 	struct list_node rounded_corners_blacklist;
 	/// Rounded corner rules. A linked list of conditions.
 	struct list_node corner_radius_rules;
+	/// Border blur enabled (for zoom mode)
+	bool border_blur_enable;
+	/// Border blur dim level (0.0 - 1.0)
+	double border_blur_dim;
 
 	// === Focus related ===
 	/// Whether to try to detect WM windows and mark them as focused.

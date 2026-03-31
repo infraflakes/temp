@@ -1316,6 +1316,10 @@ void gl_draw_zoom_border_blur(struct gl_data *gd) {
 		return;
 	}
 
+	if (!ps->o.border_blur_enable) {
+		return;
+	}
+
 	float zoom = ps->srwm_zoom;
 	int screen_w = gd->back_image.width;
 	int screen_h = gd->back_image.height;
@@ -1433,7 +1437,7 @@ void gl_draw_zoom_border_blur(struct gl_data *gd) {
 	glUseProgram(gd->border_blur_shader.prog);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gd->border_blur_textures[0]);
-	glUniform1f(UNIFORM_OPACITY_LOC, 0.7f); // set darkness value for border blur
+	glUniform1f(UNIFORM_OPACITY_LOC, (float)ps->o.border_blur_dim); // set darkness value for border blur
 
 	glUniform4f(gd->border_blur_viewport_loc, vp_left, vp_top, vp_right, vp_bottom);
 	glUniform1f(gd->border_blur_corner_radius_loc, 20.0f);

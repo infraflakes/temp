@@ -946,6 +946,17 @@ bool parse_config_libconfig(options_t *opt, const char *config_file) { /*NOLINT(
 	// --corner-radius
 	config_lookup_int(&cfg, "corner-radius", &opt->corner_radius);
 
+	// --border-blur
+	lcfg_lookup_bool(&cfg, "border-blur", &opt->border_blur_enable);
+	// --border-blur-dim
+	if (config_lookup_float(&cfg, "border-blur-dim", &dval)) {
+		if (dval < 0.0 || dval > 1.0) {
+			log_warn("border-blur-dim must be between 0 and 1, got %f", dval);
+		} else {
+			opt->border_blur_dim = dval;
+		}
+	}
+
 	if (lcfg_lookup_bool(&cfg, "no-frame-pacing", &bval)) {
 		opt->frame_pacing = !bval;
 	}

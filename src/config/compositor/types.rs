@@ -58,6 +58,21 @@ impl Default for BlurConfig {
 }
 
 #[derive(Clone)]
+pub struct BorderBlurConfig {
+    pub enable: bool,
+    pub dim: f64,
+}
+
+impl Default for BorderBlurConfig {
+    fn default() -> Self {
+        Self {
+            enable: false,
+            dim: 0.5,
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct AnimationConfig {
     pub preset: String,
     pub duration: f64,
@@ -98,6 +113,7 @@ pub struct CompositorConfig {
     pub fade: FadeConfig,
     pub corner_radius: i32,
     pub blur: BlurConfig,
+    pub border_blur: BorderBlurConfig,
     pub animations: std::collections::BTreeMap<String, AnimationConfig>,
     pub rules: Vec<RuleConfig>,
 }

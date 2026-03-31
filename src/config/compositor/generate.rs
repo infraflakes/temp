@@ -32,6 +32,9 @@ pub fn generate(c: &CompositorConfig) -> String {
         out.push_str("}\n");
     }
 
+    out.push_str(&format!("border-blur = {};\n", c.border_blur.enable));
+    out.push_str(&format!("border-blur-dim = {};\n", c.border_blur.dim));
+
     if !c.animations.is_empty() || !c.rules.is_empty() {
         out.push_str("rules: (\n");
 

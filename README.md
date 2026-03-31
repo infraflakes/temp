@@ -18,9 +18,8 @@ Since `srwm` is built with most dependencies statically linked, you can run it o
 ### Getting started
 
 > [!CAUTION]
-> You should modify your bar config at ~/.config/srwm/srwmrc.lua
-> And keybindings at ~/.config/srwm/keybindings.lua before starting
-> The default tab bar uses nerd glyph to display control buttons, you may want to install it
+> If you use an external bar (eg. polybar, yambar) You should set it at ~/.config/srwm/srwmrc.lua
+> And keybindings at keybindings.lua and canvas.lua before starting
 
 You can generate the default config with `srwm kickstart`:
 

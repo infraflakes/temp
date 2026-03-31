@@ -1,8 +1,15 @@
+-- srwm's compositor config carries characteristics of picom
+
 local comp = srwm.compositor
 
 comp.enable()
 
 comp.vsync(true)
+
+comp.border_blur({
+	enable = true,
+	dim = 0.3,
+})
 
 comp.shadow({
 	enable = true,
@@ -23,7 +30,7 @@ comp.fade({
 comp.corner_radius(10)
 
 comp.blur({
-	method = "dual_kawase",
+	method = "dual_kawase", -- or "none", "box", "gaussian", "kernel"
 	strength = 10,
 })
 
@@ -55,18 +62,13 @@ comp.rule("window_type = 'dock'", {
 	shadow = false,
 })
 
-comp.rule("class_g = 'dmenu'", {
-	corner_radius = 0,
-	shadow = false,
-	blur = false,
-	animate_open = { preset = "slide-in", direction = "up", duration = 0.2 },
-	animate_close = { preset = "slide-out", direction = "up", duration = 0.1 },
-})
-
-comp.rule("class_g = 'Dunst'", {
-	animate_open = { preset = "slide-in", direction = "up", duration = 0.2 },
-	animate_close = { preset = "slide-out", direction = "up", duration = 0.1 },
-})
+-- comp.rule("class_g = 'dmenu'", {
+-- 	corner_radius = 0,
+-- 	shadow = false,
+-- 	blur = false,
+-- 	animate_open = { preset = "slide-in", direction = "up", duration = 0.2 },
+-- 	animate_close = { preset = "slide-out", direction = "up", duration = 0.1 },
+-- })
 
 comp.rule("window_type = 'srwm'", {
 	shadow = false,

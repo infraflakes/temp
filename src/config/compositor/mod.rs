@@ -131,6 +131,24 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
     })?;
     compositor.set("blur", blur_fn)?;
 
+    let border_blur_fn = lua.create_function(|_, opts: LuaTable| {
+        types::with_config(|cfg| {
+            let mut c = cfg.borrow_mut();
+            if let Ok(v) = opts.get::<bool>("enable") {
+                c.border_blur.enable = v;
+            }
+            if let Ok(v) = opts.get::<f64>("dim") {
+                if !(0.0..=1.0).contains(&v) {
+                    eprintln!("srwm: warning: border_blur.dim must be 0.0..1.0, got {}", v);
+                } else {
+                    c.border_blur.dim = v;
+                }
+            }
+        });
+        Ok(())
+    })?;
+    compositor.set("border_blur", border_blur_fn)?;
+
     let animate_fn = lua.create_function(|_, (trigger, opts): (String, LuaTable)| {
         let valid_triggers = ["open", "close", "geometry"];
         if !valid_triggers.contains(&trigger.as_str()) {
