@@ -1,7 +1,7 @@
 # Serein Window Manager
 A floating, zooming X11 window manager. Built with Rust, C and Lua.
 
-![Preview](./assets/screenshot_default.png)
+![Preview](./assets/preview.png)
 
 ## Installation
 
@@ -19,7 +19,10 @@ Since `srwm` is built with most dependencies statically linked, you can run it o
 
 > [!CAUTION]
 > If you use an external bar (eg. polybar, yambar) You should set it at ~/.config/srwm/srwmrc.lua
+>
 > And keybindings at keybindings.lua and canvas.lua before starting
+>
+> Make sure to read changelog before you update in case of deprecated config
 
 You can generate the default config with `srwm kickstart`:
 
