@@ -196,13 +196,13 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
             if let Ok(v) = opts.get::<i64>("corner_radius") {
                 rule.corner_radius = Some(v as i32);
             }
-            if let Ok(v) = opts.get::<bool>("shadow") {
+            if let Ok(Some(v)) = opts.get::<Option<bool>>("shadow") {
                 rule.shadow = Some(v);
             }
-            if let Ok(v) = opts.get::<bool>("fade") {
+            if let Ok(Some(v)) = opts.get::<Option<bool>>("fade") {
                 rule.fade = Some(v);
             }
-            if let Ok(v) = opts.get::<bool>("blur") {
+            if let Ok(Some(v)) = opts.get::<Option<bool>>("blur") {
                 rule.blur = Some(v);
             }
             if let Ok(v) = opts.get::<LuaTable>("animate_open") {
