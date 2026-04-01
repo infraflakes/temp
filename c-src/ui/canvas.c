@@ -244,11 +244,13 @@ void zoomcanvas(const Arg *arg) {
 // `exclude` is an optional client to skip when moving windows (e.g., the window being dragged).  
 // `pan_dx_out` and `pan_dy_out` return the pan delta applied (for callers that need to adjust drag references).  
 int canvas_edge_autopan(int cursor_x, int cursor_y, Client *exclude, int *pan_dx_out, int *pan_dy_out) {  
-    int wsidx = selmon->current_ws;  
-    float zoom = selmon->canvas_zoom;  
-    if (zoom >= 1.0f)  
-        return 0;  
-      
+    extern int edge_autopan_enabled;
+    if (!edge_autopan_enabled)
+        return 0;
+
+    int wsidx = selmon->current_ws;
+    float zoom = selmon->canvas_zoom;
+
     int edge_margin = 6;   // pixels from edge to trigger pan  
     float base_pan_speed = 22.5; // base pixels per frame  
     // Scale pan speed inversely with zoom so it feels consistent  

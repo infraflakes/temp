@@ -209,3 +209,7 @@ void srwm_action_movecanvas(int dir) { movecanvas(&(Arg){.i = dir}); }
 void srwm_action_homecanvas(void) { homecanvas(&(Arg){0}); }  
 void srwm_action_centerwindowoncanvas(void) { centerwindowoncanvas(&(Arg){0}); }  
 void srwm_action_zoomcanvas(int dir) { zoomcanvas(&(Arg){.i = dir}); }
+
+extern int edge_autopan_enabled;
+int srwm_get_edge_autopan(void) { return edge_autopan_enabled; }
+void srwm_set_edge_autopan(int v) { edge_autopan_enabled = v; }

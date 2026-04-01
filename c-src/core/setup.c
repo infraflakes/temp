@@ -197,7 +197,8 @@ void run(void) {
   XSync(dpy, False);
   while (running) {
     // Check if we need continuous auto-pan
-    int need_autopan = selmon && selmon->canvas_zoom < 1.0f;
+    extern int edge_autopan_enabled;
+    int need_autopan = selmon && edge_autopan_enabled;
 
     if (need_autopan && !XPending(dpy)) {
       fd_set fds;
@@ -503,6 +504,7 @@ const char* colors[][3] = {
 };
 char* ws_labels[9] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 int ws_count = 5;
+int edge_autopan_enabled = 0;
 
 /* button definitions */
 const Button buttons[] = {

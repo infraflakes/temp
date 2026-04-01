@@ -43,6 +43,16 @@ pub fn register(lua: &Lua, srwm: &LuaTable) -> LuaResult<()> {
         })?,
     )?;
 
+    canvas.set(
+        "edge_autopan",
+        lua.create_function(|_, enabled: bool| {
+            unsafe {
+                crate::ffi::srwm_set_edge_autopan(if enabled { 1 } else { 0 });
+            }
+            Ok(())
+        })?,
+    )?;
+
     srwm.set("canvas", canvas)?;
     Ok(())
 }

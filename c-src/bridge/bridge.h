@@ -84,6 +84,9 @@ void srwm_action_homecanvas(void);
 void srwm_action_centerwindowoncanvas(void);  
 void srwm_action_zoomcanvas(int dir);
 
+int srwm_get_edge_autopan(void);
+void srwm_set_edge_autopan(int);
+
 /* Called from C -> Rust when a dynamic key is pressed */
 extern void srwm_handle_key(int id);
 

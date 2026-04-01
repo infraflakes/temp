@@ -145,6 +145,7 @@ pub fn main_run() {
         unsafe {
             ffi::srwm_clear_keybindings();
             ffi::srwm_clear_mousebindings();
+            ffi::srwm_set_edge_autopan(0);
         }
     }
     session::bar::stop();
