@@ -124,7 +124,11 @@ void resizemouse(const Arg* arg) {
                 unsigned int dui;
                 if (XQueryPointer(dpy, root, &dummy_w, &dummy_w, &cx, &cy, &di, &di, &dui)) {
                     int pan_dx = 0, pan_dy = 0;
-                    canvas_edge_autopan(cx, cy, c, &pan_dx, &pan_dy);
+                    canvas_edge_autopan(cx, cy, NULL, &pan_dx, &pan_dy);
+                    // Window moved with the canvas — update resize reference
+                    // so the window grows by the pan amount
+                    ocx -= pan_dx;
+                    ocy -= pan_dy;
                 }
             }
             continue;
@@ -143,7 +147,12 @@ void resizemouse(const Arg* arg) {
         if ((ev.xmotion.time - lasttime) <= (1000 / 60)) continue;
         lasttime = ev.xmotion.time;
 
-        canvas_edge_autopan(ev.xmotion.x_root, ev.xmotion.y_root, c, NULL, NULL);
+        {
+            int pan_dx = 0, pan_dy = 0;
+            canvas_edge_autopan(ev.xmotion.x_root, ev.xmotion.y_root, NULL, &pan_dx, &pan_dy);
+            ocx -= pan_dx;
+            ocy -= pan_dy;
+        }
 
         nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
         nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
