@@ -10,7 +10,7 @@ type Srwm struct{}
 // BuildCompositor builds srcom as a standalone binary (ubuntu:22.04, known working).
 func (m *Srwm) BuildCompositor(ctx context.Context, source *dagger.Directory) *dagger.File {
 	return dag.Container().
-		From("ubuntu:22.04").
+		From("ubuntu:24.04").
 		WithEnvVariable("DEBIAN_FRONTEND", "noninteractive").
 		WithExec([]string{"apt-get", "update"}).
 		WithExec([]string{"apt-get", "install", "-y",
