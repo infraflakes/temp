@@ -120,6 +120,12 @@ pub fn main_run(replace: bool) {
                     session::bar::start(&cmd);
                 }
             }
+        } else {
+            // Always allow compositor if enabled in replace mode
+            // (user is responsible for ensuring no other compositor is running)
+            if config::compositor::is_enabled() {
+                session::compositor::start();
+            }
         }
 
         unsafe {

@@ -742,6 +742,21 @@ void configure_root(session_t *ps) {
 static bool paint_preprocess(session_t *ps, bool *animation, struct win **out_bottom) {
 	// XXX need better, more general name for `fade_running`. It really
 	// means if fade is still ongoing after the current frame is rendered
+	static bool first_diag = true;
+	if (first_diag) {
+		int n_total = 0, n_mapped = 0, n_damaged = 0, n_has_image = 0;
+		wm_stack_foreach_safe(ps->wm, cursor, tmp) {
+			auto w = wm_ref_deref(cursor);
+			if (w == NULL) continue;
+			n_total++;
+			if (w->state == WSTATE_MAPPED) n_mapped++;
+			if (w->ever_damaged) n_damaged++;
+			if (w->win_image != NULL) n_has_image++;
+		}
+		log_info("DIAG: total=%d mapped=%d ever_damaged=%d has_image=%d redirected=%d",
+				 n_total, n_mapped, n_damaged, n_has_image, ps->redirected);
+		if (ps->redirected) first_diag = false;
+	}
 	struct win *bottom = NULL;
 	*animation = false;
 	*out_bottom = NULL;
@@ -1315,6 +1330,22 @@ static bool redirect_start(session_t *ps) {
 
 	ps->redirected = true;
 	ps->first_frame = true;
+
+	// Force-damage all existing mapped windows so they get rendered
+	// This is needed when the compositor starts after windows are already mapped
+	// (e.g., when used as a replacement WM under a desktop environment)
+	wm_stack_foreach(ps->wm, cursor) {
+		auto w = wm_ref_deref(cursor);
+		if (w != NULL && w->state == WSTATE_MAPPED) {
+			w->ever_damaged = true;
+			win_set_flags(w, WIN_FLAGS_PIXMAP_STALE);
+			// Mark the entire window as damaged
+			pixman_region32_clear(&w->damaged);
+			pixman_region32_union_rect(&w->damaged, &w->damaged, 0, 0,
+			                            (unsigned)w->widthb, (unsigned)w->heightb);
+		}
+	}
+	ps->pending_updates = true;
 
 	root_damaged(ps);
 
