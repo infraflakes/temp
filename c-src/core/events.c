@@ -14,6 +14,7 @@ void (*handler[LASTEvent])(XEvent *) = {[ButtonPress] = buttonpress,
                                         [MapRequest] = maprequest,
                                         [MotionNotify] = motionnotify,
                                         [PropertyNotify] = propertynotify,
+                                        [SelectionClear] = srwm_wm_sn_handle_selection_clear,
                                         [UnmapNotify] = unmapnotify};
 
 

@@ -1,6 +1,6 @@
 use mlua::prelude::*;
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
+use std::sync::Mutex;
 
 static FONT_STRINGS: Mutex<Vec<std::ffi::CString>> = Mutex::new(Vec::new());
 

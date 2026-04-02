@@ -12,7 +12,11 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     /// Start the window manager (default)
-    Start,
+    Start {
+        /// Replace an existing window manager
+        #[arg(long)]
+        replace: bool,
+    },
     /// Print version information
     Version,
     /// Shut down the running instance

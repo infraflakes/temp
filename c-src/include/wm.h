@@ -82,6 +82,24 @@ enum {
   SrwmCanvasActive,
   NetWMStrut,
   NetWMStrutPartial,
+  NetWMStateSticky,
+  NetWMStateDemandsAttention,
+  NetWMStateHidden,
+  NetWMStateFocused,
+  NetWMStateMaximizedVert,
+  NetWMStateMaximizedHorz,
+  NetWMStateModal,
+  NetWMMoveresize,
+  NetCloseWindow,
+  NetMoveresizeWindow,
+  NetClientListStacking,
+  NetWMDesktop,
+  NetWMWindowTypeNormal,
+  NetWMWindowTypeUtility,
+  NetWMWindowTypeToolbar,
+  NetWMWindowTypeSplash,
+  NetWMWindowTypeMenu,
+  NetWMWindowTypeNotification,
   NetLast
 }; /* EWMH atoms */
 
@@ -339,6 +357,11 @@ extern Drw *drw;
 extern const char *colors[5][3];
 extern Monitor *mons, *selmon;
 extern Window root, wmcheckwin;
+
+/* WM replacement (WM_Sn selection) */
+void srwm_wm_sn_handle_selection_clear(XEvent *e);
+int srwm_wm_sn_acquire(int replace);
+void srwm_wm_sn_cleanup(void);
 
 #define MAX_DOCKS 16
 extern Window dock_wins[MAX_DOCKS];

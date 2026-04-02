@@ -19,7 +19,7 @@ extern void run(void);
 extern void cleanup(void);
 
 /* Bridge lifecycle — called by Rust */
-int  srwm_init_display(void);
+int  srwm_init_display(int replace);
 void srwm_init_setup(void);
 void srwm_run(void);
 void srwm_cleanup(void);

@@ -16,8 +16,11 @@ fn main() {
 
     let cli = Cli::parse();
     match cli.command {
-        Some(crate::cli::Command::Start) | None => {
-            main_run();
+        Some(crate::cli::Command::Start { replace }) => {
+            main_run(replace);
+        }
+        None => {
+            main_run(false);
         }
         Some(crate::cli::Command::Version) => {
             println!("srwm {}", env!("CARGO_PKG_VERSION"));
@@ -67,7 +70,7 @@ fn setup_signal_handlers() {
     }
 }
 
-pub fn main_run() {
+pub fn main_run(replace: bool) {
     let _dbus = session::dbus::Session::start();
 
     let _xserver: Option<_> = if std::env::var("DISPLAY").is_err() {
@@ -84,11 +87,9 @@ pub fn main_run() {
 
     ipc::start_ipc_server();
 
-    deploy::deploy_defaults();
-
     loop {
         unsafe {
-            if ffi::srwm_init_display() != 0 {
+            if ffi::srwm_init_display(replace as i32) != 0 {
                 eprintln!("srwm: cannot open display");
                 std::process::exit(1);
             }
@@ -109,13 +110,15 @@ pub fn main_run() {
             ffi::srwm_init_setup();
         }
 
-        if config::compositor::is_enabled() {
-            session::compositor::start();
-        }
+        if !replace {
+            if config::compositor::is_enabled() {
+                session::compositor::start();
+            }
 
-        if config::bar::is_external_bar_enabled() {
-            if let Some(cmd) = config::bar::get_external_bar_command() {
-                session::bar::start(&cmd);
+            if config::bar::is_external_bar_enabled() {
+                if let Some(cmd) = config::bar::get_external_bar_command() {
+                    session::bar::start(&cmd);
+                }
             }
         }
 

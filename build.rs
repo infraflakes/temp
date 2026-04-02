@@ -19,6 +19,7 @@ fn main() {
             "c-src/core/wm.c",
             "c-src/core/events.c",
             "c-src/core/setup.c",
+            "c-src/core/wm_replace.c",
             "c-src/ui/bar.c",
             "c-src/ui/canvas.c",
             "c-src/ui/drw.c",

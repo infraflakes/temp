@@ -45,7 +45,7 @@ static void ensure_fontconfig(void) {
   /* If nothing found, fontconfig will use its compiled-in default (may fail) */
 }
 
-int srwm_init_display(void) {
+int srwm_init_display(int replace) {
   /* Reset for re-init on restart */
   running = 1;
   restart_requested = 0;
@@ -62,7 +62,13 @@ int srwm_init_display(void) {
     return -1;
   }
 
-  checkotherwm();
+  if (replace) {
+    if (srwm_wm_sn_acquire(1) != 0) {
+      return 1;
+    }
+  } else {
+    checkotherwm();
+  }
   return 0;
 }
 
@@ -77,6 +83,7 @@ void srwm_run(void) {
 }
 
 void srwm_cleanup(void) {
+  srwm_wm_sn_cleanup();
   cleanup();
   XCloseDisplay(dpy);
   dpy = NULL;

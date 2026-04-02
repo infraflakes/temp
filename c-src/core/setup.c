@@ -143,6 +143,24 @@ void setup(void) {
   netatom[SrwmCanvasActive] = XInternAtom(dpy, "_SRWM_CANVAS_ACTIVE", False);
   netatom[NetWMStrut] = XInternAtom(dpy, "_NET_WM_STRUT", False);
   netatom[NetWMStrutPartial] = XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", False);
+  netatom[NetWMStateSticky] = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
+  netatom[NetWMStateDemandsAttention] = XInternAtom(dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", False);
+  netatom[NetWMStateHidden] = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
+  netatom[NetWMStateFocused] = XInternAtom(dpy, "_NET_WM_STATE_FOCUSED", False);
+  netatom[NetWMStateMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+  netatom[NetWMStateMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+  netatom[NetWMStateModal] = XInternAtom(dpy, "_NET_WM_STATE_MODAL", False);
+  netatom[NetWMMoveresize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
+  netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
+  netatom[NetMoveresizeWindow] = XInternAtom(dpy, "_NET_MOVERESIZE_WINDOW", False);
+  netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
+  netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
+  netatom[NetWMWindowTypeNormal] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+  netatom[NetWMWindowTypeUtility] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_UTILITY", False);
+  netatom[NetWMWindowTypeToolbar] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+  netatom[NetWMWindowTypeSplash] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_SPLASH", False);
+  netatom[NetWMWindowTypeMenu] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_MENU", False);
+  netatom[NetWMWindowTypeNotification] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
   /* init cursors */
   cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
   cursor[CurResize] = drw_cur_create(drw, XC_sizing);
@@ -238,8 +256,14 @@ void scan(void) {
       if (!XGetWindowAttributes(dpy, wins[i], &wa) || wa.override_redirect ||
           XGetTransientForHint(dpy, wins[i], &d1))
         continue;
-      if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
+      if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
+        Atom type = getatomprop_client(wins[i], netatom[NetWMWindowType]);
+        if (type == netatom[NetWMWindowTypeDock]) {
+          dock_track(wins[i]);
+          continue;
+        }
         manage(wins[i], &wa);
+      }
     }
     for (i = 0; i < num; i++) { /* now the transients */
       if (!XGetWindowAttributes(dpy, wins[i], &wa)) continue;
