@@ -101,10 +101,20 @@ void clientmessage(XEvent *e) {
                         || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ &&
                             !c->isfullscreen)));
   } else if (cme->message_type == netatom[NetActiveWindow]) {
-    if (c != selmon->sel && !c->isurgent)
-      seturgent(c, 1);
+      /* Switch to the window's workspace if it's not currently visible */
+      if (c->ws != c->mon->current_ws) {
+        view(&(Arg){.i = c->ws});
+      }
+      /* Switch monitor if the window is on a different one */
+      if (c->mon != selmon) {
+        unfocus(selmon->sel, 1);
+        selmon = c->mon;
+      }
+      focus(c);
+      centerwindowoncanvas(&(Arg){0});
+      restack(selmon);
+    }
   }
-}
 
 void configurenotify(XEvent *e) {
   Monitor *m;

@@ -250,9 +250,10 @@ int canvas_edge_autopan(int cursor_x, int cursor_y, Client *exclude, int *pan_dx
 
     int wsidx = selmon->current_ws;
     float zoom = selmon->canvas_zoom;
-
-    int edge_margin = 6;   // pixels from edge to trigger pan  
-    float base_pan_speed = 25; // base pixels per frame  
+    
+    // TODO: add config option for these twos
+    int edge_margin = 2;   // pixels from edge to trigger pan  
+    float base_pan_speed = 40; // base pixels per frame  
     // Scale pan speed inversely with zoom so it feels consistent  
     int pan_speed = (int)(base_pan_speed / zoom);  
       
