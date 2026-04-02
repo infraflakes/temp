@@ -437,6 +437,7 @@ void restack(Monitor* m) {
   for (int i = 0; i < n_docks; i++)
       XRaiseWindow(dpy, dock_wins[i]);
 
+  updateclientliststacking();
   XSync(dpy, False);
   while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
@@ -476,6 +477,10 @@ void setclientwsprop(Client* c) {
   long data[] = {(long)c->ws, (long)c->mon->num};
   XChangeProperty(dpy, c->win, netatom[NetClientInfo], XA_CARDINAL, 32,
                   PropModeReplace, (unsigned char*)data, 2);
+  /* Standard EWMH desktop property — needed for DE panel integration (e.g. XFCE Window Buttons) */
+  long desktop = (long)c->ws;
+  XChangeProperty(dpy, c->win, netatom[NetWMDesktop], XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char*)&desktop, 1);
 }
 
 void setfullscreen(Client* c, int fullscreen) {
@@ -609,6 +614,17 @@ void updateclientlist(void) {
   for (m = mons; m; m = m->next)
     for (c = m->clients; c; c = c->next)
       XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32,
+                      PropModeAppend, (unsigned char*)&(c->win), 1);
+}
+
+void updateclientliststacking(void) {
+  Client* c;
+  Monitor* m;
+
+  XDeleteProperty(dpy, root, netatom[NetClientListStacking]);
+  for (m = mons; m; m = m->next)
+    for (c = m->clients; c; c = c->next)
+      XChangeProperty(dpy, root, netatom[NetClientListStacking], XA_WINDOW, 32,
                       PropModeAppend, (unsigned char*)&(c->win), 1);
 }
 

@@ -288,6 +288,7 @@ void unmanage(Client *c, int destroyed);
 void unmapnotify(XEvent *e);
 void updatecurrentdesktop(void);
 void updateclientlist(void);
+void updateclientliststacking(void);
 int updategeom(void);
 void updatenumlockmask(void);
 void rebuild_tab_order(Monitor *m);
